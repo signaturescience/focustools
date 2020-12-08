@@ -133,7 +133,7 @@ do.call("rbind", res) %>%
   ## bind that data frame to the training data
   bind_rows(usa_train) %>%
   ## crate date column from week number
-  mutate(date = as.Date(paste("2020", week, 1, sep="-"), "%Y-%U-%u")) %>% View()
+  mutate(date = as.Date(paste("2020", week, 1, sep="-"), "%Y-%U-%u")) %>%
   ggplot() +
   ## prediction interval for forecasts
   geom_ribbon(aes(x = date, y = fit, ymin = lwr, ymax = upr), fill = "lightpink", alpha = 0.5) +
