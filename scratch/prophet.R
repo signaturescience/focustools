@@ -1,3 +1,5 @@
+# TODO: get more info on seasonality: https://facebook.github.io/prophet/docs/seasonality,_holiday_effects,_and_regressors.html
+
 # Setup -------------------------------------------------------------------
 
 library(tidyverse)
