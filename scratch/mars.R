@@ -12,37 +12,36 @@ library(tidyverse)
 library(earth)
 library(lubridate)
 
-## read in county level cumulative data from NYT
-counties <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
 
-# add epiyear and epiweek
-counties <-
-  counties %>%
-  mutate(week=week(date), .after=date) %>%
-  mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=week) %>%
-  mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear)
-
-## create tibble with number of cases, lagged cases, deaths, lagged deaths by week
-usa <-
-  counties %>%
-  mutate(week = week(date)) %>%
-  group_by(week) %>%
-  summarise(cases = sum(cases, na.rm = TRUE),
-            deaths = sum(deaths, na.rm = TRUE)) %>%
-  ## cases are originally recorded as cumulative cases
-  mutate(cases = cases - lag(cases),
-         deaths = deaths - lag(deaths)) %>%
-  mutate(lag_cases = lag(cases),
-         lag_deaths = lag(deaths)) %>%
-  ## exclude current week as the case/death tallies may be incomplete
-  filter(week != week(Sys.Date())) %>%
-  ## remove any weeks with NA predictions
-  filter(complete.cases(.)) %>%
-  ## MAKE SURE DATA IS ARRANGED WITH WEEK ASCENDING
-  ## critical given that we are using lag() for predictor
-  arrange(week)
-
-usa
+# # TODO: fix code to get weekly inc/cum deaths/cases by summarizing county data. isn't quite correct here.
+# ## read in county level cumulative data from NYT
+# counties <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
+# # add epiyear and epiweek
+# counties <-
+#   counties %>%
+#   mutate(week=week(date), .after=date) %>%
+#   mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=week) %>%
+#   mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear)
+# ## create tibble with number of cases, lagged cases, deaths, lagged deaths by week
+# usa <-
+#   counties %>%
+#   mutate(week = week(date)) %>%
+#   group_by(week) %>%
+#   summarise(cases = sum(cases, na.rm = TRUE),
+#             deaths = sum(deaths, na.rm = TRUE)) %>%
+#   ## cases are originally recorded as cumulative cases
+#   mutate(cases = cases - lag(cases),
+#          deaths = deaths - lag(deaths)) %>%
+#   mutate(lag_cases = lag(cases),
+#          lag_deaths = lag(deaths)) %>%
+#   ## exclude current week as the case/death tallies may be incomplete
+#   filter(week != week(Sys.Date())) %>%
+#   ## remove any weeks with NA predictions
+#   filter(complete.cases(.)) %>%
+#   ## MAKE SURE DATA IS ARRANGED WITH WEEK ASCENDING
+#   ## critical given that we are using lag() for predictor
+#   arrange(week)
+# usa
 
 # get usa data straight from nyt usa summarized data
 usa2 <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
@@ -57,6 +56,20 @@ usa2 <-
   usa2 %>%
   mutate(cases_inc=cases-lag(cases, default=0L), deaths_inc=deaths-lag(deaths, default=0L)) %>%
   filter(date!=today())
+
+
+# make the training data look like the training data originally developed by VPN.
+usa <- usa2 %>%
+  # get weekly incident cases and deaths
+  group_by(week) %>%
+  summarize(cases=sum(cases_inc), deaths=sum(deaths_inc), .groups="drop") %>%
+  # remove incomplete week
+  filter(week != week(Sys.Date())) %>%
+  # get week before cases and deaths
+  mutate(lag_cases  = lag(cases , default=0L),
+         lag_deaths = lag(deaths, default=0L))
+
+
 
 ## evaluate how well the model fits
 ## create separate training / test sets
