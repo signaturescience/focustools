@@ -44,6 +44,20 @@ usa <-
 
 usa
 
+# get usa data straight from nyt usa summarized data
+usa2 <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv")
+# add epiyear and epiweek
+usa2 <-
+  usa2 %>%
+  mutate(week=week(date), .after=date) %>%
+  mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=week) %>%
+  mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear)
+# calculate incident cases, deaths, and exclude today if it's in there
+usa2 <-
+  usa2 %>%
+  mutate(cases_inc=cases-lag(cases, default=0L), deaths_inc=deaths-lag(deaths, default=0L)) %>%
+  filter(date!=today())
+
 ## evaluate how well the model fits
 ## create separate training / test sets
 ## train on everything *except* last 4 weeks
