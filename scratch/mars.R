@@ -60,6 +60,7 @@ usa2 <-
 
 # make the training data look like the training data originally developed by VPN.
 usa <- usa2 %>%
+  # TODO: use epiweek here.
   # get weekly incident cases and deaths
   group_by(week) %>%
   summarize(cases=sum(cases_inc), deaths=sum(deaths_inc), .groups="drop") %>%
@@ -112,6 +113,7 @@ predict(usa_mars_fit, newdata = usa_test, interval = "pint") %>%
   ## line for predicted
   geom_line(aes(date, fit), col = "firebrick", lwd = 1.25) +
   theme_minimal() +
+  scale_y_continuous(labels=scales::number_format()) +
   labs(x = "Date", y = "Weekly COVID-19 Incidence")
 
 
@@ -175,4 +177,5 @@ do.call("rbind", res) %>%
   ## line for predicted
   geom_line(aes(date, fit), col = "firebrick", lwd = 1.25) +
   theme_minimal() +
+  scale_y_continuous(labels=scales::number_format()) +
   labs(x = "Date", y = "Weekly COVID-19 Incidence")
