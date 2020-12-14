@@ -1,7 +1,6 @@
-library(readr)
-library(dplyr)
-library(lubridate)
-library(MMWRweek)
+suppressPackageStartupMessages(library(readr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(lubridate))
 
 # get usa data straight from nyt usa summarized data
 usa <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii")
