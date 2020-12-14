@@ -3,7 +3,6 @@
 ## https://cran.r-project.org/web/packages/earth/index.html
 ## NOTE: YMMV until the epiweeks format is fixed
 ## TODO: look into using tidymodels to implement this model (MARS is one of the parsnip engines ...)
-## TODO: accommodate epiweeks format
 ## TODO: get case counts from JHU instead of NYT ?
 ## TODO: add logic to split predictions into binned quantiles
 ## TODO: re-implement loop for predicting horizons as purrr::map_df() for legibility ?
@@ -15,6 +14,13 @@ library(lubridate)
 
 ## read in county level cumulative data from NYT
 counties <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
+
+# add epiyear and epiweek
+counties <-
+  counties %>%
+  mutate(week=week(date), .after=date) %>%
+  mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=week) %>%
+  mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear)
 
 ## create tibble with number of cases, lagged cases, deaths, lagged deaths by week
 usa <-
