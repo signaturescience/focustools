@@ -179,3 +179,23 @@ do.call("rbind", res) %>%
   theme_minimal() +
   scale_y_continuous(labels=scales::number_format()) +
   labs(x = "Date", y = "Weekly COVID-19 Incidence")
+
+
+## try to get quantiles for 1w ahead
+## first week in horizon then use the last of observed data
+oneweek_horizon <- tail(usa_train$cases, 1)
+
+## create the input tibble to be passed to predict()
+## use the last week number from training plus the horizon index (e.g. 2 weeks ahead of last week = 45 => 47)
+## lag_cases is set at either the last value in cases (if first horizon index)
+## or the fitted value ("fit") from the prediction for the previous horizon week (see below)
+usa_future <- tibble(week = tail(usa_train$week, 1) + 1, lag_cases = oneweek_horizon)
+
+## predict
+## create standard error (TODO: check with CHL and SDT about SE for prediction interval formula here ...)
+pred <-
+  predict(usa_mars_fit, newdata = usa_future, interval = "pint") %>%
+  dplyr::mutate(se = (upr - fit) / qt(0.975, nrow(usa_train)))
+
+sims <- rnorm(1000, mean = pred$fit, sd = pred$se)
+quantile(sims, probs = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99))
