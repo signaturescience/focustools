@@ -73,7 +73,6 @@ get_cases <- function(source = "jhu", granularity = "national", cache = TRUE) {
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
       dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
       dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
-      # dplyr::mutate(week=week(date), .after=epiweek) %>%
       dplyr::mutate(icases  = cases  - lag(cases, default = 0L),
                     ccases = cases)
 
@@ -173,15 +172,8 @@ get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
       dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
       dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
-      # dplyr::mutate(week=week(date), .after=epiweek) %>%
       dplyr::mutate(ideaths  = deaths - lag(deaths, default = 0L),
                     cdeaths = deaths)
-
-    ## by usa
-    dat <-
-      dat %>%
-      dplyr::group_by(epiyear, epiweek) %>%
-      dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop")
 
     ## by usa
     if(granularity == "national") {
