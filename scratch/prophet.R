@@ -1,4 +1,5 @@
 # TODO: get more info on seasonality: https://facebook.github.io/prophet/docs/seasonality,_holiday_effects,_and_regressors.html
+# TODO: use prophet within fable: https://github.com/mitchelloharawild/fable.prophet
 
 # Setup -------------------------------------------------------------------
 
@@ -118,3 +119,28 @@ wcomb %>%
        subtitle=glue::glue("Retroactive forecast window: {n_weeks_to_forecast} weeks (indicated by dotted vertical line)"),
        color=NULL) +
   theme(legend.position="bottom")
+
+
+
+# Do this within fable framework ---------------------------------------
+
+# TODO: this needs lots of clean up, maybe new script
+
+library(fable.prophet)
+library(dplyr)
+
+usa_train <-
+  usa %>%
+  slice(-tail(row_number(), n_weeks_to_forecast*7))
+
+usa_train_tsibble <- usa_train %>%
+  as_tsibble(index=date)
+
+fit <-
+  usa_train_tsibble %>%
+  model(prophet=prophet(y))
+
+components(fit)
+
+fit %>%
+  forecast(h=n_weeks_to_forecast*7)
