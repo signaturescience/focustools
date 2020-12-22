@@ -61,25 +61,17 @@ quibble <- function(x, q = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.9
   tibble(q = q, x = quantile(x, q))
 }
 
+format_fit_for_submission <- function(mable, horizon, target_name) {
 
-fit <- fit.icases
-
-format_fit_for_submission <- function(mable, horizon) {
-
-  # get target name
-  targetname <-
-    substitute(mable) %>%
-    as.character() %>%
-    gsub(".*icases.*", "inc case", .) %>%
-    gsub(".*ideaths.*", "inc death", .) %>%
-    gsub(".*cdeaths.*", "cum death", .)
+  ## bailing on the substitute()!
+  ## just pass in an argument to this function for target_name ?
 
   # forecast
-  myforecast <- forecast(fit, h=horizon)
+  myforecast <- forecast(mable, h=horizon)
 
   # bootstrap a model
   boots <-
-    fit %>%
+    mable %>%
     generate(h=horizon, times=1000, bootstrap=TRUE)
 
   # get the quantiles
@@ -97,23 +89,29 @@ format_fit_for_submission <- function(mable, horizon) {
       myforecast %>%
         as_tibble() %>%
         mutate(quantile=NA_real_, .after=yweek) %>%
-        select(-icases) %>%
         mutate(type="point") %>%
         rename(value=.mean)
     ) %>%
+    ## instead of selecting *out* outcome name ('ideaths','icases',etc) ...
+    ## select *in* variables besides outcome
+    select(.model:type) %>%
     arrange(type, quantile, yweek) %>%
     group_by(yweek) %>%
     mutate(N=cur_group_id()) %>%
     ungroup() %>%
-    mutate(target=glue::glue("{N} wk ahead {targetname}")) %>%
+    mutate(target=glue::glue("{N} wk ahead {target_name}")) %>%
     select(-N) %>%
-    # TODO: problem here, as_date starts on a monday... easier to explain via phone
-    mutate(target_end_date=as_date(yweek)+5) %>%
+    ## think i've fixed this ...
+    ## some sleight of hand to get the "year week" format to epiyear, epiweek separately ...
+    ## then use MMRweek to convert that to the *first* day of the epiweek and add 6 to get the last date
+    mutate(target_end_year = lubridate::epiyear(yweek),
+           target_end_week = lubridate::epiweek(yweek),
+           target_end_date = MMWRweek::MMWRweek2Date(target_end_year, target_end_week) + 6) %>%
     mutate(location="US", forecast_date=today()) %>%
     select(forecast_date, target, target_end_date, location, type, quantile, value)
 
   # restrict inc case quantiles to c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
-  if (targetname=="inc case") {
+  if (target_name=="inc case") {
     bound <- bound %>%
       filter(type=="point" | quantile  %in% c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975))
   }
@@ -122,10 +120,11 @@ format_fit_for_submission <- function(mable, horizon) {
 }
 
 submission <-
-  list(format_fit_for_submission(fit.icases, horizon=horizon),
-       format_fit_for_submission(fit.ideaths, horizon=horizon),
-       format_fit_for_submission(fit.cdeaths, horizon=horizon)) %>%
-  reduce(bind_rows)
+  list(format_fit_for_submission(fit.icases, horizon=horizon, target_name = "inc cases"),
+       format_fit_for_submission(fit.ideaths, horizon=horizon, target_name = "inc deaths"),
+       format_fit_for_submission(fit.cdeaths, horizon=horizon, target_name = "cum deaths")) %>%
+  reduce(bind_rows) %>%
+  arrange(target)
 
 submission %>% write_csv(here::here("scratch/fable-submission-mockup-allmetrics.csv"))
 
