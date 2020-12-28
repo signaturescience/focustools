@@ -9,12 +9,14 @@ library(tsibble)
 # library(fable.prophet) # install from source worked for me
 theme_set(theme_classic())
 
-
 # Set up national data ----------------------------------------------------
 
-# Get national data
+# Get national data for cases and deaths (incident and cumulative)
+
 source(here::here("utils/get_data.R"))
-usa <- get_cases(source="nyt",  granularity = "national")
+usac <-  get_cases(source="nyt",  granularity = "national")
+usad <- get_deaths(source="nyt",  granularity = "national")
+usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek"))
 
 # Add sunday date, and yearweek based on that sunday, convert to tsibble
 # see package?tsibble for more
@@ -46,104 +48,68 @@ usa <-
   usa %>%
   slice(-tail(row_number(), horizon))
 
+## function to evaluate accuracy
+## to add new models include another line in model() in this function
+evaluate_accuracy <- function(.data, outcome, horizon = 4) {
 
-# Create some models ------------------------------------------------------
+  ## test on n week horizon
+  test_data <-
+    .data %>%
+    dplyr::slice(tail(dplyr::row_number(), horizon))
 
-# The linear trend is dumb, but use as a benchmark.
-# I've done no other tuning of anything in the exponential model or arima model (which are roughly equivalent)
-# For differences on ETS and ARIMA methods, see:
-# https://otexts.com/fpp3/arima-ets.html
+  ## train on everything *except* n week horizon
+  train_data <-
+    .data %>%
+    dplyr::slice(-tail(dplyr::row_number(), horizon))
 
-# Fit some models!
-fit <-
-  usa %>%
-  model(
-    # Linear trend
-    # https://otexts.com/fpp3/useful-predictors.html
-    linear = TSLM(icases ~ trend()),
-    # Exponential smoothing
-    # https://otexts.com/fpp3/estimation-and-model-selection.html
-    exponential = ETS(icases ~ error("A") + trend("A") + season("N")),
-    # Auto ARIMA
-    # https://otexts.com/fpp3/arima-r.html
-    arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE),
-  )
+  .outcome <-
+    train_data %>%
+    dplyr::pull(outcome)
 
-# Combine those forecasts! Which makes no sense at all given the linear forecast
-# https://otexts.com/fpp3/combinations.html
-fit <- fit %>%
-  mutate(comb = (linear+exponential+arima)/3)
+  fit <-
+    train_data %>%
+    model(
+      # Linear trend
+      # https://otexts.com/fpp3/useful-predictors.html
+      linear = TSLM(.outcome ~ trend()),
+      # Exponential smoothing methods
+      # https://otexts.com/fpp3/ets.html
+      ## ETS(A,N,N): simple exponential smoothing with additive errors
+      ses_additive = ETS(.outcome ~ error("A") + trend("N") + season("N")),
+      ## ETS(M,N,N): simple exponential smoothing with multiplicative errors
+      ses_multiplicative = ETS(.outcome ~ error("M") + trend("N") + season("N")),
+      ## ETS(A,A,N): Holt’s linear method with additive errors
+      holt_additive = ETS(.outcome ~ error("A") + trend("A") + season("N")),
+      ## ETS(M,A,N): Holt’s linear method with multiplicative errors
+      holt_multiplicative = ETS(.outcome ~ error("M") + trend("A") + season("N")),
+      # Auto ARIMA
+      # https://otexts.com/fpp3/arima-r.html
+      arima = ARIMA(.outcome, stepwise=FALSE, approximation=FALSE)
+    )
 
-# plot actual data versus fitted values
-augment(fit) %>%
-  mutate(date=as_date(yweek)) %>%
-  ggplot(aes(x=date)) +
-  geom_line(aes(y=icases), lty=3, lwd=1) +
-  geom_line(aes(y=.fitted, col=.model))
+  myforecast <-
+    fit %>%
+    forecast(h=horizon)
 
-# forecast four period (four weeks)
-myforecast <- fit %>%
-  forecast(h=horizon)
+  ## the forecast obj is carrying along the column name 'y'
+  ## need to set that input value for the outcome param
+  names(test_data)[which(names(test_data) == outcome)] <- ".outcome"
 
-# plot forecast against actual data observed to date
-myforecast %>%
-  autoplot(usa, level=c(80, 95), alpha=.5)
+  accuracy(myforecast, test_data) %>%
+    mutate(.outcome = outcome)
 
-
-# Distributional forecasts ------------------------------------------------
-
-# forecast distributions
-# https://otexts.com/fpp3/prediction-intervals.html
-
-# prediction intervals (good luck getting this into something tidier)
-myforecast %>%
-  hilo(level=c(97.5, 90, 75, 50))
-
-# do it with boostrapping
-
-# first you need a function to return a tibble of quantiles and the value
-# requires dplyr 1.0.0 so summarise can return a tibble
-# make a quantile tibble for quantiles required for N wk ahead inc case target
-quibble <- function(x, q = c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)) {
-  tibble(q = q, x = quantile(x, q))
 }
-# quibble(mtcars$mpg)
-# A tibble: 7 x 2
-#        q     x
-#    <dbl> <dbl>
-# 1  0.025  10.4
-# 2  0.1    14.3
-# 3  0.25   15.4
-# 4  0.5    19.2
-# 5  0.75   22.8
-# 6  0.9    30.1
-# 7  0.975  32.7
 
-# bootstrap a model
-boots <- fit %>%
-  generate(h=horizon, times=1000, bootstrap=TRUE)
+## calculate and combine model metrics for different endpoints
+metrics <-
+  c("icases","ccases","ideaths","cdeaths") %>%
+  map_df(., .f = evaluate_accuracy, horizon = 4, .data = usa)
 
-# get the quantiles
-myquibbles <- boots %>%
-  as_tibble() %>%
-  group_by(.model, yweek) %>%
-  summarize(quibble(.sim), .groups="drop")
+## plot results
+metrics %>%
+  gather(Metric, Value, ME:MAPE) %>%
+  ggplot(aes(.model,Value)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ Metric + .outcome, scale = "free_x", ncol = 4)
 
-# join back to the forecast and spread to take a look
-myforecast %>%
-  as_tibble() %>%
-  inner_join(myquibbles) %>%
-  spread(q, x)
-
-# TODO: now need a way to turn this back into epiweeks!
-
-# Other stuff -------------------------------------------------------------
-
-# TODO: forecasting on training and testing sets
-# https://otexts.com/fpp3/forecasting-on-training-and-test-sets.html
-
-# TODO: check accuracy
-# https://otexts.com/fpp3/distaccuracy.html
-
-## accuracy of point estimates
-accuracy(myforecast, usa_test)
