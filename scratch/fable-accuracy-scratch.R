@@ -95,15 +95,23 @@ evaluate_accuracy <- function(.data, outcome, horizon = 4) {
   ## need to set that input value for the outcome param
   names(test_data)[which(names(test_data) == outcome)] <- ".outcome"
 
+  mean_forecasts <-
+    myforecast %>%
+    as_tibble() %>%
+    select(-.outcome) %>%
+    mutate(yweek = as.character(yweek)) %>%
+    spread(yweek, .mean)
+
   accuracy(myforecast, test_data) %>%
-    mutate(.outcome = outcome)
+    mutate(.outcome = outcome) %>%
+    left_join(mean_forecasts)
 
 }
 
 ## calculate and combine model metrics for different endpoints
 metrics <-
   c("icases","ccases","ideaths","cdeaths") %>%
-  map_df(., .f = evaluate_accuracy, horizon = 4, .data = usa)
+  map_df(., .f = evaluate_accuracy, horizon = horizon, .data = usa)
 
 ## plot results
 metrics %>%
