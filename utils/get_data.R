@@ -89,14 +89,7 @@ get_cases <- function(source = "jhu", granularity = "national", cache = TRUE) {
     }
 
   }
-
-  ## return the data *except for* the current week (because that may be incomplete)
-  this_week <- paste0(lubridate::year(Sys.Date()), "-", lubridate::week(Sys.Date()))
-
-  dat %>%
-    mutate(ind = paste0(epiyear, "-", epiweek)) %>%
-    filter(ind != this_week) %>%
-    select(-ind)
+  return(dat)
 }
 
 
@@ -188,13 +181,6 @@ get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
     }
 
   }
-
-  ## return the data *except for* the current week (because that may be incomplete)
-  this_week <- paste0(lubridate::year(Sys.Date()), "-", lubridate::week(Sys.Date()))
-
-  dat %>%
-    mutate(ind = paste0(epiyear, "-", epiweek)) %>%
-    filter(ind != this_week) %>%
-    select(-ind)
+  return(dat)
 }
 
