@@ -45,24 +45,6 @@ report(fit.cdeaths)
 
 # Format all for submission -----------------------------------------------
 
-#' Make quantile tibbles
-#'
-#' Make a quantile tibble for required quantiles.
-#' Defaults to `c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)`.
-#' For `N wk ahead inc case target`, filter to: `c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)`
-#'
-#' @param x A numeric vector.
-#' @param q Quantiles to report. Defaults to `c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)`.
-#' @return A tibble of quantiles (`q`) and their values (`x`).
-#' @export
-#' @md
-#' @examples
-#' quibble(iris$Sepal.Length)
-quibble <- function(x, q = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)) {
-  tibble::tibble(q = q, x = stats::quantile(x, q))
-}
-
-
 format_fit_for_submission <- function(mable, horizon, target_name) {
 
   # Check for the correct target type
