@@ -116,8 +116,27 @@ submission <-
   reduce(bind_rows) %>%
   arrange(target)
 
-# submission %>%
-#   distinct(target, target_end_date)
+
+
+
+# Ensure quantiles for cum aren't below current ---------------------------
+
+# What's the most recent week's cumulative deaths?
+most_recent_cdeaths <- tail(usa$cdeaths, 1)
+
+# Ensure ANY value (not just 10th quantile) for cumulative isn't below current
+submission <-
+  submission %>%
+  # indicator column whether any value for cumulative deaths is below the most recent cumulative death
+  mutate(tmp_is_cdeaths_below_current = grepl("cum deaths", target) & value<most_recent_cdeaths) %>%
+  # if so, set that value to the most recent cumulative deaths
+  mutate(value = ifelse(tmp_is_cdeaths_below_current, most_recent_cdeaths, value)) %>%
+  # get rid of that indicator
+  select(-starts_with("tmp_"))
+
+
+
+# write out ---------------------------------------------------------------
 
 submission %>% write_csv(here::here("scratch/fable-submission-mockup-allmetrics.csv"))
 
