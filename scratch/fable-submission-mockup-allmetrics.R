@@ -10,11 +10,12 @@ theme_set(theme_classic())
 # This doesn't seem to fix the TODO noted below, and further messes up the bootstrapping bit
 # options(lubridate.week.start = 7)
 
+source(here::here("utils/get_data.R"))
+source(here::here("R/utils.R"))
 
 # Set up national data ----------------------------------------------------
 
 # Get national data
-source(here::here("utils/get_data.R"))
 usac <-  get_cases(source="nyt",  granularity = "national")
 usad <- get_deaths(source="nyt",  granularity = "national")
 
