@@ -10,9 +10,6 @@ theme_set(theme_classic())
 # This doesn't seem to fix the TODO noted below, and further messes up the bootstrapping bit
 # options(lubridate.week.start = 7)
 
-# TODO: create "monday" var to base yearweek off of, that's mmwrweek2date starting on mmwrday=2 (MONDAY)
-# TODO: add five days to as_date(yearweek) after forecast and boostrap to get the saturday that ends the week starting on that monday
-
 
 # Set up national data ----------------------------------------------------
 
