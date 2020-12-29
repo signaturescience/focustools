@@ -184,3 +184,25 @@ get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
   return(dat)
 }
 
+
+#' Make tsibble
+#'
+#' @param df A tibble containing columns `epiyear` and `epiweek`.
+#' @param chop Logical indicating whether or not to remove the most current week (default `TRUE`).
+#' @return A tsibble containing additional colums `monday` indicating the date
+#'   for the Monday of that epiweek, and `yweek` (a yearweek vctr class object)
+#'   that indexes the tsibble in 1 week increments.
+#' @export
+#' @md
+make_tsibble <- function(df, chop=TRUE) {
+  out <- df %>%
+    # get the monday that starts the MMWRweek
+    mutate(monday=MMWRweek::MMWRweek2Date(MMWRyear=epiyear, MMWRweek=epiweek, MMWRday=2), .after="epiweek") %>%
+    # convert represent as yearweek (see package?tsibble)
+    dplyr::mutate(yweek=tsibble::yearweek(monday), .after="monday") %>%
+    # convert to tsibble
+    tsibble::as_tsibble(index=yweek)
+  # Remove the incomplete week
+  if (chop) out <- out %>% dplyr::filter(lubridate::week(monday)!=lubridate::week(lubridate::today()))
+  return(out)
+}
