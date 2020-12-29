@@ -7,8 +7,11 @@ library(fable)
 library(tsibble)
 theme_set(theme_classic())
 
-# TODO: This doesn't seem to fix the TODO noted below, and further messes up the bootstrapping bit
+# This doesn't seem to fix the TODO noted below, and further messes up the bootstrapping bit
 # options(lubridate.week.start = 7)
+
+# TODO: create "monday" var to base yearweek off of, that's mmwrweek2date starting on mmwrday=2 (MONDAY)
+# TODO: add five days to as_date(yearweek) after forecast and boostrap to get the saturday that ends the week starting on that monday
 
 
 # Set up national data ----------------------------------------------------
@@ -17,20 +20,10 @@ theme_set(theme_classic())
 source(here::here("utils/get_data.R"))
 usac <-  get_cases(source="nyt",  granularity = "national")
 usad <- get_deaths(source="nyt",  granularity = "national")
-usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek"))
 
-# Add sunday date, and yearweek based on that sunday, convert to tsibble
-# see package?tsibble for more
-usa <-
-  usa %>%
-  # get the date that starts the MMWRweek
-  mutate(day=MMWRweek::MMWRweek2Date(epiyear, epiweek), .after="epiweek") %>%
-  # Remove the incomplete week
-  filter(week(day)!=week(today())) %>%
-  # convert represent as yearweek (see package?tsibble)
-  mutate(yweek=yearweek(day), .after="day") %>%
-  # convert to tsibble
-  as_tsibble(index=yweek)
+# Turn into a tsibble (see function definition in utils/get_data.R)
+usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek")) %>% make_tsibble(chop=TRUE)
+tail(usa)
 
 # when later forecasting or limiting to training/testing, how many periods?
 horizon <- 4
