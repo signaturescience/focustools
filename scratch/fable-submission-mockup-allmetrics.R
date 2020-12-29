@@ -106,6 +106,10 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
       filter(type=="point" | quantile  %in% c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975))
   }
 
+  bound <- bound %>%
+    mutate(quantile=round(quantile, 4)) %>%
+    mutate(value=as.integer(round(value)))
+
   return(bound)
 }
 
