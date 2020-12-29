@@ -21,7 +21,8 @@ tail(usatibble)
 # Make the tsibble: note that "day" here is SUNDAY of the epiweek.
 usa <- usatibble %>%
   # get the date that starts the MMWRweek
-  mutate(day=MMWRweek::MMWRweek2Date(epiyear, epiweek), .after="epiweek") %>%
+  # GET THE MONDAY that starts the week so yearweek ... XX document somewhere else.
+  mutate(day=MMWRweek::MMWRweek2Date(epiyear, epiweek, MMWRday=2), .after="epiweek") %>%
   # Remove the incomplete week
   filter(week(day)!=week(today())) %>%
   # convert represent as yearweek (see package?tsibble)
@@ -29,6 +30,8 @@ usa <- usatibble %>%
   # convert to tsibble
   as_tsibble(index=yweek)
 tail(usa)
+
+
 
 # You're doing the modeling on the yweek variable here as the index
 # So what comes out of the modeling side you have to use that yweek to get back to dates.
