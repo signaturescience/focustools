@@ -142,6 +142,14 @@ submission <-
 
 # write out ---------------------------------------------------------------
 
-submission %>% write_csv(here::here("scratch/fable-submission-mockup-allmetrics.csv"))
+forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-arima.csv")
+submission %>% write_csv(forecast_filename)
 
 # submission %>% knitr::kable() %>% clipr::write_clip()
+
+
+# validate ----------------------------------------------------------------
+
+# wget https://raw.githubusercontent.com/signaturescience/covid19-forecast-hub/master/code/validation/R-scripts/functions_plausibility.R
+source(here::here("utils/functions_plausibility.R"))
+validate_file(forecast_filename)
