@@ -6,10 +6,6 @@ library(lubridate)
 library(fable)
 library(tsibble)
 theme_set(theme_classic())
-
-# This doesn't seem to fix the TODO noted below, and further messes up the bootstrapping bit
-# options(lubridate.week.start = 7)
-
 source(here::here("utils/get_data.R"))
 source(here::here("R/utils.R"))
 
