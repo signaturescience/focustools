@@ -76,16 +76,10 @@ case_future <-
   new_data(usa, 4) %>%
   mutate(icases = best_guess)
 
-myforecast <-  forecast(fit, h = horizon)
+myforecast <-  forecast(fit, new_data = case_future)
 
 myforecast
 
 myforecast %>%
   autoplot(usa)
 
-# bootstrap a model
-boots <-
-  fit %>%
-  generate(h=horizon, times=1000, bootstrap=TRUE, new_data = case_future)
-
-boots
