@@ -49,7 +49,7 @@ report(fit.cdeaths)
 format_fit_for_submission <- function(mable, horizon, target_name) {
 
   # Check for the correct target type
-  stopifnot(target_name %in% c("inc cases", "inc deaths", "cum deaths"))
+  stopifnot(target_name %in% c("inc case", "inc death", "cum death"))
 
   ## bailing on the substitute()!
   ## just pass in an argument to this function for target_name ?
@@ -114,9 +114,9 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
 }
 
 submission <-
-  list(format_fit_for_submission(fit.icases, horizon=horizon, target_name = "inc cases"),
-       format_fit_for_submission(fit.ideaths, horizon=horizon, target_name = "inc deaths"),
-       format_fit_for_submission(fit.cdeaths, horizon=horizon, target_name = "cum deaths")) %>%
+  list(format_fit_for_submission(fit.icases, horizon=horizon, target_name = "inc case"),
+       format_fit_for_submission(fit.ideaths, horizon=horizon, target_name = "inc death"),
+       format_fit_for_submission(fit.cdeaths, horizon=horizon, target_name = "cum death")) %>%
   reduce(bind_rows) %>%
   arrange(target)
 
