@@ -170,6 +170,7 @@ verify_targets <- function(entry){
   allowed_targets <- c(
     paste(0:130, "day ahead inc death"),
     paste(0:130, "day ahead cum death"),
+    paste(0:20, "wk ahead inc case"),
     paste(0:20, "wk ahead inc death"),
     paste(0:20, "wk ahead cum death"),
     paste(0:130, "day ahead inc hosp")
