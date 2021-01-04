@@ -30,13 +30,17 @@ horizon <- 4
 # Model -------------------------------------------------------------------
 
 fit.icases <- usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
+fit.ccases <- usa %>% model(arima = ARIMA(ccases, stepwise=FALSE, approximation=FALSE))
 fit.ideaths <- usa %>% model(arima = ARIMA(ideaths, stepwise=FALSE, approximation=FALSE))
 fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
 
 plotforecast <- function(fit) fit %>% forecast(h=horizon) %>% autoplot(usa)
-plotforecast(fit.icases)
-plotforecast(fit.ideaths) #uh-oh
-plotforecast(fit.cdeaths)
+p1 <- plotforecast(fit.icases) + labs(title="Incident Cases")
+p2 <- plotforecast(fit.ccases) + labs(title="Cumulative Cases")
+p3 <- plotforecast(fit.ideaths)  + labs(title="Incident Deaths") #uh-oh
+p4 <- plotforecast(fit.cdeaths) + labs(title="Cumulative Deaths")
+library(patchwork)
+(p1+p2)/(p3+p4)
 
 # all different arima parameters
 report(fit.icases)
