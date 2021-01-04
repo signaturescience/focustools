@@ -13,23 +13,14 @@ theme_set(theme_classic())
 # Get national data for cases and deaths (incident and cumulative)
 
 source(here::here("utils/get_data.R"))
+source(here::here("R/utils.R"))
 usac <-  get_cases(source="nyt",  granularity = "national")
 usad <- get_deaths(source="nyt",  granularity = "national")
 usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek"))
 
 # Add sunday date, and yearweek based on that sunday, convert to tsibble
 # see package?tsibble for more
-usa <-
-  usa %>%
-  # get the date that starts the MMWRweek
-  mutate(day=MMWRweek::MMWRweek2Date(epiyear, epiweek), .after="epiweek") %>%
-  # Remove the incomplete week
-  filter(week(day)!=week(today())) %>%
-  # convert represent as yearweek (see package?tsibble)
-  mutate(yweek=yearweek(day), .after="day") %>%
-  # convert to tsibble
-  as_tsibble(index=yweek)
-
+usa <- usa %>% make_tsibble(.)
 
 # when later forecasting or limiting to training/testing, how many periods?
 horizon <- 4
@@ -62,15 +53,14 @@ fit <-
 
 ## ok now we need to get the cases to use in future data
 ## lets get the "best" model from fable-accuracy-scratch.R
-source(here::here("utils/get_data.R"))
+source(here::here("scratch/fable-accuracy-scratch.R"))
 
 best_guess <-
   metrics %>%
   filter(.outcome == "icases") %>%
   filter(RMSE == min(RMSE)) %>%
-  gather(week, icases, `2020 W44`:`2020 W47`) %>%
+  gather(week, icases, `2020 W45`:`2020 W48`) %>%
   pull(icases)
-
 
 case_future <-
   new_data(usa, 4) %>%
