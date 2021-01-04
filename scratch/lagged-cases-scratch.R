@@ -20,23 +20,23 @@ usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek"))
 
 # Add sunday date, and yearweek based on that sunday, convert to tsibble
 # see package?tsibble for more
-usa <- usa %>% make_tsibble(.)
+usa <- usa %>% make_tsibble(., chop = TRUE)
 
 # when later forecasting or limiting to training/testing, how many periods?
 horizon <- 4
 
-## evaluate how well the model fits
-## create separate training / test sets
-
-## test on n week horizon
-usa_test <-
-  usa %>%
-  slice(tail(row_number(), horizon))
-
-## train on everything *except* n week horizon
-usa <-
-  usa %>%
-  slice(-tail(row_number(), horizon))
+# ## evaluate how well the model fits
+# ## create separate training / test sets
+#
+# ## test on n week horizon
+# usa_test <-
+#   usa %>%
+#   slice(tail(row_number(), horizon))
+#
+# ## train on everything *except* n week horizon
+# usa <-
+#   usa %>%
+#   slice(-tail(row_number(), horizon))
 
 fit <-
   usa %>%
@@ -51,24 +51,41 @@ fit <-
   )
 
 
-## ok now we need to get the cases to use in future data
-## lets get the "best" model from fable-accuracy-scratch.R
-source(here::here("scratch/fable-accuracy-scratch.R"))
+# ## ok now we need to get the cases to use in future data
+# ## lets get the "best" model from fable-accuracy-scratch.R
+# source(here::here("scratch/fable-accuracy-scratch.R"))
+#
+# best_guess <-
+#   metrics %>%
+#   filter(.outcome == "icases") %>%
+#   filter(RMSE == min(RMSE)) %>%
+#   gather(week, icases, `2020 W45`:`2020 W48`) %>%
+#   pull(icases)
+#
+# tail(usa)
+
+fit.icases <-
+  usa %>%
+  model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
 
 best_guess <-
-  metrics %>%
-  filter(.outcome == "icases") %>%
-  filter(RMSE == min(RMSE)) %>%
-  gather(week, icases, `2020 W45`:`2020 W48`) %>%
-  pull(icases)
+  forecast(fit.icases, h=horizon, new_data = NULL) %>%
+  pull(.mean)
 
 case_future <-
   new_data(usa, 4) %>%
   mutate(icases = best_guess)
 
-myforecast <-
-  fit %>%
-  forecast(case_future)
+myforecast <-  forecast(fit, h = horizon)
+
+myforecast
 
 myforecast %>%
   autoplot(usa)
+
+# bootstrap a model
+boots <-
+  fit %>%
+  generate(h=horizon, times=1000, bootstrap=TRUE, new_data = case_future)
+
+boots
