@@ -272,7 +272,7 @@ verify_no_quantile_crossings <- function(entry){
   # check whether rows are non-decreasing (i.e. there are no crossings)
   is_crossing <- apply(quantiles, 1, function(v) any(diff(v) < -0.01)) # leave some tolerance
   # warn if there are crossing and return info on where they ocurred
-  if(any(is_crossing)){
+  if(any(na.omit(is_crossing))){
     cat("  WARNING: Quantile crossing found for ", sum(is_crossing),
         " combination(s) of location and target. Details in returned table.")
     return(invisible(entry_wide[is_crossing, c("location", "target")]))
