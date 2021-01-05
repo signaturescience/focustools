@@ -9,58 +9,22 @@ theme_set(theme_classic())
 source(here::here("utils/get_data.R"))
 source(here::here("R/utils.R"))
 
-# Set up national data ----------------------------------------------------
+# define forecasting functions
 
-# Get national data
-usac <-  get_cases(source="nyt",  granularity = "national")
-usad <- get_deaths(source="nyt",  granularity = "national")
+## COMING SOON: generic wrapper to fable::model (this would let us pass in a list of arbitrary functions to the functions)
+# ts_fit <- function(.data, outcome, model) {
+#
+# }
 
-# Turn into a tsibble (see function definition in utils/get_data.R)
-usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek")) %>% make_tsibble(chop=TRUE)
-tail(usa)
-
-# when later forecasting or limiting to training/testing, how many periods?
-horizon <- 4
-
-
-# Model -------------------------------------------------------------------
-
-fit.icases <- usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
-fit.ccases <- usa %>% model(arima = ARIMA(ccases, stepwise=FALSE, approximation=FALSE))
-fit.ideaths <- usa %>% model(arima = ARIMA(ideaths, stepwise=FALSE, approximation=FALSE))
-fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
-
-plotforecast <- function(fit) fit %>% forecast(h=horizon) %>% autoplot(usa)
-p1 <- plotforecast(fit.icases) + labs(title="Incident Cases")
-p2 <- plotforecast(fit.ccases) + labs(title="Cumulative Cases")
-p3 <- plotforecast(fit.ideaths)  + labs(title="Incident Deaths") #uh-oh
-p4 <- plotforecast(fit.cdeaths) + labs(title="Cumulative Deaths")
-library(patchwork)
-(p1+p2)/(p3+p4)
-
-# all different arima parameters
-report(fit.icases)
-report(fit.ideaths)
-report(fit.cdeaths)
-
-
-# Format all for submission -----------------------------------------------
-
-format_fit_for_submission <- function(mable, horizon, target_name) {
-
-  # Check for the correct target type
-  stopifnot(target_name %in% c("inc case", "inc death", "cum death"))
-
-  ## bailing on the substitute()!
-  ## just pass in an argument to this function for target_name ?
+ts_forecast <- function(mable, horizon = 4, new_data = NULL, seed = 1863) {
 
   # forecast
-  myforecast <- forecast(mable, h=horizon)
+  myforecast <- forecast(mable, h=horizon, new_data = new_data)
 
   # bootstrap a model
   boots <-
     mable %>%
-    generate(h=horizon, times=1000, bootstrap=TRUE)
+    generate(h=horizon, times=1000, bootstrap=TRUE, new_data = new_data, seed = seed)
 
   # get the quantiles
   myquibbles <-
@@ -69,7 +33,7 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
     group_by(.model, yweek) %>%
     summarize(quibble(.sim), .groups="drop")
 
-  bound <-
+  .forecast <-
     bind_rows(
       myquibbles %>%
         mutate(type="quantile") %>%
@@ -79,9 +43,22 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
         mutate(quantile=NA_real_, .after=yweek) %>%
         mutate(type="point") %>%
         rename(value=.mean)
-    ) %>%
-    ## instead of selecting *out* outcome name ('ideaths','icases',etc) ...
-    ## select *in* variables besides outcome
+    )
+
+  ## return named list with forecast AND quibbles
+  return(.forecast)
+
+}
+
+# Format all for submission -----------------------------------------------
+
+format_fit_for_submission <- function(.forecast, target_name) {
+
+  # Check for the correct target type
+  stopifnot(target_name %in% c("inc case", "inc death", "cum death"))
+
+  bound <-
+    .forecast %>%
     select(.model:type) %>%
     arrange(type, quantile, yweek) %>%
     group_by(yweek) %>%
@@ -91,12 +68,6 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
     select(-N) %>%
     # Fix dates: as_date(yweek) returns the MONDAY that starts that week. add 5 days to get the Saturday date.
     mutate(target_end_date=as_date(yweek)+days(5)) %>%
-    ## think i've fixed this ...
-    ## some sleight of hand to get the "year week" format to epiyear, epiweek separately ...
-    ## then use MMRweek to convert that to the *first* day of the epiweek and add 6 to get the last date
-    # mutate(target_end_year = lubridate::epiyear(yweek),
-    #        target_end_week = lubridate::epiweek(yweek),
-    #        target_end_date = MMWRweek::MMWRweek2Date(target_end_year, target_end_week) + 6) %>%
     mutate(location="US", forecast_date=today()) %>%
     select(forecast_date, target, target_end_date, location, type, quantile, value)
 
@@ -113,15 +84,61 @@ format_fit_for_submission <- function(mable, horizon, target_name) {
   return(bound)
 }
 
+
+# Set up national data ----------------------------------------------------
+
+# Get national data
+usac <-  get_cases(source="nyt",  granularity = "national")
+usad <- get_deaths(source="nyt",  granularity = "national")
+
+# Turn into a tsibble (see function definition in utils/get_data.R)
+usa <-  inner_join(usac, usad, by = c("epiyear", "epiweek")) %>% make_tsibble(chop=TRUE)
+tail(usa)
+
+# when later forecasting or limiting to training/testing, how many periods?
+horizon <- 4
+
+# Model -------------------------------------------------------------------
+
+fit.icases <- usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
+## NOTE: using the lagged cases (3 weeks) as predictor ... maybe eventually some way to combine this with ARIMA via xreg formulat (see ?ARIMA)
+fit.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
+# fit.ideaths <- usa %>% model(arima = ARIMA(ideaths, stepwise=FALSE, approximation=FALSE))
+## NOTE: for now we are just getting the
+fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
+
+icases_forecast <- ts_forecast(fit.icases, horizon = 4)
+
+## best guess for incident cases in the future
+## need this to forecast deaths
+best_guess <-
+  icases_forecast %>%
+  filter(type == "point") %>%
+  arrange(yweek) %>%
+  pull(value)
+
+future_cases <-
+  new_data(usa, 4) %>%
+  mutate(icases = best_guess)
+
+## NOTE: you will probably see a WARNING here about horizon being ignored ...
+## ... not an issue given that new_data object passes along the horizon info
+ideaths_forecast <- ts_forecast(fit.ideaths, new_data = future_cases)
+
+## if modeled the "old" (ARIMA) way ...
+# ideaths_forecast <- ts_forecast(fit.ideaths, horizon = 4)
+
+## NOTE: we need to figure out how to get the cumulative deaths from incident deaths model
+cdeaths_forecast <- ts_forecast(fit.cdeaths, horizon = 4)
+
+format_fit_for_submission(icases_forecast, target_name = "inc case")
+
 submission <-
-  list(format_fit_for_submission(fit.icases, horizon=horizon, target_name = "inc case"),
-       format_fit_for_submission(fit.ideaths, horizon=horizon, target_name = "inc death"),
-       format_fit_for_submission(fit.cdeaths, horizon=horizon, target_name = "cum death")) %>%
+  list(format_fit_for_submission(icases_forecast, target_name = "inc case"),
+       format_fit_for_submission(ideaths_forecast, target_name = "inc death"),
+       format_fit_for_submission(cdeaths_forecast, target_name = "cum death")) %>%
   reduce(bind_rows) %>%
   arrange(target)
-
-
-
 
 # Ensure quantiles for cum aren't below current ---------------------------
 
@@ -138,15 +155,12 @@ submission <-
   # get rid of that indicator
   select(-starts_with("tmp_"))
 
-
-
 # write out ---------------------------------------------------------------
 
-forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-arima.csv")
+forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv")
 submission %>% write_csv(forecast_filename)
 
 # submission %>% knitr::kable() %>% clipr::write_clip()
-
 
 # validate ----------------------------------------------------------------
 
