@@ -39,6 +39,7 @@ pip3 install -r misc/validation/requirements.txt
 In order to run a very similar check using R, we have developed a wrapper to the [`validate_quantile_csv_file()` function from the `zoltpy` module](https://github.com/reichlab/zoltpy/blob/master/zoltpy/covid19.py#L75-L93), which drives the `validate_single_forecast_file.py` script above. To use the wrapper function in R:
 
 ```
+source("R/submission.R")
 validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv")
 validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-05-sigsci-ts.csv")
 ```

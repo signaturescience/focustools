@@ -128,12 +128,6 @@ future_cases <-
 # Forecast incident deaths based on best guess for cases
 ideaths_forecast <- ts_forecast(fit.ideaths, new_data = future_cases)
 
-## if modeled the "old" (ARIMA) way ...
-# ideaths_forecast <- ts_forecast(fit.ideaths, horizon = 4)
-
-## NOTE: we need to figure out how to get the cumulative deaths from incident deaths model
-cdeaths_forecast <- ts_forecast(fit.cdeaths, horizon = horizon)
-
 ## Cumulative deaths from incident deaths
 # TODO: This could probably stand to be a function, but need to ensure that the data (usa) is the same data used in creating the forecast (ideaths_forecast)
 # What was the last week of recorded data you have?
@@ -209,3 +203,7 @@ read_csv(forecast_filename) %>%
 # wget https://raw.githubusercontent.com/signaturescience/covid19-forecast-hub/master/code/validation/R-scripts/functions_plausibility.R
 source(here::here("utils/functions_plausibility.R"))
 validate_file(forecast_filename_monday)
+
+source(here::here("R/submission.R"))
+validate_forecast(forecast_filename_monday)
+
