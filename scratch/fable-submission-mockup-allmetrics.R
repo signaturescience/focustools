@@ -107,7 +107,7 @@ fit.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
 ## NOTE: for now we are just getting the
 fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
 
-icases_forecast <- ts_forecast(fit.icases, horizon = 4)
+icases_forecast <- ts_forecast(fit.icases, horizon = horizon)
 
 ## best guess for incident cases in the future
 ## need this to forecast deaths
@@ -129,9 +129,7 @@ ideaths_forecast <- ts_forecast(fit.ideaths, new_data = future_cases)
 # ideaths_forecast <- ts_forecast(fit.ideaths, horizon = 4)
 
 ## NOTE: we need to figure out how to get the cumulative deaths from incident deaths model
-cdeaths_forecast <- ts_forecast(fit.cdeaths, horizon = 4)
-
-format_fit_for_submission(icases_forecast, target_name = "inc case")
+cdeaths_forecast <- ts_forecast(fit.cdeaths, horizon = horizon)
 
 submission <-
   list(format_fit_for_submission(icases_forecast, target_name = "inc case"),
@@ -157,8 +155,13 @@ submission <-
 
 # write out ---------------------------------------------------------------
 
-forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv")
+forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-05-sigsci-ts.csv")
 submission %>% write_csv(forecast_filename)
+
+## have to add this to make the validation work as of 2020-01-05
+read_csv(forecast_filename) %>%
+  mutate(forecast_date = lubridate::today() - 1) %>%
+  write_csv(here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv"))
 
 # submission %>% knitr::kable() %>% clipr::write_clip()
 
