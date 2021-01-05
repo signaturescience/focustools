@@ -20,7 +20,7 @@ metadata_version = 5
 
 # this is the root of the repository. 
 root = (Path(__file__) / '..'/'..'/'..').resolve()
-pop_df = pd.read_csv(open('locations.csv')).astype({'location':str})
+pop_df = pd.read_csv(open('misc/validation/locations.csv')).astype({'location':str})
 
 
 '''
@@ -266,7 +266,6 @@ def main():
     remove_all_entries_from_validated_files(forecasts_changed)
     print(f"files changed: {forecasts_changed}")
     check_formatting(my_path)
-
 
 if __name__ == "__main__":
     main()
