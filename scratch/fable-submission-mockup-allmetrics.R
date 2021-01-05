@@ -134,6 +134,40 @@ ideaths_forecast <- ts_forecast(fit.ideaths, new_data = future_cases)
 ## NOTE: we need to figure out how to get the cumulative deaths from incident deaths model
 cdeaths_forecast <- ts_forecast(fit.cdeaths, horizon = horizon)
 
+## Cumulative deaths from incident deaths
+# TODO: This could probably stand to be a function, but need to ensure that the data (usa) is the same data used in creating the forecast (ideaths_forecast)
+# What was the last week of recorded data you have?
+last_recorded_week <- max(usa$yweek)
+# What's the first forecasted week?
+first_forecast_week <- min(ideaths_forecast$yweek)
+# Check to make sure they're 1 week apart. "Arithmetic" works on yearweek vctrs!
+stopifnot(first_forecast_week == last_recorded_week+1)
+# What's the cumulative deaths for the last week of recorded data?
+deaths_recorded_so_far <- usa %>% filter(yweek==last_recorded_week) %>% pull(cdeaths)
+# Now add up the incident deaths week over week, then tack on the last recorded cumulative death count.
+cdeaths_forecast <-
+  # Starting with the inc deaths forecast
+  ideaths_forecast %>%
+  # Make sure you're arranged ascending by date (yweek)
+  arrange(yweek, type, quantile) %>%
+  # Create a new grouping variable, throw it away when you're done with the mutate
+  # I don't know what happens if you group by quantile but quantile is NA for point estimates.
+  # This creates a throwaway char that's eg "quantile 0.01" or "point NA" so you're not grouping over an NA
+  mutate(groupvar=paste(type, quantile)) %>%
+  # Group by each quantile(/point)
+  group_by(groupvar) %>%
+  # For each point or quantile, get the cumulative sums for weeks 2, 3, and 4
+  mutate(cvalue=cumsum(value)) %>%
+  ungroup() %>%
+  # Then add the deaths recorded so far
+  mutate(cvalue=cvalue+deaths_recorded_so_far) %>%
+  # Make the 'value' column this new cumulative sum
+  mutate(value=cvalue) %>%
+  # Get rid of junk
+  select(-groupvar, -cvalue)
+
+
+
 submission <-
   list(format_fit_for_submission(icases_forecast, target_name = "inc case"),
        format_fit_for_submission(ideaths_forecast, target_name = "inc death"),
@@ -162,9 +196,11 @@ forecast_filename <- here::here("scratch/fable-submission-mockup-allmetrics-fore
 submission %>% write_csv(forecast_filename)
 
 ## have to add this to make the validation work as of 2020-01-05
+## FML THis only works if it's Tuesday!2021-01-05
+forecast_filename_monday <- here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv")
 read_csv(forecast_filename) %>%
   mutate(forecast_date = lubridate::today() - 1) %>%
-  write_csv(here::here("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv"))
+  write_csv(forecast_filename_monday)
 
 # submission %>% knitr::kable() %>% clipr::write_clip()
 
@@ -172,4 +208,4 @@ read_csv(forecast_filename) %>%
 
 # wget https://raw.githubusercontent.com/signaturescience/covid19-forecast-hub/master/code/validation/R-scripts/functions_plausibility.R
 source(here::here("utils/functions_plausibility.R"))
-validate_file(forecast_filename)
+validate_file(forecast_filename_monday)
