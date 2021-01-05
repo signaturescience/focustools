@@ -9,5 +9,7 @@
 .RData
 .Ruserdata
 
+**/__pycache__
+
 # internal stuff not going to github (proposal, slides, PILIT report, etc)
 internal/
