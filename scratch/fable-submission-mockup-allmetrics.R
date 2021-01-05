@@ -19,7 +19,11 @@ source(here::here("R/utils.R"))
 ts_forecast <- function(mable, horizon = 4, new_data = NULL, seed = 1863) {
 
   # forecast
-  myforecast <- forecast(mable, h=horizon, new_data = new_data)
+  if (is.null(new_data)) {
+    myforecast <- forecast(mable, h=horizon)
+  } else {
+    myforecast <- forecast(mable, new_data=new_data)
+  }
 
   # bootstrap a model
   boots <-
@@ -121,8 +125,7 @@ future_cases <-
   new_data(usa, 4) %>%
   mutate(icases = best_guess)
 
-## NOTE: you will probably see a WARNING here about horizon being ignored ...
-## ... not an issue given that new_data object passes along the horizon info
+# Forecast incident deaths based on best guess for cases
 ideaths_forecast <- ts_forecast(fit.ideaths, new_data = future_cases)
 
 ## if modeled the "old" (ARIMA) way ...
