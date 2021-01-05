@@ -108,8 +108,8 @@ fit.icases <- usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=
 ## NOTE: using the lagged cases (3 weeks) as predictor ... maybe eventually some way to combine this with ARIMA via xreg formulat (see ?ARIMA)
 fit.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
 # fit.ideaths <- usa %>% model(arima = ARIMA(ideaths, stepwise=FALSE, approximation=FALSE))
-## NOTE: for now we are just getting the
-fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
+## NOTE: for now we are just getting the cdeaths from ARIMA
+# fit.cdeaths <- usa %>% model(arima = ARIMA(cdeaths, stepwise=FALSE, approximation=FALSE))
 
 icases_forecast <- ts_forecast(fit.icases, horizon = horizon)
 
