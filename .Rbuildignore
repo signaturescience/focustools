@@ -1,0 +1,5 @@
+^focustools\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+scratch
+^data-raw$
