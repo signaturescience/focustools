@@ -1,12 +1,14 @@
-#' Title
+#' Generate time series forecasts including quantile estimates
 #'
 #' @param mable
-#' @param horizon
-#' @param new_data
-#' @param seed
+#' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
+#' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
+#' @param seed Random seed used in bootstrapping process; default `1863`
 #'
 #' @return
 #' @export
+#'
+#' @md
 #'
 #' @examples
 #'
@@ -14,33 +16,33 @@ ts_forecast <- function(mable, horizon = 4, new_data = NULL, seed = 1863) {
 
   # forecast
   if (is.null(new_data)) {
-    myforecast <- forecast(mable, h=horizon)
+    myforecast <- fable::forecast(mable, h=horizon)
   } else {
-    myforecast <- forecast(mable, new_data=new_data)
+    myforecast <- fable::forecast(mable, new_data=new_data)
   }
 
   # bootstrap a model
   boots <-
     mable %>%
-    generate(h=horizon, times=1000, bootstrap=TRUE, new_data = new_data, seed = seed)
+    fabletools::generate(h=horizon, times=1000, bootstrap=TRUE, new_data = new_data, seed = seed)
 
   # get the quantiles
   myquibbles <-
     boots %>%
-    as_tibble() %>%
-    group_by(.model, yweek) %>%
-    summarize(quibble(.sim), .groups="drop")
+    dplyr::as_tibble() %>%
+    dplyr::group_by(.model, yweek) %>%
+    dplyr::summarize(quibble(.sim), .groups="drop")
 
   .forecast <-
-    bind_rows(
+    dplyr::bind_rows(
       myquibbles %>%
-        mutate(type="quantile") %>%
-        rename(quantile=q, value=x),
+        dplyr::mutate(type="quantile") %>%
+        dplyr::rename(quantile=q, value=x),
       myforecast %>%
-        as_tibble() %>%
-        mutate(quantile=NA_real_, .after=yweek) %>%
-        mutate(type="point") %>%
-        rename(value=.mean)
+        dplyr::as_tibble() %>%
+        dplyr::mutate(quantile=NA_real_, .after=yweek) %>%
+        dplyr::mutate(type="point") %>%
+        dplyr::rename(value=.mean)
     )
 
   ## return named list with forecast AND quibbles

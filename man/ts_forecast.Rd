@@ -2,15 +2,19 @@
 % Please edit documentation in R/ts.R
 \name{ts_forecast}
 \alias{ts_forecast}
-\title{Title}
+\title{Generate time series forecasts including quantile estimates}
 \usage{
 ts_forecast(mable, horizon = 4, new_data = NULL, seed = 1863)
 }
 \arguments{
-\item{seed}{}
+\item{horizon}{Optional horizon periods through which the forecasts should be generated; default is \code{4}}
+
+\item{new_data}{Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is \code{NULL}}
+
+\item{seed}{Random seed used in bootstrapping process; default \code{1863}}
 }
 \description{
-Title
+Generate time series forecasts including quantile estimates
 }
 \examples{
 
