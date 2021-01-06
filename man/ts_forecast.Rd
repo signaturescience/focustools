@@ -16,6 +16,3 @@ ts_forecast(mable, horizon = 4, new_data = NULL, seed = 1863)
 \description{
 Generate time series forecasts including quantile estimates
 }
-\examples{
-
-}

@@ -2,16 +2,15 @@
 % Please edit documentation in R/submission.R
 \name{format_fit_for_submission}
 \alias{format_fit_for_submission}
-\title{Title}
+\title{Format forecast for COVID-19 Forecast Hub submission entry}
 \usage{
 format_fit_for_submission(.forecast, target_name)
 }
 \arguments{
-\item{target_name}{}
+\item{.forecast}{Forecast object}
+
+\item{target_name}{Name of the target for the forecast; must be one of \code{'inc case'}, \code{'inc death'}, or \code{'cum death'}}
 }
 \description{
-Title
-}
-\examples{
-
+Format forecast for COVID-19 Forecast Hub submission entry
 }

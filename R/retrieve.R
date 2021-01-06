@@ -1,18 +1,16 @@
-## TODO: check weekly case count logic (i.e. disentangling cumulative cases) is working
-## TODO: flesh out cache = TRUE idea (option to use pre-downloaded object)
-
 #' Retrieve case count data
 #'
-#' @param source
-#' @param granularity
-#' @param cache
+#' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
+#' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #'
-#' @return
+#' @return A `tibble`
 #' @export
+#' @md
 #'
-#' @examples
+#' @references https://github.com/CSSEGISandData/COVID-19
+#' @references https://github.com/nytimes/covid-19-data
 #'
-get_cases <- function(source = "jhu", granularity = "national", cache = TRUE) {
+get_cases <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {
     ## first read in data
@@ -105,15 +103,14 @@ get_cases <- function(source = "jhu", granularity = "national", cache = TRUE) {
 
 #' Retrieve deaths data
 #'
-#' @param source
-#' @param granularity
-#' @param cache
+#' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
+#' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #'
 #' @return
 #' @export
+#' @md
 #'
-#' @examples
-get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
+get_deaths <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {
     ## first read in data
@@ -145,12 +142,12 @@ get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
         ## within each county (fips code), year, week grouping
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
-        filter(epiweek != lubridate::week(Sys.Date())) %>%
-        mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
-        group_by(fips) %>%
-        arrange(fips,date) %>%
-        mutate(cdeaths = cumsum(ideaths)) %>%
-        ungroup()
+        dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
+        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
+        dplyr::group_by(fips) %>%
+        dplyr::arrange(fips,date) %>%
+        dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
+        dplyr::ungroup()
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -177,7 +174,7 @@ get_deaths <- function(source = "jhu", granularity = "national", cache = TRUE) {
         dat %>%
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop") %>%
-        mutate(cdeaths = cumsum(ideaths))
+        dplyr::mutate(cdeaths = cumsum(ideaths))
     }
 
   } else if (source == "nyt") {

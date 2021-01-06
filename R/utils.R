@@ -10,7 +10,7 @@
 make_tsibble <- function(df, chop=TRUE) {
   out <- df %>%
     # get the monday that starts the MMWRweek
-    mutate(monday=MMWRweek::MMWRweek2Date(MMWRyear=epiyear, MMWRweek=epiweek, MMWRday=2), .after="epiweek") %>%
+    dplyr::mutate(monday=MMWRweek::MMWRweek2Date(MMWRyear=epiyear, MMWRweek=epiweek, MMWRday=2), .after="epiweek") %>%
     # convert represent as yearweek (see package?tsibble)
     dplyr::mutate(yweek=tsibble::yearweek(monday), .after="monday") %>%
     # convert to tsibble
@@ -48,7 +48,6 @@ quibble <- function(x, q = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.9
 #'
 #' @md
 #'
-#' @examples
 #'
 c19fh_meta <- function(team = NULL, write = TRUE) {
 

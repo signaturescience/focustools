@@ -4,14 +4,21 @@
 \alias{get_cases}
 \title{Retrieve case count data}
 \usage{
-get_cases(source = "jhu", granularity = "national", cache = TRUE)
+get_cases(source = "jhu", granularity = "national")
 }
 \arguments{
-\item{cache}{}
+\item{source}{Data source to query; must be one of \code{'jhu'} or \code{'nyt'}; default is \code{'jhu'}}
+
+\item{granularity}{Data aggregation level; must be one of \code{'national'}, \code{'state'}, or \code{'county'}; if data source is \code{'nyt'} then only \code{'national'} can be used currently; default is \code{'national'}}
+}
+\value{
+A \code{tibble}
 }
 \description{
 Retrieve case count data
 }
-\examples{
+\references{
+https://github.com/CSSEGISandData/COVID-19
 
+https://github.com/nytimes/covid-19-data
 }

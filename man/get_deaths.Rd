@@ -4,10 +4,12 @@
 \alias{get_deaths}
 \title{Retrieve deaths data}
 \usage{
-get_deaths(source = "jhu", granularity = "national", cache = TRUE)
+get_deaths(source = "jhu", granularity = "national")
 }
 \arguments{
-\item{cache}{}
+\item{source}{Data source to query; must be one of \code{'jhu'} or \code{'nyt'}; default is \code{'jhu'}}
+
+\item{granularity}{Data aggregation level; must be one of \code{'national'}, \code{'state'}, or \code{'county'}; if data source is \code{'nyt'} then only \code{'national'} can be used currently; default is \code{'national'}}
 }
 \description{
 Retrieve deaths data

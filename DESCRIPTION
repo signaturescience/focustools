@@ -10,6 +10,8 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
+Depends:
+    R (>= 2.10)
 LazyData: true
 RoxygenNote: 6.1.1
 Imports: 
@@ -21,4 +23,10 @@ Imports:
     glue,
     fable,
     fabletools,
-    tsibble
+    tsibble,
+    MMWRweek,
+    httr,
+    lubridate,
+    purrr,
+    reticulate,
+    tibble

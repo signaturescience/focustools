@@ -10,15 +10,14 @@
 #'
 #' @md
 #'
-#' @examples
 #'
 ts_forecast <- function(mable, horizon = 4, new_data = NULL, seed = 1863) {
 
   # forecast
   if (is.null(new_data)) {
-    myforecast <- fable::forecast(mable, h=horizon)
+    myforecast <- fabletools::forecast(mable, h=horizon)
   } else {
-    myforecast <- fable::forecast(mable, new_data=new_data)
+    myforecast <- fabletools::forecast(mable, new_data=new_data)
   }
 
   # bootstrap a model

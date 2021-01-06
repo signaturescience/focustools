@@ -8,7 +8,6 @@
 #' @return If `verbose = FALSE`, the returned value will be a boolean with `TRUE` for valid submission file and `FALSE` for invalid file. If `verbose = FALSE`, the function will return a named list with two elements: "valid" (boolean with the `TRUE`/`FALSE` validation code) and "message" (the output from the `zoltpy valid_quantile_csv_file()` function).
 #' @export
 #'
-#' @examples
 #' @md
 validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname = NULL) {
 
@@ -41,16 +40,15 @@ validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname
 }
 
 
-#' Title
+#' Format forecast for COVID-19 Forecast Hub submission entry
 #'
-#' @param .forecast
-#' @param target_name
+#' @param .forecast Forecast object
+#' @param target_name Name of the target for the forecast; must be one of `'inc case'`, `'inc death'`, or `'cum death'`
 #'
 #' @return
 #' @export
 #'
 #' @md
-#' @examples
 #'
 format_fit_for_submission <- function(.forecast, target_name) {
 
@@ -67,8 +65,8 @@ format_fit_for_submission <- function(.forecast, target_name) {
     dplyr::mutate(target=glue::glue("{N} wk ahead {target_name}")) %>%
     dplyr::select(-N) %>%
     # Fix dates: as_date(yweek) returns the MONDAY that starts that week. add 5 days to get the Saturday date.
-    dplyr::mutate(target_end_date=as_date(yweek)+days(5)) %>%
-    dplyr::mutate(location="US", forecast_date=today()) %>%
+    dplyr::mutate(target_end_date=lubridate::as_date(yweek)+days(5)) %>%
+    dplyr::mutate(location="US", forecast_date=lubridate::today()) %>%
     dplyr::select(forecast_date, target, target_end_date, location, type, quantile, value)
 
   # restrict inc case quantiles to c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)

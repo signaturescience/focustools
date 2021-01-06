@@ -17,6 +17,3 @@ A \code{tibble} with the model metadata, which includes (among other fields) tea
 \description{
 Parse model metadata from COVID-19 Forecast Hub repository
 }
-\examples{
-
-}
