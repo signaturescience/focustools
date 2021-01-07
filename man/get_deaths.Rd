@@ -11,6 +11,17 @@ get_deaths(source = "jhu", granularity = "national")
 
 \item{granularity}{Data aggregation level; must be one of \code{'national'}, \code{'state'}, or \code{'county'}; if data source is \code{'nyt'} then only \code{'national'} can be used currently; default is \code{'national'}}
 }
+\value{
+A \code{tibble} with (at minimum) the following columns:
+\itemize{
+\item \strong{epiyear}: Epidemiological year (see \link[lubridate]{epiyear} for more details)
+\item \strong{epiweek}: Epidemiological week (see \link[lubridate]{epiweek} for more details)
+\item \strong{ideaths}: Incident case count
+\item \strong{cdeaths}: Cumulative case count
+}
+
+If \code{source = 'jhu'} and \code{granularity = 'state'} then the data will include column for \strong{state} (full name of the state) and \strong{date}. If \code{source = 'jhu'} and \code{granularity = 'county'} then the data will include column for \strong{fips} (county code) and \strong{date}.
+}
 \description{
 Retrieve deaths data
 }

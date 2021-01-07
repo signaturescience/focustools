@@ -7,7 +7,7 @@
 ts_forecast(mable, horizon = 4, new_data = NULL, seed = 1863)
 }
 \arguments{
-\item{mable}{A \code{mable} (model table). For more information see \link[fabletools]{mable}.}
+\item{mable}{A \code{mable} (model table); for more information see \link[fabletools]{mable}}
 
 \item{horizon}{Optional horizon periods through which the forecasts should be generated; default is \code{4}}
 

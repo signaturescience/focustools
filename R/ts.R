@@ -1,11 +1,11 @@
 #' Wrapper to fit time series models
 #'
-#' @param .data
-#' @param outcomes
-#' @param .fun
-#' @param single
+#' @param .data Data to use for modeling
+#' @param outcomes Character vector specifying names of the column to use as the outcome
+#' @param .fun List of modeling functions to use
+#' @param single Boolean indicating whether or not a "shortcut" should be used to return a single `tibble`; only works if there is one outcome ("outcomes") and one model function (".fun"); default is `TRUE`
 #'
-#' @return A `mable` (model table). For more information see \link[fabletools]{mable}.
+#' @return A single `mable` (model table) if (`single = TRUE`) or a named list of `mable`s (if `single = FALSE`). For more information see \link[fabletools]{mable}.
 #' @export
 #'
 #' @md
@@ -42,7 +42,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 
 #' Generate time series forecasts including quantile estimates
 #'
-#' @param mable A `mable` (model table). For more information see \link[fabletools]{mable}.
+#' @param mable A `mable` (model table); for more information see \link[fabletools]{mable}
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
 #' @param seed Random seed used in bootstrapping process; default `1863`

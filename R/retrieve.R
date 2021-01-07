@@ -3,7 +3,14 @@
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
 #' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #'
-#' @return A `tibble`
+#' @return A `tibble` with (at minimum) the following columns:
+#' - **epiyear**: Epidemiological year (see \link[lubridate]{epiyear} for more details)
+#' - **epiweek**: Epidemiological week (see \link[lubridate]{epiweek} for more details)
+#' - **icases**: Incident case count
+#' - **ccases**: Cumulative case count
+#'
+#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#'
 #' @export
 #' @md
 #'
@@ -106,7 +113,14 @@ get_cases <- function(source = "jhu", granularity = "national") {
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
 #' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #'
-#' @return
+#' @return A `tibble` with (at minimum) the following columns:
+#' - **epiyear**: Epidemiological year (see \link[lubridate]{epiyear} for more details)
+#' - **epiweek**: Epidemiological week (see \link[lubridate]{epiweek} for more details)
+#' - **ideaths**: Incident case count
+#' - **cdeaths**: Cumulative case count
+#'
+#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#'
 #' @export
 #' @md
 #'
