@@ -4,6 +4,6 @@
 ^README\.md$
 ^README_files$
 ^README\.html$
-scratch
-submission
+^scratch$
+^submission$
 ^data-raw$
