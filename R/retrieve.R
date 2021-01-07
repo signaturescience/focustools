@@ -32,7 +32,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
       dplyr::arrange(date) %>%
       ## coerce from cumulative to incident cases
       ## hold onto count as "ccases" for cumulative cases
-      dplyr::mutate(icases = count - lag(count, default = 0L),
+      dplyr::mutate(icases = count - dplyr::lag(count, default = 0L),
                     ccases = count)
 
     ## by county
@@ -82,7 +82,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
       dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
       dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
-      dplyr::mutate(icases  = cases  - lag(cases, default = 0L),
+      dplyr::mutate(icases  = cases  - dplyr::lag(cases, default = 0L),
                     ccases = cases)
 
     ## by usa
@@ -132,7 +132,7 @@ get_deaths <- function(source = "jhu", granularity = "national") {
       dplyr::arrange(date) %>%
       ## coerce from cumulative to incident deaths
       ## hold onto count as "cdeaths" for cumulative deaths
-      dplyr::mutate(ideaths = count - lag(count, default = 0L),
+      dplyr::mutate(ideaths = count - dplyr::lag(count, default = 0L),
                     cdeaths = count)
 
     ## by county
@@ -182,7 +182,7 @@ get_deaths <- function(source = "jhu", granularity = "national") {
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
       dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
       dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
-      dplyr::mutate(ideaths  = deaths - lag(deaths, default = 0L),
+      dplyr::mutate(ideaths  = deaths - dplyr::lag(deaths, default = 0L),
                     cdeaths = deaths)
 
     ## by usa

@@ -1,6 +1,48 @@
+#' Wrapper to fit time series models
+#'
+#' @param .data
+#' @param outcomes
+#' @param .fun
+#' @param single
+#'
+#' @return A `mable` (model table). For more information see \link[fabletools]{mable}.
+#' @export
+#'
+#' @md
+#'
+ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
+
+  ## use variable names to get list of vectors for time series modeling for each outcome
+  ## doing this in a for loop for expedience (convert to purrr ??)
+  res <- list()
+  for(i in 1:length(outcomes)) {
+    outcome <- outcomes[i]
+    ## probably should handle this better with quosures or similar
+    ## here unlisting the subset data to ensure it is a vector
+    train_dat <- unlist(.data[,outcome], use.names = FALSE)
+    # return(train_dat)
+    res[[i]] <- purrr::invoke_map(.f = .fun, list(list(x = train_dat, .data = .data)))
+    names(res[[i]]) <- names(.fun)
+
+  }
+  res <-
+    res %>%
+    purrr::set_names(outcomes)
+
+  if(single) {
+    if(length(outcomes) > 1 | length(.fun) > 1) {
+      stop("you cannot use the 'single' shortcut if you have more than outcome and/or model ...")
+    }
+    res <- res[[1]][[1]]
+  }
+  return(res)
+}
+
+
+
 #' Generate time series forecasts including quantile estimates
 #'
-#' @param mable
+#' @param mable A `mable` (model table). For more information see \link[fabletools]{mable}.
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
 #' @param seed Random seed used in bootstrapping process; default `1863`
