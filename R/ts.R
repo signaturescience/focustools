@@ -108,7 +108,7 @@ ts_forecast <- function(mable, outcome, horizon = 4,new_data = NULL, seed = 1863
 #' @param .forecast A `tibble` with forecast data generated using \link[focustools]{ts_forecast}; should *only* be a forecast of incident cases
 #' @param horizon Horizon periods through which the \link[tsibble]{new_data} should be generated; default is `4`
 #'
-#' @return
+#' @return A `tsibble` with horizon periods and respective forecasted incident cases.
 #'
 #' @md
 #' @export
@@ -199,11 +199,11 @@ ts_accuracy <- function(.data, horizon = 4, outcomes, .fun) {
   ## create training and test split by horizon
   train_data <-
     .data %>%
-    dplyr::slice(-tail(dplyr::row_number(), horizon))
+    dplyr::slice(-utils::tail(dplyr::row_number(), horizon))
 
   test_data <-
     .data %>%
-    dplyr::slice(tail(dplyr::row_number(), horizon))
+    dplyr::slice(utils::tail(dplyr::row_number(), horizon))
 
   ## run ts_fit
   fit <- ts_fit(.data = train_data, outcomes = outcomes, .fun = .fun, single = FALSE)
@@ -211,14 +211,14 @@ ts_accuracy <- function(.data, horizon = 4, outcomes, .fun) {
   ## run forecast operation on all fits
   ## need the nested map here to traverse the list of lists
   ## recall: ts_fit returns a list of models nested in a list of otucomes
-  l <- map(fit, function(x) map(x, function(y) (forecast(y, h=4))))
+  l <- purrr::map(fit, function(x) purrr::map(x, function(y) (fabletools::forecast(y, h=4))))
 
   ## now loop over each outcome in that list ...
   ## get its name ...
   ## force the column names for test data to be named to match the outcome name in the .fun funs
   ## NOTE: using a for loop here to have a little more flexibility than a nested map()
   ## create empty tibble to store loop results
-  res <- tibble()
+  res <- dplyr::tibble()
 
   for(i in 1:length(names(l))) {
 
@@ -227,7 +227,7 @@ ts_accuracy <- function(.data, horizon = 4, outcomes, .fun) {
     outcome <- names(l)[i]
 
     names(test_data_tmp)[which(names(test_data_tmp) == outcome)] <- "x"
-    tmp_res <- map_df(l[[i]], accuracy, test_data_tmp)
+    tmp_res <- purrr::map_df(l[[i]], fabletools::accuracy, test_data_tmp)
     tmp_res$outcome <- outcome
 
     res <- rbind(res,tmp_res)

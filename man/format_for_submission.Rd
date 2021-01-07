@@ -11,6 +11,12 @@ format_for_submission(.forecast, target_name)
 
 \item{target_name}{Name of the target for the forecast; must be one of \code{'inc case'}, \code{'inc death'}, or \code{'cum death'}}
 }
+\value{
+A \code{tibble} with target names and quantiles/point estimates formatted per the COVID-19 Forecast Hub submission guidelines.
+}
 \description{
 Format forecast for COVID-19 Forecast Hub submission entry
+}
+\references{
+https://covid19forecasthub.org/
 }

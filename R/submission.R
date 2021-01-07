@@ -45,10 +45,11 @@ validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname
 #' @param .forecast Forecast object
 #' @param target_name Name of the target for the forecast; must be one of `'inc case'`, `'inc death'`, or `'cum death'`
 #'
-#' @return
+#' @return A `tibble` with target names and quantiles/point estimates formatted per the COVID-19 Forecast Hub submission guidelines.
 #' @export
 #'
 #' @md
+#' @references https://covid19forecasthub.org/
 #'
 format_for_submission <- function(.forecast, target_name) {
 

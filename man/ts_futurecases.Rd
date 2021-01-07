@@ -13,6 +13,9 @@ ts_futurecases(.data, .forecast, horizon = 4)
 
 \item{horizon}{Horizon periods through which the \link[tsibble]{new_data} should be generated; default is \code{4}}
 }
+\value{
+A \code{tsibble} with horizon periods and respective forecasted incident cases.
+}
 \description{
 Helper to generate the estimate of incident cases from an icases forecast object
 }
