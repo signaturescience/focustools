@@ -607,15 +607,210 @@ body {
 
 <!-- badges: end -->
 
-<p>The goal of focustools is to …</p>
 <h2 id="installation">Installation</h2>
-<p>You can install the released version of focustools from <a href="https://CRAN.R-project.org">CRAN</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">&quot;focustools&quot;</span>)</span></code></pre></div>
-<p>And the development version from <a href="https://github.com/">GitHub</a> with:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;signaturescience/focustools&quot;</span>)</span></code></pre></div>
-<h2 id="example">Example</h2>
-<h2 id="validating-submission-file">Validating submission file</h2>
+<p>Install from GitHub as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;signaturescience/focustools&quot;</span>)</span></code></pre></div>
+<h2 id="usage">Usage</h2>
+<h3 id="generating-forecasts-and-formatting-submission">Generating forecasts and formatting submission</h3>
+<p>Here we provide an example of how to use <code>focustools</code> to generate forecasts for COVID-19 Forecast Hub targets via time series approaches.</p>
+<p>First, load ancillary packages for data analysis and retrieve COVID-19 data from the NYT source. Note that the <code>get_cases()</code> and <code>get_deaths()</code> functions are executed separately, then joined and converted to a <code>tsibble</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">library</span>(focustools)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">library</span>(readr)</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="kw">library</span>(purrr)</span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">library</span>(fabletools)</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">library</span>(fable)</span>
+<span id="cb2-7"><a href="#cb2-7"></a></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="co">## get data at the national scale from nyt source</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>usac &lt;-<span class="st">  </span><span class="kw">get_cases</span>(<span class="dt">source=</span><span class="st">&quot;nyt&quot;</span>,  <span class="dt">granularity =</span> <span class="st">&quot;national&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10"></a>usad &lt;-<span class="st"> </span><span class="kw">get_deaths</span>(<span class="dt">source=</span><span class="st">&quot;nyt&quot;</span>,  <span class="dt">granularity =</span> <span class="st">&quot;national&quot;</span>)</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="co">## use the focustools helper to prep the tsibble format</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>usa &lt;-<span class="st">  </span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">inner_join</span>(usac, usad, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;epiyear&quot;</span>, <span class="st">&quot;epiweek&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="st">  </span><span class="kw">make_tsibble</span>(<span class="dt">chop=</span><span class="ot">TRUE</span>)</span></code></pre></div>
+<p>With the data prepped, we can now fit the models. In this case, we’ll fit two models. One will be an ARIMA of incident cases, with parameters automatically optimized. For more details see <code>?fable::ARIMA</code>. The other model will use the three week lagged incident case counts to predict incident deaths:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>fit.icases &lt;-<span class="st"> </span>usa <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">model</span>(<span class="dt">arima =</span> <span class="kw">ARIMA</span>(icases, <span class="dt">stepwise=</span><span class="ot">FALSE</span>, <span class="dt">approximation=</span><span class="ot">FALSE</span>))</span>
+<span id="cb3-2"><a href="#cb3-2"></a>fit.ideaths &lt;-<span class="st"> </span>usa <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">model</span>(<span class="dt">linear_caselag3 =</span> <span class="kw">TSLM</span>(ideaths <span class="op">~</span><span class="st"> </span><span class="kw">lag</span>(icases, <span class="dv">3</span>)))</span></code></pre></div>
+<p>Note that the code above uses the <code>fabletools::model()</code> function directly. The <code>focustools</code> package does include <code>ts_fit()</code>, which is a wrapper for modeling multiple outcomes and/or using a list of model specifications. However, currently <code>ts_fit()</code> is incompatible with the <code>TSLM</code> model used above for the incident deaths. For an example of <code>ts_fit()</code> in action see the “Evaluating model accuracy” section below.</p>
+<p>With the model fit objects created, we can generate forecasts (including point and quantile estimates) for the outcomes of interest at an arbitrary horizon. Note that given the model we have chosen for the incident deaths outcome, we do need to make sure to generate the incident case forecast <em>first</em> so that we can retrieve point estimates for future cases, which will be passed into the incident deaths forecast:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">## generate incident case forecast</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>icases_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(fit.icases, <span class="dt">outcome =</span> <span class="st">&quot;icases&quot;</span>, <span class="dt">horizon =</span> <span class="dv">4</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>icases_forecast</span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt; # A tibble: 96 x 6</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co">#&gt;    .model    yweek quantile    value type     icases</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="co">#&gt;    &lt;chr&gt;    &lt;week&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;    &lt;dist&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co">#&gt;  1 arima  2021 W01    0.01  1332663. quantile      ?</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="co">#&gt;  2 arima  2021 W01    0.025 1360242. quantile      ?</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="co">#&gt;  3 arima  2021 W01    0.05  1432585. quantile      ?</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="co">#&gt;  4 arima  2021 W01    0.1   1441244. quantile      ?</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="co">#&gt;  5 arima  2021 W01    0.15  1457494. quantile      ?</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="co">#&gt;  6 arima  2021 W01    0.2   1466760. quantile      ?</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="co">#&gt;  7 arima  2021 W01    0.25  1476786. quantile      ?</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="co">#&gt;  8 arima  2021 W01    0.3   1485404. quantile      ?</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="co">#&gt;  9 arima  2021 W01    0.35  1490695. quantile      ?</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="co">#&gt; 10 arima  2021 W01    0.4   1490697. quantile      ?</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="co">#&gt; # … with 86 more rows</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a></span>
+<span id="cb4-19"><a href="#cb4-19"></a><span class="co">## need to get future cases to pass to ideaths forecast</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a>future_cases &lt;-<span class="st"> </span><span class="kw">ts_futurecases</span>(usa, icases_forecast, <span class="dt">horizon =</span> <span class="dv">4</span>)</span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="co"># Forecast incident deaths based on best guess for cases</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a>ideaths_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(fit.ideaths,  <span class="dt">outcome =</span> <span class="st">&quot;ideaths&quot;</span>, <span class="dt">new_data =</span> future_cases)</span>
+<span id="cb4-23"><a href="#cb4-23"></a>ideaths_forecast</span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="co">#&gt; # A tibble: 96 x 7</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a><span class="co">#&gt;    .model             yweek quantile  value type     ideaths icases</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="co">#&gt;    &lt;chr&gt;             &lt;week&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;dist&gt;  &lt;dbl&gt;</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a><span class="co">#&gt;  1 linear_caselag3 2021 W01    0.01  14322. quantile       ?     NA</span></span>
+<span id="cb4-28"><a href="#cb4-28"></a><span class="co">#&gt;  2 linear_caselag3 2021 W01    0.025 14322. quantile       ?     NA</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a><span class="co">#&gt;  3 linear_caselag3 2021 W01    0.05  14323. quantile       ?     NA</span></span>
+<span id="cb4-30"><a href="#cb4-30"></a><span class="co">#&gt;  4 linear_caselag3 2021 W01    0.1   14622. quantile       ?     NA</span></span>
+<span id="cb4-31"><a href="#cb4-31"></a><span class="co">#&gt;  5 linear_caselag3 2021 W01    0.15  16259. quantile       ?     NA</span></span>
+<span id="cb4-32"><a href="#cb4-32"></a><span class="co">#&gt;  6 linear_caselag3 2021 W01    0.2   16467. quantile       ?     NA</span></span>
+<span id="cb4-33"><a href="#cb4-33"></a><span class="co">#&gt;  7 linear_caselag3 2021 W01    0.25  16511. quantile       ?     NA</span></span>
+<span id="cb4-34"><a href="#cb4-34"></a><span class="co">#&gt;  8 linear_caselag3 2021 W01    0.3   16756. quantile       ?     NA</span></span>
+<span id="cb4-35"><a href="#cb4-35"></a><span class="co">#&gt;  9 linear_caselag3 2021 W01    0.35  16881. quantile       ?     NA</span></span>
+<span id="cb4-36"><a href="#cb4-36"></a><span class="co">#&gt; 10 linear_caselag3 2021 W01    0.4   16959. quantile       ?     NA</span></span>
+<span id="cb4-37"><a href="#cb4-37"></a><span class="co">#&gt; # … with 86 more rows</span></span></code></pre></div>
+<p>We can use the forecasts of incidence to infer cumulative targets. The <code>ts_forecast()</code> function is flexible enough to switch methods internally, requiring a “inc_forecast” parameter if either “cdeaths” or “ccases” is passed as the “outcome” for the forecast:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">## generate cumulative forecasts</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>cdeaths_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(<span class="dt">outcome =</span> <span class="st">&quot;cdeaths&quot;</span>, <span class="dt">.data =</span> usa, <span class="dt">inc_forecast =</span> ideaths_forecast)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>cdeaths_forecast</span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt; # A tibble: 96 x 8</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt;    .model    yweek quantile  value type            ideaths  icases</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt;    &lt;chr&gt;    &lt;week&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;            &lt;dist&gt;   &lt;dbl&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">#&gt;  1 linea… 2021 W01   NA     3.69e5 point N(18973, 1.5e+07)  1.50e6</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="co">#&gt;  2 linea… 2021 W01    0.01  3.65e5 quan…                 ? NA     </span></span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="co">#&gt;  3 linea… 2021 W01    0.025 3.65e5 quan…                 ? NA     </span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co">#&gt;  4 linea… 2021 W01    0.05  3.65e5 quan…                 ? NA     </span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="co">#&gt;  5 linea… 2021 W01    0.1   3.65e5 quan…                 ? NA     </span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="co">#&gt;  6 linea… 2021 W01    0.15  3.67e5 quan…                 ? NA     </span></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="co">#&gt;  7 linea… 2021 W01    0.2   3.67e5 quan…                 ? NA     </span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="co">#&gt;  8 linea… 2021 W01    0.25  3.67e5 quan…                 ? NA     </span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="co">#&gt;  9 linea… 2021 W01    0.3   3.67e5 quan…                 ? NA     </span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="co">#&gt; 10 linea… 2021 W01    0.35  3.67e5 quan…                 ? NA     </span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="co">#&gt; # … with 86 more rows, and 1 more variable: `ifelse(value &lt; recorded_so_far,</span></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="co">#&gt; #   recorded_so_far, value)` &lt;dbl&gt;</span></span></code></pre></div>
+<p>Prior to submitting these forecasts to the COVID-19 Forecast Hub we need to prepare them in the canonical submission format. Data prep in <code>format_for_submission</code> includes naming targets appropriately and ensuring that target dates adhere to epidemiological week format:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">## create submission object</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>submission &lt;-</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="st">  </span><span class="kw">list</span>(<span class="kw">format_for_submission</span>(icases_forecast, <span class="dt">target_name =</span> <span class="st">&quot;inc case&quot;</span>),</span>
+<span id="cb6-4"><a href="#cb6-4"></a>       <span class="kw">format_for_submission</span>(ideaths_forecast, <span class="dt">target_name =</span> <span class="st">&quot;inc death&quot;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5"></a>       <span class="kw">format_for_submission</span>(cdeaths_forecast, <span class="dt">target_name =</span> <span class="st">&quot;cum death&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="st">  </span><span class="kw">reduce</span>(bind_rows) <span class="op">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="st">  </span><span class="kw">arrange</span>(target)</span>
+<span id="cb6-8"><a href="#cb6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9"></a>submission</span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="co">#&gt; # A tibble: 216 x 7</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a><span class="co">#&gt;    forecast_date target          target_end_date location type   quantile  value</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="co">#&gt;    &lt;date&gt;        &lt;glue&gt;          &lt;date&gt;          &lt;chr&gt;    &lt;chr&gt;     &lt;dbl&gt;  &lt;int&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="co">#&gt;  1 2021-01-07    1 wk ahead cum… 2021-01-09      US       point    NA     369302</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a><span class="co">#&gt;  2 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.01  364651</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a><span class="co">#&gt;  3 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.025 364651</span></span>
+<span id="cb6-16"><a href="#cb6-16"></a><span class="co">#&gt;  4 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.05  364652</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a><span class="co">#&gt;  5 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.1   364951</span></span>
+<span id="cb6-18"><a href="#cb6-18"></a><span class="co">#&gt;  6 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.15  366588</span></span>
+<span id="cb6-19"><a href="#cb6-19"></a><span class="co">#&gt;  7 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.2   366796</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a><span class="co">#&gt;  8 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.25  366840</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a><span class="co">#&gt;  9 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.3   367085</span></span>
+<span id="cb6-22"><a href="#cb6-22"></a><span class="co">#&gt; 10 2021-01-07    1 wk ahead cum… 2021-01-09      US       quant…    0.35  367210</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a><span class="co">#&gt; # … with 206 more rows</span></span></code></pre></div>
+<p>Last of all, we can validate the submission. The object must be written to a file and then validated with <code>validate_forecast()</code>, which wraps a python function developed and maintained by the COVID-19 Forecast Hub organizers. For more information on validating the entry see the “Submission validation” section below:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">## set up file path for submission file</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">## forcing the date in the file name and submission conents to be this monday</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>ffile &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="kw">paste0</span>(<span class="kw">this_monday</span>(), <span class="st">&quot;-sigsci-arima.csv&quot;</span>))</span>
+<span id="cb7-4"><a href="#cb7-4"></a>submission <span class="op">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">forecast_date =</span> <span class="kw">this_monday</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="st">  </span><span class="kw">write_csv</span>(ffile)</span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="kw">validate_forecast</span>(ffile)</span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt; $valid</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt; $message</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt; [1] &quot;no errors&quot;</span></span></code></pre></div>
+<h3 id="evaluating-model-accuracy">Evaluating model accuracy</h3>
+<p>In order to facilitate model selection and evaluation, we included a wrapper function to generate model accuracy measures for multiple outcomes and models simultaneously. The <code>ts_accuracy()</code> function relies heavily on <code>ts_fit()</code>. As noted above, in basic usage it may not be necessary to use <code>ts_fit()</code> to generate forecasts / submissions. Furthermore, there are some models for which <code>ts_fit()</code> will not work. Those limitations will apply to <code>ts_accuracy()</code> as well.</p>
+<p>However, <code>ts_fit()</code> can be useful for iterating over outcomes and arbitrary compatible models:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>ts_funs &lt;-<span class="st"> </span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="st">  </span><span class="kw">list</span>(</span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="dt">ARIMA =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">ARIMA =</span> <span class="kw">ARIMA</span>(x, <span class="dt">stepwise=</span><span class="ot">FALSE</span>, <span class="dt">approximation=</span><span class="ot">FALSE</span>)),</span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="dt">SES_Additive =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">SES_additive =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;N&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb8-5"><a href="#cb8-5"></a>    <span class="dt">SES_Multiplicative =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">SES_multiplicative =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;M&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;N&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="dt">Holt_Additive =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">Holt_Additive =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="dt">Holt_Multiplicative =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">Holt_Multiplicative =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;M&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>)))</span>
+<span id="cb8-8"><a href="#cb8-8"></a>  )</span>
+<span id="cb8-9"><a href="#cb8-9"></a></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="kw">ts_fit</span>(usa, <span class="dt">outcomes =</span> <span class="st">&quot;icases&quot;</span>, <span class="dt">.fun =</span> ts_funs, <span class="dt">single =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt; $icases</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">#&gt; $icases$ARIMA</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co">#&gt;            ARIMA</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="co">#&gt;          &lt;model&gt;</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; 1 &lt;ARIMA(0,1,4)&gt;</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="co">#&gt; </span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="co">#&gt; $icases$SES_Additive</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a><span class="co">#&gt;   SES_additive</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a><span class="co">#&gt;        &lt;model&gt;</span></span>
+<span id="cb8-22"><a href="#cb8-22"></a><span class="co">#&gt; 1 &lt;ETS(A,N,N)&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23"></a><span class="co">#&gt; </span></span>
+<span id="cb8-24"><a href="#cb8-24"></a><span class="co">#&gt; $icases$SES_Multiplicative</span></span>
+<span id="cb8-25"><a href="#cb8-25"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb8-26"><a href="#cb8-26"></a><span class="co">#&gt;   SES_multiplicative</span></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="co">#&gt;              &lt;model&gt;</span></span>
+<span id="cb8-28"><a href="#cb8-28"></a><span class="co">#&gt; 1       &lt;ETS(M,N,N)&gt;</span></span>
+<span id="cb8-29"><a href="#cb8-29"></a><span class="co">#&gt; </span></span>
+<span id="cb8-30"><a href="#cb8-30"></a><span class="co">#&gt; $icases$Holt_Additive</span></span>
+<span id="cb8-31"><a href="#cb8-31"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb8-32"><a href="#cb8-32"></a><span class="co">#&gt;   Holt_Additive</span></span>
+<span id="cb8-33"><a href="#cb8-33"></a><span class="co">#&gt;         &lt;model&gt;</span></span>
+<span id="cb8-34"><a href="#cb8-34"></a><span class="co">#&gt; 1  &lt;ETS(A,A,N)&gt;</span></span>
+<span id="cb8-35"><a href="#cb8-35"></a><span class="co">#&gt; </span></span>
+<span id="cb8-36"><a href="#cb8-36"></a><span class="co">#&gt; $icases$Holt_Multiplicative</span></span>
+<span id="cb8-37"><a href="#cb8-37"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb8-38"><a href="#cb8-38"></a><span class="co">#&gt;   Holt_Multiplicative</span></span>
+<span id="cb8-39"><a href="#cb8-39"></a><span class="co">#&gt;               &lt;model&gt;</span></span>
+<span id="cb8-40"><a href="#cb8-40"></a><span class="co">#&gt; 1        &lt;ETS(M,A,N)&gt;</span></span></code></pre></div>
+<p>For convenience, the function can return a single <code>mable</code> (model tables) instead of a list if <code>single = TRUE</code> and there is only one outcome and model:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>ts_funs &lt;-<span class="st"> </span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="st">  </span><span class="kw">list</span>(</span>
+<span id="cb9-3"><a href="#cb9-3"></a>    <span class="dt">ARIMA =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">ARIMA =</span> <span class="kw">ARIMA</span>(x, <span class="dt">stepwise=</span><span class="ot">FALSE</span>, <span class="dt">approximation=</span><span class="ot">FALSE</span>))</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  )</span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="kw">ts_fit</span>(usa, <span class="dt">outcomes =</span> <span class="st">&quot;icases&quot;</span>, <span class="dt">.fun =</span> ts_funs, <span class="dt">single =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">#&gt; # A mable: 1 x 1</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">#&gt;            ARIMA</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#&gt;          &lt;model&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#&gt; 1 &lt;ARIMA(0,1,4)&gt;</span></span></code></pre></div>
+<p>The <code>ts_accuracy()</code> function accepts a list of models and returns metrics for each model and outcome(s):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>ts_funs &lt;-<span class="st"> </span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="st">  </span><span class="kw">list</span>(</span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="dt">ARIMA =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">ARIMA =</span> <span class="kw">ARIMA</span>(x, <span class="dt">stepwise=</span><span class="ot">FALSE</span>, <span class="dt">approximation=</span><span class="ot">FALSE</span>)),</span>
+<span id="cb10-4"><a href="#cb10-4"></a>    <span class="dt">SES_Additive =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">SES_additive =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;N&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="dt">SES_Multiplicative =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">SES_multiplicative =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;M&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;N&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="dt">Holt_Additive =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">Holt_Additive =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>))),</span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="dt">Holt_Multiplicative =</span> <span class="cf">function</span>(x, .data) <span class="kw">model</span>(.data, <span class="dt">Holt_Multiplicative =</span> <span class="kw">ETS</span>(x <span class="op">~</span><span class="st"> </span><span class="kw">error</span>(<span class="st">&quot;M&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">trend</span>(<span class="st">&quot;A&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">season</span>(<span class="st">&quot;N&quot;</span>)))</span>
+<span id="cb10-8"><a href="#cb10-8"></a>  )</span>
+<span id="cb10-9"><a href="#cb10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="kw">ts_accuracy</span>(<span class="dt">.data =</span> usa, <span class="dt">horizon =</span> <span class="dv">4</span>, <span class="dt">outcomes =</span> <span class="kw">c</span>(<span class="st">&quot;icases&quot;</span>,<span class="st">&quot;ideaths&quot;</span>), <span class="dt">.fun =</span> ts_funs)</span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="co">#&gt; # A tibble: 10 x 10</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="co">#&gt;    .model       .type       ME   RMSE    MAE    MPE  MAPE  MASE     ACF1 outcome</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="co">#&gt;    &lt;chr&gt;        &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;  </span></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="co">#&gt;  1 ARIMA        Test  -218597. 2.70e5 2.19e5 -15.6  15.6    NaN  0.293   icases </span></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="co">#&gt;  2 SES_additive Test   107871. 1.36e5 1.19e5   7.12  7.95   NaN -0.0720  icases </span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="co">#&gt;  3 SES_multipl… Test   107887. 1.36e5 1.19e5   7.12  7.95   NaN -0.0720  icases </span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="co">#&gt;  4 Holt_Additi… Test  -225279. 3.08e5 2.51e5 -16.3  17.9    NaN  0.294   icases </span></span>
+<span id="cb10-18"><a href="#cb10-18"></a><span class="co">#&gt;  5 Holt_Multip… Test   279976. 2.94e5 2.80e5  19.0  19.0    NaN  0.00877 icases </span></span>
+<span id="cb10-19"><a href="#cb10-19"></a><span class="co">#&gt;  6 ARIMA        Test     1179. 2.09e3 1.29e3   6.42  7.16   NaN -0.212   ideaths</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="co">#&gt;  7 SES_additive Test     2020. 2.32e3 2.02e3  11.3  11.3    NaN -0.778   ideaths</span></span>
+<span id="cb10-21"><a href="#cb10-21"></a><span class="co">#&gt;  8 SES_multipl… Test     4187. 4.34e3 4.19e3  23.9  23.9    NaN -0.778   ideaths</span></span>
+<span id="cb10-22"><a href="#cb10-22"></a><span class="co">#&gt;  9 Holt_Additi… Test    -6514. 7.53e3 6.51e3 -38.1  38.1    NaN  0.302   ideaths</span></span>
+<span id="cb10-23"><a href="#cb10-23"></a><span class="co">#&gt; 10 Holt_Multip… Test     1614. 1.97e3 1.67e3   8.94  9.28   NaN -0.735   ideaths</span></span></code></pre></div>
+<blockquote>
+<p><strong>CAUTION</strong>: The list passed to “.fun” in either <code>ts_accuracy()</code> or <code>ts_fit()</code> <em>must</em> include functions formatted exactly as the example above. These functions should all wrap <code>fable::model</code> with the outcome as “x” and data passed in as “.data”.</p>
+</blockquote>
+<h2 id="submission-validation">Submission validation</h2>
 <p>Submissions to the COVID-19 Forecast Hub must comply to the entry format for the forecast file:</p>
 <p><a href="https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format">https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format</a></p>
 <p>The organizers have provided code to validate entry formats. We have included some of those methods in this repo, such that entry format can be checked as follows:</p>
@@ -638,8 +833,7 @@ https://github.com/hannanabdul55/pykwalify/archive/master.zip
 <pre><code>pip3 install -r misc/validation/requirements.txt
 </code></pre>
 <p>In order to run a very similar check using R, we have developed a wrapper to the <a href="https://github.com/reichlab/zoltpy/blob/master/zoltpy/covid19.py#L75-L93"><code>validate_quantile_csv_file()</code> function from the <code>zoltpy</code> module</a>, which drives the <code>validate_single_forecast_file.py</code> script above. To use the wrapper function in R:</p>
-<pre><code>source(&quot;R/submission.R&quot;)
-validate_forecast(&quot;scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv&quot;)
+<pre><code>validate_forecast(&quot;scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv&quot;)
 validate_forecast(&quot;scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-05-sigsci-ts.csv&quot;)
 </code></pre>
 
