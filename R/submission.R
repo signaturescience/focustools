@@ -65,7 +65,7 @@ format_for_submission <- function(.forecast, target_name) {
     dplyr::mutate(target=glue::glue("{N} wk ahead {target_name}")) %>%
     dplyr::select(-N) %>%
     # Fix dates: as_date(yweek) returns the MONDAY that starts that week. add 5 days to get the Saturday date.
-    dplyr::mutate(target_end_date=lubridate::as_date(yweek)+days(5)) %>%
+    dplyr::mutate(target_end_date=lubridate::as_date(yweek)+lubridate::days(5)) %>%
     dplyr::mutate(location="US", forecast_date=lubridate::today()) %>%
     dplyr::select(forecast_date, target, target_end_date, location, type, quantile, value)
 
