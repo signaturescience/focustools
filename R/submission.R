@@ -50,7 +50,7 @@ validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname
 #'
 #' @md
 #'
-format_fit_for_submission <- function(.forecast, target_name) {
+format_for_submission <- function(.forecast, target_name) {
 
   # Check for the correct target type
   stopifnot(target_name %in% c("inc case", "inc death", "cum death"))
