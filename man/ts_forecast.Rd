@@ -10,7 +10,7 @@ ts_forecast(mable, outcome, horizon = 4, new_data = NULL,
 \arguments{
 \item{mable}{A \code{mable} (model table); for more information see \link[fabletools]{mable}}
 
-\item{outcome}{Name of the outcome}
+\item{outcome}{Name of the outcome; must be one of \code{'icases',},\code{'ideaths'}, \code{'cdeaths'}, \code{'ccases'}}
 
 \item{horizon}{Optional horizon periods through which the forecasts should be generated; default is \code{4}}
 

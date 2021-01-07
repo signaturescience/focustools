@@ -7,7 +7,7 @@
 ts_futurecases(.data, .forecast, horizon = 4)
 }
 \arguments{
-\item{.data}{From which the \link[tsibble]{new_data} should be generated; \emph{CAUTION} for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in ".forecast"}
+\item{.data}{Data from which the \link[tsibble]{new_data} should be generated; \emph{CAUTION} for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in ".forecast"}
 
 \item{.forecast}{A \code{tibble} with forecast data generated using \link[focustools]{ts_forecast}; should \emph{only} be a forecast of incident cases}
 

@@ -83,3 +83,13 @@ c19fh_meta <- function(team = NULL, write = TRUE) {
   return(c19f_methods)
 
 }
+
+
+#' Helper to get the date for the Monday of the current week
+#'
+#' @return Date for the Monday of the current week. For more details see \link[lubridate]{floor_date}.
+#' @export
+#'
+this_monday <- function() {
+  lubridate::floor_date(lubridate::today(), "weeks", week_start = 1)
+}

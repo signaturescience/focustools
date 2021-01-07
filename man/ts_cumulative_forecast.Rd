@@ -7,7 +7,14 @@
 ts_cumulative_forecast(.data, outcome = "cdeaths", inc_forecast)
 }
 \arguments{
-\item{inc_forecast}{}
+\item{.data}{Data from which the cumulative forecast should get recent counts; \emph{CAUTION} for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in "inc_forecast"}
+
+\item{outcome}{Name of the outcome; should be be one of \code{'cdeaths'} or \code{'ccases'}}
+
+\item{inc_forecast}{A \code{tibble} with incident forecast data generated using \link[focustools]{ts_forecast}; should \emph{only} be incident cases corresponding to outcome for which cumulative count is to be aggregated}
+}
+\value{
+A \code{tibble} with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
 }
 \description{
 Helper used in \code{ts_forecast()} to get cumulative foreacst from incident

@@ -43,7 +43,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' Generate time series forecasts including quantile estimates
 #'
 #' @param mable A `mable` (model table); for more information see \link[fabletools]{mable}
-#' @param outcome Name of the outcome
+#' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
 #' @param seed Random seed used in bootstrapping process; default `1863`
@@ -104,7 +104,7 @@ ts_forecast <- function(mable, outcome, horizon = 4,new_data = NULL, seed = 1863
 
 #' Helper to generate the estimate of incident cases from an icases forecast object
 #'
-#' @param .data From which the \link[tsibble]{new_data} should be generated; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in ".forecast"
+#' @param .data Data from which the \link[tsibble]{new_data} should be generated; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in ".forecast"
 #' @param .forecast A `tibble` with forecast data generated using \link[focustools]{ts_forecast}; should *only* be a forecast of incident cases
 #' @param horizon Horizon periods through which the \link[tsibble]{new_data} should be generated; default is `4`
 #'
@@ -133,11 +133,11 @@ ts_futurecases <- function(.data, .forecast, horizon = 4) {
 
 #' Helper used in `ts_forecast()` to get cumulative foreacst from incident
 #'
-#' @param .data
-#' @param outcome
-#' @param inc_forecast
+#' @param .data Data from which the cumulative forecast should get recent counts; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in "inc_forecast"
+#' @param outcome Name of the outcome; should be be one of `'cdeaths'` or `'ccases'`
+#' @param inc_forecast A `tibble` with incident forecast data generated using \link[focustools]{ts_forecast}; should *only* be incident cases corresponding to outcome for which cumulative count is to be aggregated
 #'
-#' @return
+#' @return  A `tibble` with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
 #' @md
 #'
 ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
@@ -154,7 +154,8 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
   recorded_so_far <- .data %>% dplyr::filter(yweek==last_recorded_week) %>% dplyr::pull(outcome)
 
   # Starting with the inc deaths forecast
-  inc_forecast %>%
+  .forecast <-
+    inc_forecast %>%
     # Make sure you're arranged ascending by date (yweek)
     dplyr::arrange(yweek, type, quantile) %>%
     # Create a new grouping variable, throw it away when you're done with the mutate
@@ -173,4 +174,65 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
     # Get rid of junk
     dplyr::select(-groupvar, -cvalue)
 
+  ## check to confirm that none of the values are below initially recorded cumsum
+  .forecast <-
+    .forecast %>%
+    dplyr::mutate(ifelse(value < recorded_so_far, recorded_so_far, value))
+
+  return(.forecast)
+
+}
+
+#' Compuate accuracy metrics in support of model selection
+#'
+#' @param .data Data to use for modeling
+#' @param horizon Horizon of periods to use for splitting input to ".data" into training / test sets; default is `4`
+#' @param outcomes Character vector specifying names of the column to use as the outcome
+#' @param .fun List of modeling functions to use
+#'
+#' @return A `tibble`` containing one row for each combination of model and outcome with accuracy measures from \link[fabletools]{accuracy}.
+#' @md
+#' @export
+#'
+ts_accuracy <- function(.data, horizon = 4, outcomes, .fun) {
+
+  ## create training and test split by horizon
+  train_data <-
+    .data %>%
+    dplyr::slice(-tail(dplyr::row_number(), horizon))
+
+  test_data <-
+    .data %>%
+    dplyr::slice(tail(dplyr::row_number(), horizon))
+
+  ## run ts_fit
+  fit <- ts_fit(.data = train_data, outcomes = outcomes, .fun = .fun, single = FALSE)
+
+  ## run forecast operation on all fits
+  ## need the nested map here to traverse the list of lists
+  ## recall: ts_fit returns a list of models nested in a list of otucomes
+  l <- map(fit, function(x) map(x, function(y) (forecast(y, h=4))))
+
+  ## now loop over each outcome in that list ...
+  ## get its name ...
+  ## force the column names for test data to be named to match the outcome name in the .fun funs
+  ## NOTE: using a for loop here to have a little more flexibility than a nested map()
+  ## create empty tibble to store loop results
+  res <- tibble()
+
+  for(i in 1:length(names(l))) {
+
+    test_data_tmp <- test_data
+
+    outcome <- names(l)[i]
+
+    names(test_data_tmp)[which(names(test_data_tmp) == outcome)] <- "x"
+    tmp_res <- map_df(l[[i]], accuracy, test_data_tmp)
+    tmp_res$outcome <- outcome
+
+    res <- rbind(res,tmp_res)
+
+  }
+
+  return(res)
 }
