@@ -1,0 +1,8 @@
+^focustools\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^README\.md$
+^README_files$
+^README\.html$
+scratch
+^data-raw$
