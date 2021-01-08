@@ -20,7 +20,7 @@ metadata_version = 5
 
 # this is the root of the repository. 
 root = (Path(__file__) / '..'/'..'/'..').resolve()
-pop_df = pd.read_csv(open('misc/validation/locations.csv')).astype({'location':str})
+pop_df = pd.read_csv(open('inst/validation/locations.csv')).astype({'location':str})
 
 
 '''
