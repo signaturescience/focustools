@@ -166,9 +166,10 @@ Submissions to the COVID-19 Forecast Hub must comply to the entry format for the
 
 https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format
 
-The organizers have provided code to validate entry formats. We have included some of those methods in this repo, such that entry format can be checked as follows:
+The organizers have provided code to validate entry formats. We have included some of those methods in this repo, such that entry format can be checked as follows (uncomment the first line if you've installed dependencies to a conda environment called `focus`):
 
 ```
+# conda activate focus
 python3 inst/validation/validate_single_forecast_file.py scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv
 ```
 
@@ -188,9 +189,11 @@ git+https://github.com/reichlab/zoltpy/
 https://github.com/hannanabdul55/pykwalify/archive/master.zip
 ```
 
-You can install these dependencies by running the following:
+You can install these dependencies by running the following. Optionally create and activate a conda environment prior to installing these dependencies.
 
 ```
+# conda create -n focus
+# conda activate focus
 pip3 install -r inst/validation/requirements.txt
 ```
 
