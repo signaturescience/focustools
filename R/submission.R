@@ -73,7 +73,7 @@ format_for_submission <- function(.forecast, target_name) {
   # restrict inc case quantiles to c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
   if (target_name=="inc case") {
     bound <- bound %>%
-      dplyr::filter(type=="point" | quantile  %in% c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975))
+      dplyr::filter(type=="point" | round(quantile, 3)  %in% c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975))
   }
 
   bound <-
