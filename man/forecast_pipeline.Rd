@@ -4,8 +4,14 @@
 \alias{forecast_pipeline}
 \title{Pipeline to produce a forecast}
 \usage{
-forecast_pipeline(method = "ts", source = "jhu",
-  granularity = "national", horizon = 4, force = FALSE, ...)
+forecast_pipeline(
+  method = "ts",
+  source = "jhu",
+  granularity = "national",
+  horizon = 4,
+  force = FALSE,
+  ...
+)
 }
 \arguments{
 \item{method}{Forecasting method to use; currently only \code{'ts'} (time series) is supported}
