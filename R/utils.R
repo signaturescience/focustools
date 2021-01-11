@@ -118,8 +118,8 @@ is_monday <- function() {
 #' 1. Suggest a submission filename
 #' 1. Return all resulting objects to a list.
 #'
-#' @param source data source (default for now: NYT)
-#' @param granularity data granularity (default for now: national)
+#' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
+#' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #' @param horizon Horizon periods through which the forecasts should be generated; default is `4`
 #' @param force Logical -- force the pipeline to run even if it isn't Monday? (default is `FALSE`; changing to `TRUE` may break something if today isn't Monday).
 #' @param ... Arguments passed to other functions
@@ -138,7 +138,7 @@ is_monday <- function() {
 #' }
 #' @md
 #' @export
-forecast_pipeline <- function(source="nyt", granularity="national", horizon=4, force=FALSE, ...) {
+forecast_pipeline <- function(source="jhu", granularity="national", horizon=4, force=FALSE, ...) {
 
   # If it isn't monday and you haven't set FORCE=TRUE, then don't run the code.
   if (!is_monday()) {
