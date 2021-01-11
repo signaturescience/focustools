@@ -4,18 +4,15 @@
 \alias{forecast_pipeline}
 \title{Pipeline to produce a forecast}
 \usage{
-forecast_pipeline(
-  source = "nyt",
-  granularity = "national",
-  horizon = 4,
-  force = FALSE,
-  ...
-)
+forecast_pipeline(method = "ts", source = "jhu",
+  granularity = "national", horizon = 4, force = FALSE, ...)
 }
 \arguments{
-\item{source}{data source (default for now: NYT)}
+\item{method}{Forecasting method to use; currently only \code{'ts'} (time series) is supported}
 
-\item{granularity}{data granularity (default for now: national)}
+\item{source}{Data source to query; must be one of \code{'jhu'} or \code{'nyt'}; default is \code{'jhu'}}
+
+\item{granularity}{Data aggregation level; must be one of \code{'national'}, \code{'state'}, or \code{'county'}; if data source is \code{'nyt'} then only \code{'national'} can be used currently; default is \code{'national'}}
 
 \item{horizon}{Horizon periods through which the forecasts should be generated; default is \code{4}}
 
@@ -28,7 +25,7 @@ forecast_pipeline(
 
 Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
 \enumerate{
-\item Get data (national level from NYT by default)
+\item Get data (national level from JHU by default)
 \item Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
 \item Get future case data to create the incident death forecast
 \item Create the incident death forecast based on this new data

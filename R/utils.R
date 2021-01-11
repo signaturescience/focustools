@@ -110,7 +110,7 @@ is_monday <- function() {
 #' \lifecycle{experimental}
 #'
 #' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
-#' 1. Get data (national level from NYT by default)
+#' 1. Get data (national level from JHU by default)
 #' 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
 #' 1. Get future case data to create the incident death forecast
 #' 1. Create the incident death forecast based on this new data
@@ -118,6 +118,7 @@ is_monday <- function() {
 #' 1. Suggest a submission filename
 #' 1. Return all resulting objects to a list.
 #'
+#' @param method Forecasting method to use; currently only `'ts'` (time series) is supported
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
 #' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
 #' @param horizon Horizon periods through which the forecasts should be generated; default is `4`
@@ -138,7 +139,7 @@ is_monday <- function() {
 #' }
 #' @md
 #' @export
-forecast_pipeline <- function(source="jhu", granularity="national", horizon=4, force=FALSE, ...) {
+forecast_pipeline <- function(method = "ts", source="jhu", granularity="national", horizon=4, force=FALSE, ...) {
 
   # If it isn't monday and you haven't set FORCE=TRUE, then don't run the code.
   if (!is_monday()) {
@@ -159,26 +160,30 @@ forecast_pipeline <- function(source="jhu", granularity="national", horizon=4, f
     dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek")) %>%
     make_tsibble(...)
 
-  # Fit incident deaths and incident cases
-  message("Fitting incident death and case models...")
-  fit.icases <-  usa %>% fabletools::model(arima = fable::ARIMA(icases, stepwise=FALSE, approximation=FALSE))
-  fit.ideaths <- usa %>% fabletools::model(linear_caselag3 = fable::TSLM(ideaths ~ lag(icases, 3)))
+  if(method == "ts") {
+    # Fit incident deaths and incident cases
+    message("Fitting incident death and case models...")
+    fit.icases <-  usa %>% fabletools::model(arima = fable::ARIMA(icases, stepwise=FALSE, approximation=FALSE))
+    fit.ideaths <- usa %>% fabletools::model(linear_caselag3 = fable::TSLM(ideaths ~ lag(icases, 3)))
 
-  ## Generate incident case forecast
-  message("Generating incident case forecast...")
-  icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = horizon)
+    ## Generate incident case forecast
+    message("Generating incident case forecast...")
+    icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = horizon)
 
-  ## Get future cases to pass to ideaths forecast
-  message("Generating future case data for incident death forecast...")
-  future_cases <- ts_futurecases(usa, icases_forecast, horizon = horizon)
+    ## Get future cases to pass to ideaths forecast
+    message("Generating future case data for incident death forecast...")
+    future_cases <- ts_futurecases(usa, icases_forecast, horizon = horizon)
 
-  # Forecast incident deaths based on best guess for cases
-  message("Generating incident death forecast...")
-  ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
+    # Forecast incident deaths based on best guess for cases
+    message("Generating incident death forecast...")
+    ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
 
-  ## Generate cumulative death forecast from incident death forecast created above
-  message("Generating cumulative death forecast...")
-  cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
+    ## Generate cumulative death forecast from incident death forecast created above
+    message("Generating cumulative death forecast...")
+    cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
+  } else {
+    stop("Currently only time series (method='ts') is supported ...")
+  }
 
   ## create submission object
   message("Formatting data for submission...")
@@ -190,7 +195,7 @@ forecast_pipeline <- function(source="jhu", granularity="national", horizon=4, f
     dplyr::arrange(target)
 
   # Suggested submission filename
-  submission_filename <- here::here("submission", "SigSci-ARIMA", paste0(Sys.Date(), "-SigSci-ARIMA.csv"))
+  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
 
   # Create and return output
   out <- list(data=usa,
