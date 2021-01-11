@@ -4,7 +4,13 @@
 \alias{forecast_pipeline}
 \title{Pipeline to produce a forecast}
 \usage{
-forecast_pipeline(source = "nyt", granularity = "national", horizon = 4, ...)
+forecast_pipeline(
+  source = "nyt",
+  granularity = "national",
+  horizon = 4,
+  force = FALSE,
+  ...
+)
 }
 \arguments{
 \item{source}{data source (default for now: NYT)}
@@ -12,6 +18,8 @@ forecast_pipeline(source = "nyt", granularity = "national", horizon = 4, ...)
 \item{granularity}{data granularity (default for now: national)}
 
 \item{horizon}{Horizon periods through which the forecasts should be generated; default is \code{4}}
+
+\item{force}{Logical -- force the pipeline to run even if it isn't Monday? (default is \code{FALSE}; changing to \code{TRUE} may break something if today isn't Monday).}
 
 \item{...}{Arguments passed to other functions}
 }

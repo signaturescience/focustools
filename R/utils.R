@@ -121,6 +121,7 @@ is_monday <- function() {
 #' @param source data source (default for now: NYT)
 #' @param granularity data granularity (default for now: national)
 #' @param horizon Horizon periods through which the forecasts should be generated; default is `4`
+#' @param force Logical -- force the pipeline to run even if it isn't Monday? (default is `FALSE`; changing to `TRUE` may break something if today isn't Monday).
 #' @param ... Arguments passed to other functions
 #'
 #' @examples
@@ -137,10 +138,18 @@ is_monday <- function() {
 #' }
 #' @md
 #' @export
-forecast_pipeline <- function(source="nyt", granularity="national", horizon=4, ...) {
+forecast_pipeline <- function(source="nyt", granularity="national", horizon=4, force=FALSE, ...) {
 
-  # Make sure it's monday
-  if (!is_monday()) stop("Try again on Monday.")
+  # If it isn't monday and you haven't set FORCE=TRUE, then don't run the code.
+  if (!is_monday()) {
+    if (!force) {
+      stop("Try again on Monday or set `force=TRUE`.")
+    } else {
+      warning("Forcing forecast on a non-Monday. This may not validate. Proceeding...")
+    }
+  } else {
+    message("Today is a Monday, proceeding with forecasting...")
+  }
 
   # Get data
   message("Getting data...")
