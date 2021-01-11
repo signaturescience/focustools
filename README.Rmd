@@ -33,7 +33,7 @@ devtools::install_github("signaturescience/focustools")
 
 Here we provide an example of how to use `focustools` to generate forecasts for COVID-19 Forecast Hub targets via time series approaches.
 
-First, load ancillary packages for data analysis and retrieve COVID-19 data from the NYT source. Note that the `get_cases()` and `get_deaths()` functions are executed separately, then joined and converted to a `tsibble`:
+First, load ancillary packages for data analysis and retrieve COVID-19 data from the JHU source. Note that the `get_cases()` and `get_deaths()` functions are executed separately, then joined and converted to a `tsibble`:
 
 ```{r}
 library(focustools)
@@ -43,9 +43,9 @@ library(purrr)
 library(fabletools)
 library(fable)
 
-## get data at the national scale from nyt source
-usac <-  get_cases(source="nyt",  granularity = "national")
-usad <- get_deaths(source="nyt",  granularity = "national")
+## get data at the national scale from jhu source
+usac <-  get_cases(source="jhu",  granularity = "national")
+usad <- get_deaths(source="jhu",  granularity = "national")
 
 ## use the focustools helper to prep the tsibble format
 usa <-  
@@ -200,15 +200,14 @@ pip3 install -r inst/validation/requirements.txt
 In order to run a very similar check using R, we have developed a wrapper to the [`validate_quantile_csv_file()` function from the `zoltpy` module](https://github.com/reichlab/zoltpy/blob/master/zoltpy/covid19.py#L75-L93), which drives the `validate_single_forecast_file.py` script above. To use the wrapper function in R:
 
 ```
-validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv")
-validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-05-sigsci-ts.csv")
+validate_forecast("submission/SigSci-TS/2021-01-11-SigSci-TS.csv")
 ```
 
 # Experimental: One-step pipeline
 
 The **experimental** `forecast_pipeline()` function will run everything above, and return a list with models, forecasts, the formatted submission, and a suggested filename relative to the project directory to save the submission. See the examples in `?forecast_pipeline()`. For now this function only works on Mondays!
 
-1. Get data (national level from NYT by default)
+1. Get data (national level from JHU by default)
 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
 1. Get future case data to create the incident death forecast
 1. Create the incident death forecast based on this new data
