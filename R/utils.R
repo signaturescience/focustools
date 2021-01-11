@@ -93,3 +93,14 @@ c19fh_meta <- function(team = NULL, write = TRUE) {
 this_monday <- function() {
   lubridate::floor_date(lubridate::today(), "weeks", week_start = 1)
 }
+
+#' Helper function to see if today is Monday
+#'
+#' \lifecycle{experimental}
+#'
+#' @return Logical indicating whether or not today is Monday
+#' @export
+is_monday <- function() {
+  lubridate::wday(lubridate::today(), label=TRUE) %in% c("Mon")
+}
+
