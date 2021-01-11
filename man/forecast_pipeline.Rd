@@ -18,7 +18,7 @@ forecast_pipeline(source = "nyt", granularity = "national", horizon = 4, ...)
 \description{
 \lifecycle{experimental}
 
-Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples.
+Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
 \enumerate{
 \item Get data (national level from NYT by default)
 \item Fit incident case and incident death models (ARIMA and lagged TSLM respectively)

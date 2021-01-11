@@ -109,7 +109,7 @@ is_monday <- function() {
 #' @description
 #' \lifecycle{experimental}
 #'
-#' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples.
+#' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
 #' 1. Get data (national level from NYT by default)
 #' 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
 #' 1. Get future case data to create the incident death forecast
