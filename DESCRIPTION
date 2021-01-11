@@ -30,5 +30,6 @@ Imports:
     purrr,
     reticulate,
     tibble,
-    lifecycle
+    lifecycle,
+    here
 RdMacros: lifecycle
