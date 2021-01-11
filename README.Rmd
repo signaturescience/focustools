@@ -204,3 +204,30 @@ validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-
 validate_forecast("scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-05-sigsci-ts.csv")
 ```
 
+# Experimental: One-step pipeline
+
+The **experimental** `forecast_pipeline()` function will run everything above, and return a list with models, forecasts, the formatted submission, and a suggested filename relative to the project directory to save the submission. See the examples in `?forecast_pipeline()`. For now this function only works on Mondays!
+
+1. Get data (national level from NYT by default)
+1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
+1. Get future case data to create the incident death forecast
+1. Create the incident death forecast based on this new data
+1. Prepare submission format
+1. Suggest a submission filename
+1. Return all resulting objects to a list.
+
+```{r, eval=FALSE}
+# Run the forecast pipeline. See ?forecast_pipeline
+myforecast <- forecast_pipeline()
+
+# Look at the submission and the suggested filename.
+myforecast$submission
+myforecast$submission_filename
+
+# Write submission to file
+readr::write_csv(myforecast$submission, file=myforecast$submission_filename)
+
+# Validate submission
+validate_forecast(myforecast$submission_filename)
+```
+
