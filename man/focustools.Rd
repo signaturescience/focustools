@@ -3,7 +3,6 @@
 \docType{package}
 \name{focustools}
 \alias{focustools}
-\alias{focustools-package}
 \title{\code{focustools} package}
 \description{
 Tools for forecasting COVID-19 in the United States
