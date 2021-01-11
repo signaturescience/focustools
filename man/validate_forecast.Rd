@@ -12,9 +12,9 @@ validate_forecast(filename, verbose = TRUE, install = FALSE,
 
 \item{verbose}{Boolean indicating whether or not the output from this function should include validation message; default \code{TRUE}}
 
-\item{install}{Boolean as to whether or not the \code{zoltpy} python module should be installed; if \code{TRUE} the module will be installed to the virtual environment specified in "envname"; default is \code{FALSE}}
+\item{install}{Boolean as to whether or not the python dependencies should be installed; if \code{TRUE} the module will be installed to the virtual environment specified in "envname"; default is \code{FALSE}}
 
-\item{envname}{Character vector specifying the name of the virtualenv to which the \code{zoltpy} module should be installed if \code{install = TRUE}; default is \code{NULL} which will install the module to a virtualenv named \code{r-reticulate}}
+\item{envname}{Character vector specifying the name of the virtualenv to which the python dependencies should be installed if \code{install = TRUE}; default is \code{NULL} which will install the module to a virtualenv named \code{r-reticulate}}
 }
 \value{
 If \code{verbose = FALSE}, the returned value will be a boolean with \code{TRUE} for valid submission file and \code{FALSE} for invalid file. If \code{verbose = FALSE}, the function will return a named list with two elements: "valid" (boolean with the \code{TRUE}/\code{FALSE} validation code) and "message" (the output from the \code{zoltpy valid_quantile_csv_file()} function).
