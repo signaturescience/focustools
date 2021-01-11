@@ -29,4 +29,6 @@ Imports:
     lubridate,
     purrr,
     reticulate,
-    tibble
+    tibble,
+    lifecycle
+RdMacros: lifecycle
