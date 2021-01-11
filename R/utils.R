@@ -104,3 +104,98 @@ is_monday <- function() {
   lubridate::wday(lubridate::today(), label=TRUE) %in% c("Mon")
 }
 
+#' Pipeline to produce a forecast
+#'
+#' @description
+#' \lifecycle{experimental}
+#'
+#' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples.
+#' 1. Get data (national level from NYT by default)
+#' 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
+#' 1. Get future case data to create the incident death forecast
+#' 1. Create the incident death forecast based on this new data
+#' 1. Prepare submission format
+#' 1. Suggest a submission filename
+#' 1. Return all resulting objects to a list.
+#'
+#' @param source data source (default for now: NYT)
+#' @param granularity data granularity (default for now: national)
+#' @param horizon Horizon periods through which the forecasts should be generated; default is `4`
+#' @param ... Arguments passed to other functions
+#'
+#' @examples
+#' \dontrun{
+#' # Run all the steps to create models and forecasts
+#' myforecast <- forecast_pipeline()
+#' # Look at the submission and the suggested filename.
+#' myforecast$submission
+#' myforecast$submission_filename
+#' # Write submission to file
+#' readr::write_csv(myforecast$submission, file=myforecast$submission_filename)
+#' # Validate submission
+#' validate_forecast(myforecast$submission_filename)
+#' }
+#' @md
+#' @export
+forecast_pipeline <- function(source="nyt", granularity="national", horizon=4, ...) {
+
+  # Make sure it's monday
+  if (!is_monday()) stop("Try again on Monday.")
+
+  # Get data
+  message("Getting data...")
+  usac <-  get_cases(source=source, granularity=granularity)
+  usad <- get_deaths(source=source, granularity=granularity)
+  usa <-
+    dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek")) %>%
+    make_tsibble(...)
+
+  # Fit incident deaths and incident cases
+  message("Fitting incident death and case models...")
+  fit.icases <-  usa %>% fabletools::model(arima = fable::ARIMA(icases, stepwise=FALSE, approximation=FALSE))
+  fit.ideaths <- usa %>% fabletools::model(linear_caselag3 = fable::TSLM(ideaths ~ lag(icases, 3)))
+
+  ## Generate incident case forecast
+  message("Generating incident case forecast...")
+  icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = horizon)
+
+  ## Get future cases to pass to ideaths forecast
+  message("Generating future case data for incident death forecast...")
+  future_cases <- ts_futurecases(usa, icases_forecast, horizon = horizon)
+
+  # Forecast incident deaths based on best guess for cases
+  message("Generating incident death forecast...")
+  ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
+
+  ## Generate cumulative death forecast from incident death forecast created above
+  message("Generating cumulative death forecast...")
+  cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
+
+  ## create submission object
+  message("Formatting data for submission...")
+  submission <-
+    list(format_for_submission(icases_forecast, target_name = "inc case"),
+         format_for_submission(ideaths_forecast, target_name = "inc death"),
+         format_for_submission(cdeaths_forecast, target_name = "cum death")) %>%
+    purrr::reduce(dplyr::bind_rows) %>%
+    dplyr::arrange(target)
+
+  # Suggested submission filename
+  submission_filename <- here::here("submission", "SigSci-ARIMA", paste0(Sys.Date(), "-SigSci-ARIMA.csv"))
+
+  # Create and return output
+  out <- list(data=usa,
+              fit.icases=fit.icases,
+              fit.ideaths=fit.ideaths,
+              icases_forecast=icases_forecast,
+              future_cases=future_cases,
+              ideaths_forecast=ideaths_forecast,
+              cdeaths_forecast=cdeaths_forecast,
+              submission=submission,
+              submission_filename=submission_filename)
+
+  message("Done!")
+  return(out)
+}
+
+
