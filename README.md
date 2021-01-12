@@ -4,7 +4,6 @@
 # focustools
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 ## Installation
@@ -76,40 +75,12 @@ forecast:
 ## generate incident case forecast
 icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = 4)
 icases_forecast
-#> # A tibble: 96 x 6
-#>    .model    yweek quantile    value type     icases
-#>    <chr>    <week>    <dbl>    <dbl> <chr>    <dist>
-#>  1 arima  2021 W02    0.01  1712015. quantile      ?
-#>  2 arima  2021 W02    0.025 1743783. quantile      ?
-#>  3 arima  2021 W02    0.05  1752029. quantile      ?
-#>  4 arima  2021 W02    0.1   1785415. quantile      ?
-#>  5 arima  2021 W02    0.15  1808497. quantile      ?
-#>  6 arima  2021 W02    0.2   1828557. quantile      ?
-#>  7 arima  2021 W02    0.25  1834539. quantile      ?
-#>  8 arima  2021 W02    0.3   1856357. quantile      ?
-#>  9 arima  2021 W02    0.35  1857048. quantile      ?
-#> 10 arima  2021 W02    0.4   1862243. quantile      ?
-#> # … with 86 more rows
 
 ## need to get future cases to pass to ideaths forecast
 future_cases <- ts_futurecases(usa, icases_forecast, horizon = 4)
 # Forecast incident deaths based on best guess for cases
 ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
 ideaths_forecast
-#> # A tibble: 96 x 7
-#>    .model             yweek quantile  value type     ideaths icases
-#>    <chr>             <week>    <dbl>  <dbl> <chr>     <dist>  <dbl>
-#>  1 linear_caselag3 2021 W02    0.01  18097. quantile       ?     NA
-#>  2 linear_caselag3 2021 W02    0.025 18097. quantile       ?     NA
-#>  3 linear_caselag3 2021 W02    0.05  18098. quantile       ?     NA
-#>  4 linear_caselag3 2021 W02    0.1   18138. quantile       ?     NA
-#>  5 linear_caselag3 2021 W02    0.15  20032. quantile       ?     NA
-#>  6 linear_caselag3 2021 W02    0.2   20133. quantile       ?     NA
-#>  7 linear_caselag3 2021 W02    0.25  20289. quantile       ?     NA
-#>  8 linear_caselag3 2021 W02    0.3   20395. quantile       ?     NA
-#>  9 linear_caselag3 2021 W02    0.35  20525. quantile       ?     NA
-#> 10 linear_caselag3 2021 W02    0.4   20561. quantile       ?     NA
-#> # … with 86 more rows
 ```
 
 We can use the forecasts of incidence to infer cumulative targets. The
@@ -121,21 +92,6 @@ internally, requiring a “inc\_forecast” parameter if either “cdeaths” or
 ## generate cumulative forecasts
 cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
 cdeaths_forecast
-#> # A tibble: 96 x 8
-#>    .model    yweek quantile  value type            ideaths  icases
-#>    <chr>    <week>    <dbl>  <dbl> <chr>            <dist>   <dbl>
-#>  1 linea… 2021 W02   NA     3.90e5 point N(17569, 1.5e+07)  1.87e6
-#>  2 linea… 2021 W02    0.01  3.91e5 quan…                 ? NA     
-#>  3 linea… 2021 W02    0.025 3.91e5 quan…                 ? NA     
-#>  4 linea… 2021 W02    0.05  3.91e5 quan…                 ? NA     
-#>  5 linea… 2021 W02    0.1   3.91e5 quan…                 ? NA     
-#>  6 linea… 2021 W02    0.15  3.93e5 quan…                 ? NA     
-#>  7 linea… 2021 W02    0.2   3.93e5 quan…                 ? NA     
-#>  8 linea… 2021 W02    0.25  3.93e5 quan…                 ? NA     
-#>  9 linea… 2021 W02    0.3   3.93e5 quan…                 ? NA     
-#> 10 linea… 2021 W02    0.35  3.93e5 quan…                 ? NA     
-#> # … with 86 more rows, and 1 more variable: `ifelse(value < recorded_so_far,
-#> #   recorded_so_far, value)` <dbl>
 ```
 
 Prior to submitting these forecasts to the COVID-19 Forecast Hub we need
@@ -153,20 +109,6 @@ submission <-
   arrange(target)
 
 submission
-#> # A tibble: 224 x 7
-#>    forecast_date target          target_end_date location type   quantile  value
-#>    <date>        <glue>          <date>          <chr>    <chr>     <dbl>  <int>
-#>  1 2021-01-11    1 wk ahead cum… 2021-01-16      US       point    NA     390077
-#>  2 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.01  390605
-#>  3 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.025 390605
-#>  4 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.05  390606
-#>  5 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.1   390646
-#>  6 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.15  392540
-#>  7 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.2   392641
-#>  8 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.25  392797
-#>  9 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.3   392903
-#> 10 2021-01-11    1 wk ahead cum… 2021-01-16      US       quant…    0.35  393033
-#> # … with 214 more rows
 ```
 
 Last of all, we can validate the submission. The object must be written
@@ -184,11 +126,6 @@ submission %>%
   write_csv(ffile)
 
 validate_forecast(ffile)
-#> $valid
-#> [1] TRUE
-#> 
-#> $message
-#> [1] "no errors"
 ```
 
 ### Evaluating model accuracy
@@ -215,36 +152,6 @@ ts_funs <-
   )
 
 ts_fit(usa, outcomes = "icases", .fun = ts_funs, single = FALSE)
-#> $icases
-#> $icases$ARIMA
-#> # A mable: 1 x 1
-#>            ARIMA
-#>          <model>
-#> 1 <ARIMA(3,2,1)>
-#> 
-#> $icases$SES_Additive
-#> # A mable: 1 x 1
-#>   SES_additive
-#>        <model>
-#> 1 <ETS(A,N,N)>
-#> 
-#> $icases$SES_Multiplicative
-#> # A mable: 1 x 1
-#>   SES_multiplicative
-#>              <model>
-#> 1       <ETS(M,N,N)>
-#> 
-#> $icases$Holt_Additive
-#> # A mable: 1 x 1
-#>   Holt_Additive
-#>         <model>
-#> 1  <ETS(A,A,N)>
-#> 
-#> $icases$Holt_Multiplicative
-#> # A mable: 1 x 1
-#>   Holt_Multiplicative
-#>               <model>
-#> 1        <ETS(M,A,N)>
 ```
 
 For convenience, the function can return a single `mable` (model tables)
@@ -258,10 +165,6 @@ ts_funs <-
   )
 
 ts_fit(usa, outcomes = "icases", .fun = ts_funs, single = TRUE)
-#> # A mable: 1 x 1
-#>            ARIMA
-#>          <model>
-#> 1 <ARIMA(3,2,1)>
 ```
 
 The `ts_accuracy()` function accepts a list of models and returns
@@ -278,19 +181,6 @@ ts_funs <-
   )
 
 ts_accuracy(.data = usa, horizon = 4, outcomes = c("icases","ideaths"), .fun = ts_funs)
-#> # A tibble: 10 x 10
-#>    .model      .type       ME   RMSE    MAE     MPE  MAPE  MASE     ACF1 outcome
-#>    <chr>       <chr>    <dbl>  <dbl>  <dbl>   <dbl> <dbl> <dbl>    <dbl> <chr>  
-#>  1 ARIMA       Test  -192752. 2.27e5 1.93e5 -13.6   13.6    NaN -0.250   icases 
-#>  2 SES_additi… Test     1461. 1.36e5 1.11e5  -0.707  7.39   NaN -0.0667  icases 
-#>  3 SES_multip… Test    91458. 1.64e5 1.30e5   5.34   8.20   NaN -0.0667  icases 
-#>  4 Holt_Addit… Test  -346119. 3.73e5 3.46e5 -23.6   23.6    NaN -0.126   icases 
-#>  5 Holt_Multi… Test   -20702. 1.32e5 1.11e5  -2.17   7.52   NaN -0.0976  icases 
-#>  6 ARIMA       Test     2762. 4.66e3 3.37e3  12.7   16.6    NaN  0.143   ideaths
-#>  7 SES_additi… Test     1920. 3.02e3 2.40e3   8.95  12.0    NaN  0.0360  ideaths
-#>  8 SES_multip… Test     3382. 4.11e3 3.38e3  16.9   16.9    NaN  0.0360  ideaths
-#>  9 Holt_Addit… Test    -4123. 4.57e3 4.12e3 -22.9   22.9    NaN -0.187   ideaths
-#> 10 Holt_Multi… Test     1405. 2.59e3 2.10e3   6.24  10.6    NaN -0.00491 ideaths
 ```
 
 > **CAUTION**: The list passed to “.fun” in either `ts_accuracy()` or
@@ -350,7 +240,7 @@ The **experimental** `forecast_pipeline()` function will run everything
 above, and return a list with models, forecasts, the formatted
 submission, and a suggested filename relative to the project directory
 to save the submission. See the examples in `?forecast_pipeline()`. For
-now this function only works on Mondays\!
+now this function only works on Mondays!
 
 1.  Get data (national level from JHU by default)
 2.  Fit incident case and incident death models (ARIMA and lagged TSLM
@@ -360,8 +250,6 @@ now this function only works on Mondays\!
 5.  Prepare submission format
 6.  Suggest a submission filename
 7.  Return all resulting objects to a list.
-
-<!-- end list -->
 
 ``` r
 # Run the forecast pipeline. See ?forecast_pipeline
