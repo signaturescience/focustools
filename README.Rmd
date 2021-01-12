@@ -15,6 +15,17 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 ```
+
+```{r, include=FALSE, eval=TRUE}
+# If you actually want to eval all the code here to check that it runs,
+# change actually_eval to TRUE and make sure you run this on a Monday
+actually_eval <- FALSE
+if (actually_eval & focustools::is_monday()) {
+  knitr::opts_chunk$set(eval=TRUE)
+}
+```
+
+
 # focustools
 
 <!-- badges: start -->
