@@ -6,6 +6,7 @@ output: github_document
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  eval=FALSE,
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
@@ -14,6 +15,17 @@ knitr::opts_chunk$set(
   message = FALSE
 )
 ```
+
+```{r, include=FALSE, eval=TRUE}
+# If you actually want to eval all the code here to check that it runs,
+# change actually_eval to TRUE and make sure you run this on a Monday
+actually_eval <- FALSE
+if (actually_eval & focustools::is_monday()) {
+  knitr::opts_chunk$set(eval=TRUE)
+}
+```
+
+
 # focustools
 
 <!-- badges: start -->
@@ -101,7 +113,7 @@ submission
 
 Last of all, we can validate the submission. The object must be written to a file and then validated with `validate_forecast()`, which wraps a python function developed and maintained by the COVID-19 Forecast Hub organizers. For more information on validating the entry see the "Submission validation" section below:
 
-```{r}
+```{r, eval=FALSE}
 ## set up file path for submission file
 ## forcing the date in the file name and submission conents to be this monday
 ffile <- file.path(tempdir(), paste0(this_monday(), "-sigsci-arima.csv"))
