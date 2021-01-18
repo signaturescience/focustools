@@ -32,8 +32,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
       ## drop unnecessary columns
       dplyr::select(-iso2,-code3,-Country_Region) %>%
       dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::rename(county = Admin2, fips = FIPS, state = Province_State) %>%
       dplyr::group_by(county, fips, state) %>%
       dplyr::arrange(date) %>%
@@ -54,7 +54,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips) %>%
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::rename(location = fips)
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -73,22 +74,22 @@ get_cases <- function(source = "jhu", granularity = "national") {
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
-        ## NOTE: for now this only keeps state names (not territories)
-        dplyr::filter(state %in% datasets::state.name)
+        dplyr::rename(location = state)
     } else if (granularity == "national") {
       ## by usa
       dat <-
         dat %>%
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm=TRUE), .groups="drop") %>%
-        dplyr::mutate(ccases = cumsum(icases))
+        dplyr::mutate(ccases = cumsum(icases)) %>%
+        dplyr::mutate(location = "US")
     }
 
   } else if (source == "nyt") {
     dat <-
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::mutate(icases  = cases  - dplyr::lag(cases, default = 0L),
                     ccases = cases)
 
@@ -99,7 +100,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm=TRUE), .groups="drop") %>%
         dplyr::arrange(epiyear,epiweek) %>%
-        dplyr::mutate(ccases = cumsum(icases))
+        dplyr::mutate(ccases = cumsum(icases)) %>%
+        dplyr::mutate(location = "US")
     } else {
       stop("for source='nyt' granularity must be 'national' (still working on incorporating 'county' and 'state') ... ")
     }
@@ -139,8 +141,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
       ## drop unnecessary columns
       dplyr::select(-iso2,-code3,-Country_Region) %>%
       dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::rename(county = Admin2, fips = FIPS, state = Province_State) %>%
       dplyr::group_by(county, fips, state) %>%
       dplyr::arrange(date) %>%
@@ -195,8 +197,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
   } else if (source == "nyt") {
     dat <-
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::mutate(ideaths  = deaths - dplyr::lag(deaths, default = 0L),
                     cdeaths = deaths)
 
