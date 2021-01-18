@@ -55,7 +55,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = fips)
+        dplyr::rename(location = fips) %>%
+        dplyr::select(-date)
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -74,7 +75,10 @@ get_cases <- function(source = "jhu", granularity = "national") {
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = state)
+        ## make sure we don't have any bogus "states/territories"
+        dplyr::filter(state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::rename(location = state) %>%
+        dplyr::select(-date)
     } else if (granularity == "national") {
       ## by usa
       dat <-
@@ -164,7 +168,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = fips)
+        dplyr::rename(location = fips) %>%
+        dplyr::select(-date)
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -183,7 +188,10 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = state)
+        ## make sure we don't have any bogus "states/territories"
+        dplyr::filter(state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::rename(location = state) %>%
+        dplyr::select(-date)
     } else if (granularity == "national") {
       ## by usa
       dat <-
