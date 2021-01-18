@@ -28,7 +28,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
 
     dat <-
       dat %>%
-      tidyr::gather(date, count, ind:ncol(dat)) %>%
+      tidyr::gather(date, count, all_of(ind:ncol(dat))) %>%
       ## drop unnecessary columns
       dplyr::select(-iso2,-code3,-Country_Region) %>%
       dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
