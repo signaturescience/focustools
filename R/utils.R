@@ -14,7 +14,7 @@ make_tsibble <- function(df, chop=TRUE) {
     # convert represent as yearweek (see package?tsibble)
     dplyr::mutate(yweek=tsibble::yearweek(monday), .after="monday") %>%
     # convert to tsibble
-    tsibble::as_tsibble(index=yweek)
+    tsibble::as_tsibble(index=yweek, key=location)
   # Remove the incomplete week
   if (chop) out <- out %>% dplyr::filter(lubridate::week(monday)!=lubridate::week(lubridate::today()))
   return(out)

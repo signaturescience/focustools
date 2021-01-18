@@ -78,7 +78,7 @@ ts_forecast <- function(mable, outcome, horizon = 4,new_data = NULL, seed = 1863
     myquibbles <-
       boots %>%
       dplyr::as_tibble() %>%
-      dplyr::group_by(.model, yweek) %>%
+      dplyr::group_by(.model, yweek, location) %>%
       dplyr::summarize(quibble(.sim), .groups="drop")
 
     .forecast <-
@@ -118,16 +118,13 @@ ts_futurecases <- function(.data, .forecast, horizon = 4) {
   ## get the point estimates from the
   best_guess <-
     .forecast %>%
+    dplyr::group_by(location) %>%
     dplyr::filter(type == "point") %>%
     dplyr::arrange(yweek) %>%
-    dplyr::pull(value)
+    dplyr::select(location, yweek, icases = value)
 
-  if(length(best_guess) != horizon) {
-    stop(sprintf("The forecast included %d point estimates but the horizon was %d periods ...", length(best_guess), horizon))
-  }
-
-  tsibble::new_data(.data, horizon) %>%
-    dplyr::mutate(icases = best_guess)
+  tsibble::new_data(.data, horizon, key=location) %>%
+    dplyr::left_join(best_guess)
 }
 
 
@@ -151,33 +148,36 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
   stopifnot(first_forecast_week == last_recorded_week+1)
 
   # What's the cumulative {outcome} for the last week of recorded data?
-  recorded_so_far <- .data %>% dplyr::filter(yweek==last_recorded_week) %>% dplyr::pull(outcome)
+  recorded_so_far <-
+    .data %>%
+    dplyr::group_by(location) %>%
+    dplyr::filter(yweek==last_recorded_week) %>%
+    dplyr::as_tibble() %>%
+    dplyr::select(location, observed_to_now = outcome)
 
   # Starting with the inc deaths forecast
   .forecast <-
     inc_forecast %>%
     # Make sure you're arranged ascending by date (yweek)
-    dplyr::arrange(yweek, type, quantile) %>%
+    dplyr::arrange(yweek, type, quantile,location) %>%
     # Create a new grouping variable, throw it away when you're done with the mutate
     # I don't know what happens if you group by quantile but quantile is NA for point estimates.
     # This creates a throwaway char that's eg "quantile 0.01" or "point NA" so you're not grouping over an NA
-    dplyr::mutate(groupvar=paste(type, quantile)) %>%
+    dplyr::mutate(groupvar=paste(location,type, quantile)) %>%
     # Group by each quantile(/point)
     dplyr::group_by(groupvar) %>%
     # For each point or quantile, get the cumulative sums for weeks 2, 3, and 4
     dplyr::mutate(cvalue=cumsum(value)) %>%
     dplyr::ungroup() %>%
+    dplyr::left_join(recorded_so_far) %>%
     # Then add the deaths recorded so far
-    dplyr::mutate(cvalue=cvalue+recorded_so_far) %>%
+    dplyr::mutate(cvalue=cvalue+observed_to_now) %>%
     # Make the 'value' column this new cumulative sum
     dplyr::mutate(value=cvalue) %>%
+    dplyr::mutate(value = ifelse(value < observed_to_now, observed_to_now, value)) %>%
     # Get rid of junk
-    dplyr::select(-groupvar, -cvalue)
+    dplyr::select(-groupvar, -cvalue,-observed_to_now)
 
-  ## check to confirm that none of the values are below initially recorded cumsum
-  .forecast <-
-    .forecast %>%
-    dplyr::mutate(ifelse(value < recorded_so_far, recorded_so_far, value))
 
   return(.forecast)
 
