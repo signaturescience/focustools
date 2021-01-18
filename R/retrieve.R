@@ -76,7 +76,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
         ## make sure we don't have any bogus "states/territories"
-        dplyr::filter(state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
         dplyr::rename(location = state) %>%
         dplyr::select(-date)
     } else if (granularity == "national") {
@@ -189,7 +189,7 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
         ## make sure we don't have any bogus "states/territories"
-        dplyr::filter(state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
         dplyr::rename(location = state) %>%
         dplyr::select(-date)
     } else if (granularity == "national") {
