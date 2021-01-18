@@ -161,7 +161,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips) %>%
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::rename(location = fips)
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -180,15 +181,15 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
-        ## NOTE: for now this only keeps state names (not territories)
-        dplyr::filter(state %in% datasets::state.name)
+        dplyr::rename(location = state)
     } else if (granularity == "national") {
       ## by usa
       dat <-
         dat %>%
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop") %>%
-        dplyr::mutate(cdeaths = cumsum(ideaths))
+        dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
+        dplyr::mutate(location = "US")
     }
 
   } else if (source == "nyt") {
@@ -206,7 +207,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop") %>%
         dplyr::arrange(epiyear,epiweek) %>%
-        dplyr::mutate(cdeaths = cumsum(ideaths))
+        dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
+        dplyr::mutate(location = "US")
     } else {
       stop("for source='nyt' granularity must be 'national' (still working on incorporating 'county' and 'state') ... ")
     }
