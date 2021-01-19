@@ -9,7 +9,7 @@
 #' - **icases**: Incident case count
 #' - **ccases**: Cumulative case count
 #'
-#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
 #'
 #' @export
 #' @md
@@ -50,7 +50,6 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         dplyr::group_by(fips) %>%
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
@@ -66,9 +65,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        ## create a variable for date using epiyear and week
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
-        ## now group by statee
+        ## now group by state
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
         dplyr::arrange(state,date) %>%
@@ -125,7 +122,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
 #' - **ideaths**: Incident case count
 #' - **cdeaths**: Cumulative case count
 #'
-#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
 #'
 #' @export
 #' @md
@@ -163,7 +160,6 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         dplyr::group_by(fips) %>%
         dplyr::arrange(fips,date) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
@@ -179,8 +175,6 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        ## create a variable for date using epiyear and week
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         ## now group by statee
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
