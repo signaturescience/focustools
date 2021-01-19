@@ -83,5 +83,15 @@ format_for_submission <- function(.forecast, target_name) {
     dplyr::mutate(quantile=round(quantile, 4)) %>%
     dplyr::mutate(value=as.integer(round(value)))
 
+  ## manage location codes
+  bound <-
+    bound %>%
+    ## the original "location" column is actually the "location_name" from focustools:::locations
+    dplyr::rename(location_name = location) %>%
+    ## join to internal locations object by "location_name" to get "location" (FIPS) code
+    dplyr::left_join(dplyr::select(locations,location, location_name)) %>%
+    ## select the correct columns
+    dplyr::select(forecast_date, target, target_end_date, location, type, quantile, value)
+
   return(bound)
 }
