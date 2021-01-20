@@ -21,14 +21,14 @@ get_cases <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {
     ## first read in data
-    jhuspec <- cols(
-      .default = col_double(),
-      iso2 = col_character(),
-      iso3 = col_character(),
-      Admin2 = col_character(),
-      Province_State = col_character(),
-      Country_Region = col_character(),
-      Combined_Key = col_character())
+    jhuspec <- readr::cols(
+      .default = readr::col_double(),
+      iso2 = readr::col_character(),
+      iso3 = readr::col_character(),
+      Admin2 = readr::col_character(),
+      Province_State = readr::col_character(),
+      Country_Region = readr::col_character(),
+      Combined_Key = readr::col_character())
     jhuurl <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
     dat <- readr::read_csv(jhuurl, col_types=jhuspec)
 
@@ -142,15 +142,14 @@ get_deaths <- function(source = "jhu", granularity = "national") {
   if(source == "jhu") {
     ## first read in data
     ## need this to get number of columns and indices for reshaping (see below)
-    ## first read in data
-    jhuspec <- cols(
-      .default = col_double(),
-      iso2 = col_character(),
-      iso3 = col_character(),
-      Admin2 = col_character(),
-      Province_State = col_character(),
-      Country_Region = col_character(),
-      Combined_Key = col_character())
+    jhuspec <- readr::cols(
+      .default = readr::col_double(),
+      iso2 = readr::col_character(),
+      iso3 = readr::col_character(),
+      Admin2 = readr::col_character(),
+      Province_State = readr::col_character(),
+      Country_Region = readr::col_character(),
+      Combined_Key = readr::col_character())
     jhuurl <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
     dat <- readr::read_csv(jhuurl, col_types=jhuspec)
     ind <- which(names(dat) == "1/22/20")
