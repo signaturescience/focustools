@@ -157,7 +157,7 @@ forecast_pipeline <- function(method = "ts", source="jhu", granularity="national
   usac <-  get_cases(source=source, granularity=granularity)
   usad <- get_deaths(source=source, granularity=granularity)
   usa <-
-    dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek")) %>%
+    dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>%
     make_tsibble(...)
 
   if(method == "ts") {
@@ -213,3 +213,59 @@ forecast_pipeline <- function(method = "ts", source="jhu", granularity="national
 }
 
 
+#' Visualize and sanity check a forecast
+#'
+#' #' @description
+#' \lifecycle{experimental}
+#'
+#' @param data Data used to create the submission
+#' @param submission Formatted submission
+#' @param location Which location to filter to? "US" by default.
+#'
+#' @examples
+#' \dontrun{
+#' myforecast <- forecast_pipeline(force=TRUE)
+#' plot_forecast(data=myforecast$data, submission=myforecast$submission, location="US")
+#' }
+#' @md
+#' @export
+#'
+plot_forecast <- function(data, submission, location="US") {
+
+  # Check that the specified location is in the data and submission.
+  stopifnot("Specified location is not in recorded data" = location %in% unique(data$location))
+  stopifnot("Specified location is not in forecast data" = location %in% unique(submission$location))
+
+  # Grab the real data
+  real <-
+    data %>%
+    tibble::as_tibble() %>%
+    tidyr::gather(target, value, icases, ccases, ideaths, cdeaths) %>%
+    dplyr::mutate(target = target %>% stringr::str_remove_all("s$") %>% stringr::str_replace_all(c("^i"="inc ", "^c"="cum "))) %>%
+    dplyr::select(location, date=monday, target, point=value) %>%
+    dplyr::mutate(type="recorded") %>%
+    dplyr::filter(type!="cum case")
+
+  # Grab the forecasted data
+  forecasted <-
+    submission %>%
+    dplyr::filter(type=="point" | quantile==.25 | quantile==.75) %>%
+    dplyr::mutate(quantile=tidyr::replace_na(quantile, "point")) %>%
+    dplyr::select(-type) %>%
+    tidyr::separate(target, into=c("nwk", "target"), sep=" wk ahead ") %>%
+    dplyr::select(location, date=target_end_date, target, quantile, value) %>%
+    tidyr::spread(quantile, value) %>%
+    dplyr::mutate(type="forecast")
+
+  # Bind them
+  bound <-
+    dplyr::bind_rows(real, forecasted) %>%
+    dplyr::arrange(date, location) %>%
+    dplyr::filter(location==location)
+
+  # Plot
+  ggplot2::ggplot(bound, ggplot2::aes(date, point)) +
+    ggplot2::geom_line(ggplot2::aes(col=type)) +
+    ggplot2::facet_wrap(~target, scales="free") +
+    ggplot2::theme_bw()
+}
