@@ -1,9 +1,9 @@
 # setup -------------------------------------------------------------------
 
-library(tidyverse)
-library(focustools)
-library(fabletools)
-library(fable)
+suppressPackageStartupMessages(suppressWarnings(library(tidyverse)))
+suppressPackageStartupMessages(suppressWarnings(library(focustools)))
+suppressPackageStartupMessages(suppressWarnings(library(fabletools)))
+suppressPackageStartupMessages(suppressWarnings(library(fable)))
 
 # get case, death, and hosp data
 usac <-  get_cases(source="jhu",  granularity = "national")
@@ -43,7 +43,7 @@ futurecases <- ts_futurecases(usa, forecast.icases, horizon = horizon)
 
 # Forecast incident deaths based on best guess for cases
 forecast.ideaths <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = futurecases)
-forecast.ideaths %>% filter(type=="point")
+forecast.ideaths %>% filter(type=="point") %>% select(yweek, value)
 
 # cool.
 
@@ -93,12 +93,12 @@ forecast.ihosp %>% filter(type=="point") %>% select(yweek,value)
 
 # Let's try forecasting hospitalizations based on a lag of cases
 fit.ihosp <- usa %>% model(linear_caselag = TSLM(ihosp ~ lag(icases, 2)))
-forecast.ihosp <- ts_forecast(fit.ihosp, outcome="ihosp", new_data=newcases)
+forecast.ihosp <- ts_forecast(fit.ihosp, outcome="ihosp", new_data=futurecases)
 
 ihosp_forecast <- ts_forecast(fit.ihosp, outcome="ihosp", new_data=futurecases)
 ihosp_forecast %>% filter(type=="point") %>% select(yweek, value)
 
-# That actually looks pretty good! Looking at the last few weeks of the data:
+# That actually looks reasonable? Looking at the last few weeks of the data:
 tail(usa, 4) %>% select(yweek, ihosp)
 
 # OK, now let's get future hospitalizations to use for the death forecast
@@ -114,7 +114,7 @@ futurehosp
 fit.ideaths__HOSP <- usa %>% model(linear_caselag = TSLM(ideaths ~ lag(ihosp, 2)))
 forecast.ideaths__HOSP <- ts_forecast(fit.ideaths__HOSP, outcome = "ideaths", new_data = futurehosp)
 
-# compare those to death data forecasted just from case data, lower unfortunately.
+# compare those to death data forecasted just from case data, lower unfortunately, with a big dip in week 2 ahead.
 forecast.ideaths__HOSP %>% filter(type=="point") %>% select(yweek, value)
 forecast.ideaths %>% filter(type=="point") %>% select(yweek, value)
 
