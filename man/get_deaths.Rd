@@ -20,7 +20,7 @@ A \code{tibble} with (at minimum) the following columns:
 \item \strong{cdeaths}: Cumulative case count
 }
 
-If \code{source = 'jhu'} and \code{granularity = 'state'} then the data will include column for \strong{state} (full name of the state) and \strong{date}. If \code{source = 'jhu'} and \code{granularity = 'county'} then the data will include column for \strong{fips} (county code) and \strong{date}.
+If \code{source = 'jhu'} and \code{granularity = 'state'} then the \strong{location} column  will include the full name of the state. If \code{source = 'jhu'} and \code{granularity = 'county'} then the \strong{location} column  will include fips (county code).
 }
 \description{
 Retrieve deaths data

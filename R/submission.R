@@ -69,7 +69,7 @@ format_for_submission <- function(.forecast, target_name) {
     dplyr::select(-N) %>%
     # Fix dates: as_date(yweek) returns the MONDAY that starts that week. add 5 days to get the Saturday date.
     dplyr::mutate(target_end_date=lubridate::as_date(yweek)+lubridate::days(5)) %>%
-    dplyr::mutate(location="US", forecast_date=lubridate::today()) %>%
+    dplyr::mutate(forecast_date=lubridate::today()) %>%
     dplyr::select(forecast_date, target, target_end_date, location, type, quantile, value)
 
   # restrict inc case quantiles to c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)

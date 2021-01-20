@@ -9,7 +9,7 @@
 #' - **icases**: Incident case count
 #' - **ccases**: Cumulative case count
 #'
-#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
 #'
 #' @export
 #' @md
@@ -21,19 +21,28 @@ get_cases <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {
     ## first read in data
-    ## need this to get number of columns and indices for reshaping (see below)
-    dat <- readr::read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
+    jhuspec <- readr::cols(
+      .default = readr::col_double(),
+      iso2 = readr::col_character(),
+      iso3 = readr::col_character(),
+      Admin2 = readr::col_character(),
+      Province_State = readr::col_character(),
+      Country_Region = readr::col_character(),
+      Combined_Key = readr::col_character())
+    jhuurl <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv"
+    dat <- readr::read_csv(jhuurl, col_types=jhuspec)
 
+    ## need this to get number of columns and indices for reshaping (see below)
     ind <- which(names(dat) == "1/22/20")
 
     dat <-
       dat %>%
-      tidyr::gather(date, count, ind:ncol(dat)) %>%
+      tidyr::gather(date, count, dplyr::all_of(ind:ncol(dat))) %>%
       ## drop unnecessary columns
       dplyr::select(-iso2,-code3,-Country_Region) %>%
       dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::rename(county = Admin2, fips = FIPS, state = Province_State) %>%
       dplyr::group_by(county, fips, state) %>%
       dplyr::arrange(date) %>%
@@ -50,11 +59,12 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         dplyr::group_by(fips) %>%
-        dplyr::arrange(fips,date) %>%
+        dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::rename(location = fips) %>%
+        dplyr::mutate(location = stringr::str_pad(location, 5, side = "left", pad = "0"))
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -64,31 +74,33 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        ## create a variable for date using epiyear and week
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
-        ## now group by statee
+        ## now group by state
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
-        dplyr::arrange(state,date) %>%
+        dplyr::arrange(state,epiyear,epiweek) %>%
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
-        ## NOTE: for now this only keeps state names (not territories)
-        dplyr::filter(state %in% datasets::state.name)
+        ## make sure we don't have any bogus "states/territories"
+        dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::rename(location_name = state) %>%
+        dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+        dplyr::select(-location_name)
     } else if (granularity == "national") {
       ## by usa
       dat <-
         dat %>%
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm=TRUE), .groups="drop") %>%
-        dplyr::mutate(ccases = cumsum(icases))
+        dplyr::mutate(ccases = cumsum(icases)) %>%
+        dplyr::mutate(location = "US")
     }
 
   } else if (source == "nyt") {
     dat <-
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::mutate(icases  = cases  - dplyr::lag(cases, default = 0L),
                     ccases = cases)
 
@@ -99,7 +111,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm=TRUE), .groups="drop") %>%
         dplyr::arrange(epiyear,epiweek) %>%
-        dplyr::mutate(ccases = cumsum(icases))
+        dplyr::mutate(ccases = cumsum(icases)) %>%
+        dplyr::mutate(location = "US")
     } else {
       stop("for source='nyt' granularity must be 'national' (still working on incorporating 'county' and 'state') ... ")
     }
@@ -119,7 +132,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
 #' - **ideaths**: Incident case count
 #' - **cdeaths**: Cumulative case count
 #'
-#' If `source = 'jhu'` and `granularity = 'state'` then the data will include column for **state** (full name of the state) and **date**. If `source = 'jhu'` and `granularity = 'county'` then the data will include column for **fips** (county code) and **date**.
+#' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
 #'
 #' @export
 #' @md
@@ -129,18 +142,26 @@ get_deaths <- function(source = "jhu", granularity = "national") {
   if(source == "jhu") {
     ## first read in data
     ## need this to get number of columns and indices for reshaping (see below)
-    dat <- readr::read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
-
+    jhuspec <- readr::cols(
+      .default = readr::col_double(),
+      iso2 = readr::col_character(),
+      iso3 = readr::col_character(),
+      Admin2 = readr::col_character(),
+      Province_State = readr::col_character(),
+      Country_Region = readr::col_character(),
+      Combined_Key = readr::col_character())
+    jhuurl <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
+    dat <- readr::read_csv(jhuurl, col_types=jhuspec)
     ind <- which(names(dat) == "1/22/20")
 
     dat <-
       dat %>%
-      tidyr::gather(date, count, ind:ncol(dat)) %>%
+      tidyr::gather(date, count, dplyr::all_of(ind:ncol(dat))) %>%
       ## drop unnecessary columns
       dplyr::select(-iso2,-code3,-Country_Region) %>%
       dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::rename(county = Admin2, fips = FIPS, state = Province_State) %>%
       dplyr::group_by(county, fips, state) %>%
       dplyr::arrange(date) %>%
@@ -157,11 +178,12 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         dplyr::group_by(fips) %>%
-        dplyr::arrange(fips,date) %>%
+        dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::rename(location = fips) %>%
+        dplyr::mutate(location = stringr::str_pad(location, 5, side = "left", pad = "0"))
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -171,31 +193,33 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
         dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        ## create a variable for date using epiyear and week
-        dplyr::mutate(date = as.Date(paste(epiyear, epiweek, 1, sep="-"), "%Y-%U-%u")) %>%
         ## now group by statee
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
-        dplyr::arrange(state,date) %>%
+        dplyr::arrange(state,epiyear,epiweek) %>%
         ## then use the arranged data and cumsum to get at the cumulative deaths at each week/state
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
-        ## NOTE: for now this only keeps state names (not territories)
-        dplyr::filter(state %in% datasets::state.name)
+        ## make sure we don't have any bogus "states/territories"
+        dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
+        dplyr::rename(location_name = state) %>%
+        dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+        dplyr::select(-location_name)
     } else if (granularity == "national") {
       ## by usa
       dat <-
         dat %>%
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop") %>%
-        dplyr::mutate(cdeaths = cumsum(ideaths))
+        dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
+        dplyr::mutate(location = "US")
     }
 
   } else if (source == "nyt") {
     dat <-
       readr::read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv", col_types="Dii") %>%
-      dplyr::mutate(epiyear=MMWRweek::MMWRweek(date)$MMWRyear, .after=date) %>%
-      dplyr::mutate(epiweek=MMWRweek::MMWRweek(date)$MMWRweek, .after=epiyear) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
       dplyr::mutate(ideaths  = deaths - dplyr::lag(deaths, default = 0L),
                     cdeaths = deaths)
 
@@ -206,7 +230,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::group_by(epiyear, epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm=TRUE), .groups="drop") %>%
         dplyr::arrange(epiyear,epiweek) %>%
-        dplyr::mutate(cdeaths = cumsum(ideaths))
+        dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
+        dplyr::mutate(location = "US")
     } else {
       stop("for source='nyt' granularity must be 'national' (still working on incorporating 'county' and 'state') ... ")
     }
