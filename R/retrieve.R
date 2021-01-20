@@ -82,7 +82,9 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::ungroup() %>%
         ## make sure we don't have any bogus "states/territories"
         dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
-        dplyr::rename(location = state)
+        dplyr::rename(location_name = state) %>%
+        dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+        dplyr::select(-location_name)
     } else if (granularity == "national") {
       ## by usa
       dat <-
@@ -199,7 +201,9 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::ungroup() %>%
         ## make sure we don't have any bogus "states/territories"
         dplyr::filter(!state %in% c("Diamond Princess", "Grand Princess")) %>%
-        dplyr::rename(location = state)
+        dplyr::rename(location_name = state) %>%
+        dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+        dplyr::select(-location_name)
     } else if (granularity == "national") {
       ## by usa
       dat <-
