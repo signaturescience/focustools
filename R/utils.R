@@ -157,7 +157,7 @@ forecast_pipeline <- function(method = "ts", source="jhu", granularity="national
   usac <-  get_cases(source=source, granularity=granularity)
   usad <- get_deaths(source=source, granularity=granularity)
   usa <-
-    dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek")) %>%
+    dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>%
     make_tsibble(...)
 
   if(method == "ts") {
@@ -212,4 +212,88 @@ forecast_pipeline <- function(method = "ts", source="jhu", granularity="national
   return(out)
 }
 
+
+#' Visualize and sanity check a forecast
+#'
+#' #' @description
+#' \lifecycle{experimental}
+#'
+#' @param .data Data used to create the submission
+#' @param submission Formatted submission
+#' @param location Vector specifying locations to filter to; "US" by default.
+#' @param pi Logical as to whether or not the plot should include 50% prediction interval; default is `TRUE`
+#'
+#' @examples
+#' \dontrun{
+#' myforecast <- forecast_pipeline(force=TRUE)
+#' plot_forecast(data=myforecast$data, submission=myforecast$submission, location="US")
+#' }
+#' @md
+#' @export
+#'
+plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
+
+  ## pretty sure we need to add an intermediary variable for the filter below
+  ## otherwise the condition will interpret as the column name not the vector ... i think?
+  loc <- location
+
+  # Check that the specified location is in the data and submission.
+  stopifnot("Specified location is not in recorded data" = loc %in% unique(.data$location))
+  stopifnot("Specified location is not in forecast data" = loc %in% unique(submission$location))
+
+
+  # Grab the real data
+  real <-
+    .data %>%
+    tibble::as_tibble() %>%
+    dplyr::filter(location %in% loc) %>%
+    tidyr::gather(target, value, icases, ccases, ideaths, cdeaths) %>%
+    dplyr::mutate(target = target %>% stringr::str_remove_all("s$") %>% stringr::str_replace_all(c("^i"="inc ", "^c"="cum "))) %>%
+    dplyr::select(location, date=monday, target, point=value) %>%
+    dplyr::mutate(type="recorded") %>%
+    dplyr::filter(type!="cum case")
+
+
+  # Grab the forecasted data
+  forecasted <-
+    submission %>%
+    dplyr::filter(type=="point" | quantile==.25 | quantile==.75) %>%
+    dplyr::filter(location %in% loc) %>%
+    dplyr::mutate(quantile=tidyr::replace_na(quantile, "point")) %>%
+    dplyr::select(-type) %>%
+    tidyr::separate(target, into=c("nwk", "target"), sep=" wk ahead ") %>%
+    dplyr::select(location, date=target_end_date, target, quantile, value) %>%
+    tidyr::spread(quantile, value) %>%
+    dplyr::mutate(type="forecast")
+
+  # Bind them
+  bound <-
+    dplyr::bind_rows(real, forecasted) %>%
+    dplyr::arrange(date, location) %>%
+    dplyr::filter(location %in% loc) %>%
+    dplyr::mutate(target =
+                    dplyr::case_when(target == "inc case" ~ "Incident Cases",
+                                     target == "inc death" ~ "Incident Deaths",
+                                     target == "cum case" ~ "Cumulative Cases",
+                                     target == "cum death" ~ "Cumulative Deaths")
+    )
+
+  # Plot
+  p <-
+    ggplot2::ggplot(bound, ggplot2::aes(date, point)) +
+    ggplot2::geom_line(ggplot2::aes(col=type)) +
+    ggplot2::facet_wrap(~location + target, scales="free", ncol = 4) +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = "Date", y = NULL) +
+    ggplot2::theme(legend.position = "Bottom", legend.title = ggplot2::element_blank())
+
+  if(pi) {
+    p <-
+      p +
+      ggplot2::geom_ribbon(ggplot2::aes(fill = type, ymin = `0.25`, ymax = `0.75`),
+                           alpha = 0.5, color="lightpink", data=dplyr::filter(bound, type == "forecast"))
+  }
+
+  return(p)
+}
 
