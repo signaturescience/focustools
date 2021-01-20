@@ -8,7 +8,7 @@
 .Rproj.user
 .RData
 .Ruserdata
-^README.R$
+README.R
 
 **/__pycache__
 
