@@ -4,14 +4,16 @@
 \alias{plot_forecast}
 \title{Visualize and sanity check a forecast}
 \usage{
-plot_forecast(data, submission, location = "US")
+plot_forecast(.data, submission, location = "US", pi = TRUE)
 }
 \arguments{
-\item{data}{Data used to create the submission}
+\item{.data}{Data used to create the submission}
 
 \item{submission}{Formatted submission}
 
-\item{location}{Which location to filter to? "US" by default.}
+\item{location}{Vector specifying locations to filter to; "US" by default.}
+
+\item{pi}{Logical as to whether or not the plot should include 50\% prediction interval; default is \code{TRUE}}
 }
 \description{
 #' @description

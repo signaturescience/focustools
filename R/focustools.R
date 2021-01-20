@@ -49,5 +49,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".",
                                                         "groupvar",
                                                         "observed_to_now",
                                                         "location_name",
+                                                        "0.25",
+                                                        "0.75",
                                                         "yweek"))
 
