@@ -61,7 +61,7 @@ ts_forecast <- function(mable, outcome, horizon = 4,new_data = NULL, seed = 1863
   if(outcome == "cdeaths" | outcome == "ccases") {
     .forecast <- ts_cumulative_forecast(outcome = outcome, ...)
     return(.forecast)
-  } else if (outcome == "ideaths" | outcome == "icases") {
+  } else if (outcome == "ideaths" | outcome == "icases" | outcome=="ihosp") {
     # forecast
     if (is.null(new_data)) {
       myforecast <- fabletools::forecast(mable, h=horizon)
@@ -96,7 +96,7 @@ ts_forecast <- function(mable, outcome, horizon = 4,new_data = NULL, seed = 1863
     ## return named list with forecast AND quibbles
     return(.forecast)
   } else {
-    stop("Outcome must be one of 'icases', 'ideaths', 'ccases', or 'cdeaths' ...")
+    stop("Outcome must be one of 'icases', 'ideaths', 'ihosp', 'ccases', or 'cdeaths' ...")
   }
 
 }

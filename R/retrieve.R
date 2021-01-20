@@ -121,6 +121,33 @@ get_cases <- function(source = "jhu", granularity = "national") {
   return(dat)
 }
 
+#' Retrieve hospitalization data
+#'
+#' @param source Data source to query (currently only "covidtracking" is accepted).
+#' @param granularity Data aggregation level; must be "national".
+#' @return a tibble with the following columns:
+#' - **location**: Currently, "US" only.
+#' - **epiyear**: Epidemiological year (see \link[lubridate]{epiyear} for more details)
+#' - **epiweek**: Epidemiological week (see \link[lubridate]{epiweek} for more details)
+#' - **ihosp**: That week's incident hospitalization increase
+#' @export
+#' @md
+get_hosp <- function(source="covidtracking", granularity="national") {
+  if (source=="covidtracking" & granularity=="national") {
+    h <- readr::read_csv("https://covidtracking.com/data/download/national-history.csv")
+    h <- h %>%
+      dplyr::mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
+      dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+      dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
+      dplyr::group_by(epiyear, epiweek) %>%
+      dplyr::summarise(ihosp=sum(hospitalizedIncrease, na.rm=TRUE), .groups="drop") %>%
+      dplyr::mutate(ihosp=ifelse(is.nan(ihosp), 0, ihosp)) %>%
+      dplyr::mutate(location="US")
+  } else {
+    stop("Source must be 'covidtracking' and granularity must be 'national'.")
+  }
+}
+
 #' Retrieve deaths data
 #'
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
