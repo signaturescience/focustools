@@ -63,7 +63,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
         dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = fips)
+        dplyr::rename(location = fips) %>%
+        dplyr::mutate(location = stringr::str_pad(location, 5, side = "left", pad = "0"))
     } else if(granularity == "state") {
       dat <-
         dat %>%
@@ -182,7 +183,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
         dplyr::ungroup() %>%
-        dplyr::rename(location = fips)
+        dplyr::rename(location = fips) %>%
+        dplyr::mutate(location = stringr::str_pad(location, 5, side = "left", pad = "0"))
     } else if(granularity == "state") {
       dat <-
         dat %>%

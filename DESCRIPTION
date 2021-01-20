@@ -31,5 +31,6 @@ Imports:
     reticulate,
     tibble,
     lifecycle,
-    here
+    here,
+    stringr
 RdMacros: lifecycle
