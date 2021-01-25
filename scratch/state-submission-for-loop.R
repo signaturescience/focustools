@@ -23,7 +23,7 @@ stopifnot(length(unique(usafull$location))==52L)
 horizon <- 4
 
 mylocs <- unique(usafull$location)
-mylocs <- c("US", "48", "51")
+mylocs <- c("US", "48", "51", "19")
 
 submission_list <- list()
 for (loc in mylocs) {
@@ -46,7 +46,7 @@ submission <- bind_rows(submission_list)
 
 # Plot if interactive
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="US", pi=FALSE)
-if (interactive()) plot_forecast(.data=usafull, submission = submission, location=c("48", "51", "US"), pi=FALSE)
+if (interactive()) plot_forecast(.data=usafull, submission = submission, location=c("19", "48", "51", "US"), pi=FALSE)
 
 # Create submission
 submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
