@@ -41,7 +41,7 @@ usad <- get_deaths(source="jhu",  granularity = "national")
 
 ## use the focustools helper to prep the tsibble format
 usa <-  
-  dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek")) %>% 
+  dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>% 
   make_tsibble(chop=TRUE)
 ```
 
@@ -234,13 +234,10 @@ the wrapper function in R:
 
     validate_forecast("submission/SigSci-TS/2021-01-11-SigSci-TS.csv")
 
-# Experimental: One-step pipeline
+## Script to create submission-ready forecasts
 
-The **experimental** `forecast_pipeline()` function will run everything
-above, and return a list with models, forecasts, the formatted
-submission, and a suggested filename relative to the project directory
-to save the submission. See the examples in `?forecast_pipeline()`. For
-now this function only works on Mondays!
+Run the script in [submission/submission.R](submission/submission.R) to
+do the following.
 
 1.  Get data (national level from JHU by default)
 2.  Fit incident case and incident death models (ARIMA and lagged TSLM
@@ -248,20 +245,6 @@ now this function only works on Mondays!
 3.  Get future case data to create the incident death forecast
 4.  Create the incident death forecast based on this new data
 5.  Prepare submission format
-6.  Suggest a submission filename
-7.  Return all resulting objects to a list.
-
-``` r
-# Run the forecast pipeline. See ?forecast_pipeline
-myforecast <- forecast_pipeline()
-
-# Look at the submission and the suggested filename.
-myforecast$submission
-myforecast$submission_filename
-
-# Write submission to file
-readr::write_csv(myforecast$submission, file=myforecast$submission_filename)
-
-# Validate submission
-validate_forecast(myforecast$submission_filename)
-```
+6.  Save the submission to the
+    `submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv`
+7.  Validates the submission
