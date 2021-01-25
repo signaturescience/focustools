@@ -27,7 +27,7 @@ forecast_pipeline(
 \item{...}{Arguments passed to other functions}
 }
 \description{
-\lifecycle{experimental}
+\lifecycle{deprecated}
 
 Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
 \enumerate{
