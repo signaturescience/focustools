@@ -78,10 +78,16 @@ format_for_submission <- function(.forecast, target_name) {
       dplyr::filter(type=="point" | round(quantile, 3)  %in% c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975))
   }
 
+  # Found quantile and make value integer (don't need/want precision / half-people)
   bound <-
     bound %>%
     dplyr::mutate(quantile=round(quantile, 4)) %>%
     dplyr::mutate(value=as.integer(round(value)))
+
+  # Don't allow negative values
+  bound <-
+    bound %>%
+    dplyr::mutate(value=ifelse(value<0, 0L, value))
 
   return(bound)
 }
