@@ -108,7 +108,7 @@ is_monday <- function() {
 #' Pipeline to produce a forecast
 #'
 #' @description
-#' \lifecycle{experimental}
+#' \lifecycle{deprecated}
 #'
 #' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
 #' 1. Get data (national level from JHU by default)
@@ -141,6 +141,8 @@ is_monday <- function() {
 #' @md
 #' @export
 forecast_pipeline <- function(method = "ts", source="jhu", granularity="national", horizon=4, force=FALSE, ...) {
+
+  .Deprecated("submission.R in the submission/ directory")
 
   # If it isn't monday and you haven't set FORCE=TRUE, then don't run the code.
   if (!is_monday()) {
@@ -196,7 +198,8 @@ forecast_pipeline <- function(method = "ts", source="jhu", granularity="national
     dplyr::arrange(target)
 
   # Suggested submission filename
-  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
+  # submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
+  submission_filename <- paste0(Sys.Date(), "-SigSci-TS.csv")
 
   # Create and return output
   out <- list(data=usa,
