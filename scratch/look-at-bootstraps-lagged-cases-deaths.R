@@ -60,7 +60,35 @@ boot.ideaths %>% filter(yweek==min(boot.ideaths$yweek)) %>% as_tibble() %>% grou
 
 
 
+#############################################################################################################
 #### Aside, why wouldn't this work? Using a six week lag but only forecasting 2 weeks, shoudld have the data?
 fits.ideaths.6weeklag <- usa %>% model(linear_caselag6 = TSLM(ideaths ~ lag(icases, 6)))
 forc.ideaths.6weeklag <- forecast(fits.ideaths, h=2)
+rm(fits.ideaths.6weeklag)
+#############################################################################################################
+
+# What if we actually try writing this into the data itself, could we use a horizon instead of new data?
+usa <- usa %>% mutate(icases.lag=lag(icases, 3, default=0L))
+fits.ideaths <- usa %>% model(linear_caselag = TSLM(ideaths ~ icases.lag))
+forc.ideaths <- forecast(fits.ideaths, h=horizon)
+
+# Try writing lagcase data into the data again, but this time use the size of
+# the horizon so you don't have to use future predictions, you can use actual
+# recorded data from the weeks leading up to forecast
+usa <- usa %>% mutate(icases.lag=lag(icases, n=horizon, default=0L))
+# The model is directly on the lagged cases variable you just created
+fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ icases.lag))
+# Your "future" cases are actually just those last few weeks of recorded data
+future_cases <- usa %>%
+  group_by(location) %>%
+  arrange(yweek) %>%
+  slice((n()-horizon+1):n()) %>%
+  select(location, yweek, icases.lag=icases) %>%
+  print()
+forc.ideaths <- forecast(fits.ideaths, new_data=future_cases)
+
+# Look at the forecast and bootstraps
+forc.ideaths %>% filter(yweek==min(forc.ideaths$yweek))
+boot.ideaths %>% filter(yweek==min(boot.ideaths$yweek)) %>% arrange(as.integer(.rep))
+boot.ideaths %>% filter(yweek==min(boot.ideaths$yweek)) %>% as_tibble() %>% group_by(location) %>% summarize(quibble(.sim)) %>% filter(round(q, 4) %in% c(.25, .5, .75))
 
