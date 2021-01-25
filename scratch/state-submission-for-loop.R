@@ -47,6 +47,9 @@ submission <- bind_rows(submission_list)
 # Plot if interactive
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="US", pi=FALSE)
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location=c("19", "48", "51", "US"), pi=FALSE)
+if (interactive()) p <- plot_forecast(.data=usafull, submission = submission, location=unique(submission$location), pi=TRUE)
+if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.pdf", width=10, height=120, limitsize=FALSE)
+
 
 # Create submission
 submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
