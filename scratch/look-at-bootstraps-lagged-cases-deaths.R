@@ -51,7 +51,7 @@ future_cases <-
 # Fit a model, forecast, bootstrap deaths
 fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
 forc.ideaths <- forecast(fits.ideaths, new_data = future_cases)
-boot.ideaths <- generate(fits.ideaths, new_data=future_cases, times=10, bootstrap=TRUE)
+boot.ideaths <- generate(fits.ideaths, new_data=future_cases, times=10, bootstrap=TRUE, seed=2021-01-25)
 
 # Look at the forecast and bootstraps
 forc.ideaths %>% filter(yweek==min(forc.ideaths$yweek))
@@ -91,4 +91,34 @@ forc.ideaths <- forecast(fits.ideaths, new_data=future_cases)
 forc.ideaths %>% filter(yweek==min(forc.ideaths$yweek))
 boot.ideaths %>% filter(yweek==min(boot.ideaths$yweek)) %>% arrange(as.integer(.rep))
 boot.ideaths %>% filter(yweek==min(boot.ideaths$yweek)) %>% as_tibble() %>% group_by(location) %>% summarize(quibble(.sim)) %>% filter(round(q, 4) %in% c(.25, .5, .75))
+
+
+# Try with hilo -----------------------------------------------------------
+
+forc.ideaths %>%
+  hilo(c(80, 99)) %>%
+  unpack_hilo(ends_with("%"))
+
+# The quantiles I need
+q <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+q
+# Figure out what the interval you need to get those quantiles
+qi <- tibble(lower=q[q<.5], upper=rev(q[q>.5])) %>%
+  mutate(interval=round((upper-lower)*100))
+qi
+qik <- qi %>%
+  tidyr::gather(key, quantile, lower, upper) %>%
+  mutate(key=paste0(interval, "%_", key)) %>%
+  arrange(quantile) %>%
+  print(n=Inf) %>%
+  select(quantile, interval, key)
+qik
+
+forc.ideaths %>%
+  hilo(sort(unique(qik$interval))) %>%
+  unpack_hilo(ends_with("%")) %>%
+  tidyr::gather(key, value, contains("%")) %>%
+  inner_join(qik, by="key") %>%
+  filter(yweek==min(forc.ideaths$yweek)) %>%
+  ggplot(aes(quantile, value)) + geom_point()
 
