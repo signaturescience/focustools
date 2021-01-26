@@ -31,5 +31,8 @@ Imports:
     reticulate,
     tibble,
     lifecycle,
-    here
+    stringr,
+    ggplot2
 RdMacros: lifecycle
+Suggests: 
+    here
