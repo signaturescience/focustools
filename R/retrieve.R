@@ -49,7 +49,9 @@ get_cases <- function(source = "jhu", granularity = "national") {
       ## coerce from cumulative to incident cases
       ## hold onto count as "ccases" for cumulative cases
       dplyr::mutate(icases = count - dplyr::lag(count, default = 0L),
-                    ccases = count)
+                    ccases = count) %>%
+      dplyr::mutate(icases = ifelse(icases < 0, 0, icases))
+
 
     ## by county
     if (granularity == "county") {
@@ -195,7 +197,8 @@ get_deaths <- function(source = "jhu", granularity = "national") {
       ## coerce from cumulative to incident deaths
       ## hold onto count as "cdeaths" for cumulative deaths
       dplyr::mutate(ideaths = count - dplyr::lag(count, default = 0L),
-                    cdeaths = count)
+                    cdeaths = count) %>%
+      dplyr::mutate(ideaths = ifelse(ideaths < 0, 0, ideaths))
 
     ## by county
     if (granularity == "county") {
