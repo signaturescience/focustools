@@ -90,8 +90,7 @@ glm_quibble <- function(fit, new_data, alpha) {
     predict(new_data, alpha = alpha) %>%
     ## get just the prediction interval bounds ...
     ## index (time column must be named index) ...
-    ## and point estimate
-    select(index, estimate, lower_pi, upper_pi) %>%
+    select(index, lower_pi, upper_pi) %>%
     ## reshape so that its in long format
     gather(quantile, value, lower_pi:upper_pi) %>%
     ## and subout out lower_pi/upper_pi for the appropriate quantile
@@ -103,23 +102,41 @@ glm_forecast <- function(.data, fit, horizon = 4, alpha = 0.05) {
   ## get the last index from the data provided
   last_index <-
     .data %>%
-    arrange(location, epiweek, epiyear) %>%
-    mutate(index = 1:n()) %>%
-    pull(index) %>%
+    dplyr::arrange(location, epiweek, epiyear) %>%
+    dplyr::mutate(index = 1:dplyr::n()) %>%
+    dplyr::pull(index) %>%
     tail(1)
 
-  ## add indicies through the horizon
+  ## get the last index from the data provided
+  last_week <-
+    .data %>%
+    dplyr::arrange(location, epiweek, epiyear) %>%
+    dplyr::pull(yweek) %>%
+    tail(1)
+
+  ## add indices through the horizon
   ## without other predictors this is just a tibble of indices
   ## if we had other predictors you would need to pass them in here
   new_data <-
-    tibble(index = last_index + 1:horizon)
+    dplyr::tibble(index = last_index + 1:horizon, yweek = last_week + 1:horizon)
 
   # ## take the fit object provided and use predict
-  # fit %>%
-  #   predict(new_data, alpha = alpha)
+  point_estimates <-
+    fit %>%
+    predict(new_data) %>%
+    dplyr::select(index, estimate) %>%
+    dplyr::mutate(estimate = round(estimate)) %>%
+    dplyr::mutate(quantile = NA) %>%
+    dplyr::select(index, quantile, value = estimate)
 
   ## map the quibble function over the alphas
-  map_df(alpha, .f = function(x) glm_quibble(fit = fit, new_data = new_data, alpha = x))
+  quants <- map_df(alpha, .f = function(x) glm_quibble(fit = fit, new_data = new_data, alpha = x))
+
+  ## prep data
+  dplyr::bind_rows(point_estimates,quants) %>%
+    dplyr::arrange(index, quantile) %>%
+    dplyr::left_join(new_data) %>%
+    dplyr::select(yweek,quantile,value)
 }
 
 ## try it on cville data
@@ -135,6 +152,46 @@ cville_fit <- glm_fit(cville, models = models)
 alphas <- c(0.01, 0.025, seq(0.05, 0.45, by = 0.05)) * 2
 cville_forecast <- glm_forecast(cville, horizon = 4, fit = cville_fit$fit, alpha = alphas)
 cville_forecast
+
+## some weirdo plotting code just to see the results for now
+## TODO: figure out a better way to plot this result (eventually plot_forecast should do it)
+cville_forecast %>%
+  filter(is.na(quantile) | quantile == 0.25 | quantile == 0.75) %>%
+  mutate(quantile = ifelse(is.na(quantile), "point", quantile)) %>%
+  spread(quantile,value) %>%
+  mutate(type = "Forecast") %>%
+  bind_rows(select(cville, yweek, point = icases)) %>%
+  mutate(type = ifelse(is.na(type), "Observed", type)) %>%
+  mutate(date = as.Date(yweek)) %>%
+  ggplot(aes(date, point)) +
+  geom_line(aes(group = type, col = type)) +
+  geom_ribbon(aes(group = type, fill = type, ymin = `0.25`, ymax = `0.75`), alpha = 0.25)
+
+## NOTE: this is the same thing as above but with travis county (austin tx)
+travis <-
+  usa %>%
+  filter(location == "48453") %>%
+  mutate(index = 1:n()) %>%
+  as_tibble()
+
+travis_fit <- glm_fit(travis, models = models)
+
+## NOTE: use quantiles up to 0.45 then multiply by 2 for alpha (because two-sided / symmetrical)
+alphas <- c(0.01, 0.025, seq(0.05, 0.45, by = 0.05)) * 2
+travis_forecast <- glm_forecast(travis, horizon = 4, fit = travis_fit$fit, alpha = alphas)
+travis_forecast
+
+travis_forecast %>%
+  filter(is.na(quantile) | quantile == 0.25 | quantile == 0.75) %>%
+  mutate(quantile = ifelse(is.na(quantile), "point", quantile)) %>%
+  spread(quantile,value) %>%
+  mutate(type = "Forecast") %>%
+  bind_rows(select(travis, yweek, point = icases)) %>%
+  mutate(type = ifelse(is.na(type), "Observed", type)) %>%
+  mutate(date = as.Date(yweek)) %>%
+  ggplot(aes(date, point)) +
+  geom_line(aes(group = type, col = type)) +
+  geom_ribbon(aes(group = type, fill = type, ymin = `0.25`, ymax = `0.75`), alpha = 0.25)
 
 ## now try on all counties
 ## split the tibble by location (FIPS code)
