@@ -9,11 +9,6 @@ usad <- get_deaths(source="jhu",  granularity = "county")
 ## use the focustools helper to prep the tsibble format
 usa <-
   dplyr::inner_join(usac, usad, by = c("epiyear", "epiweek", "location")) %>%
-  ## NOTE: need to fix this in get_* functions
-  ## but basically this code will make sure that for incident cases you cannot have -
-  ## looks like this happens in some counties that revise their cumulative case counts in given weeks
-  ## and we use cumulative case/death counts to create incident counts
-  mutate(icases = ifelse(icases < 0, 0, icases)) %>%
   make_tsibble(chop=TRUE)
 
 ## models to use in a named list
@@ -26,7 +21,11 @@ models  <- list(
 )
 
 ## define a generic function to fit these models
-glm_fit <- function(.data, models, metrics = list(yardstick::rmse, yardstick::huber_loss, yardstick::mae)) {
+glm_fit <- function(.data,
+                    models = list(glm_poisson = trending::glm_model(icases ~ index, family = "poisson"),
+                                  glm_quasipoisson = trending::glm_model(icases ~ index, family = "quasipoisson"),
+                                  glm_negbin = trending::glm_nb_model(icases ~ index)),
+                    metrics = list(yardstick::rmse, yardstick::huber_loss, yardstick::mae)) {
 
   ## convert the tsibble to a tibble to make it easier to work with
   ## add an index column to serve as predictor
@@ -42,7 +41,9 @@ glm_fit <- function(.data, models, metrics = list(yardstick::rmse, yardstick::hu
   if(sum(dat$icases) == 0) {
     ret <- tibble(model_class = NULL,
                   fit = NULL,
-                  location = unique(dat$location))
+                  location = unique(dat$location),
+                  data = tidyr::nest(dat, fit_data = everything()))
+    message("No model could be fit because no incident case data available.")
   } else {
     ## evaluate models and use metrics provided in arg
     res <- evaluate_models(
@@ -69,9 +70,12 @@ glm_fit <- function(.data, models, metrics = list(yardstick::rmse, yardstick::hu
     ## construct tibble with model type, actual fit, and the location
     ret <- dplyr::tibble(model_class = best_by_rmse$model_class,
                          fit = tmp_fit,
-                         location = unique(dat$location))
-  }
+                         location = unique(dat$location),
+                         data = tidyr::nest(dat, fit_data = everything()))
 
+    message("Selected model ...")
+    message(as.character(ret$fit$fitted_model$family)[1])
+  }
   return(ret)
 
 }
@@ -200,14 +204,47 @@ county_dat <-
   as_tibble() %>%
   group_split(location)
 
-fits <-
-  ## scratch trying on all counties at first ...
-  ## just the first 10 because this takes a while
-  county_dat[1:10] %>%
-  ## map the glm fit over and return a list
-  map(., glm_fit, models = models)
+system.time({
+  fits <-
+    ## scratch trying on all counties at first ...
+    ## just the first 10 because this takes a while
+    county_dat[1:20] %>%
+    ## map the glm fit over and return a list
+    map(., glm_fit, models = models)
+})
 
-fits
+
+## A LOT faster with furrr
+library(furrr)
+plan(multisession, workers = 4)
+
+system.time({
+  fits <- future_map(county_dat[1:100], glm_fit)
+})
+
 
 ##TODO: figure out how to use glm_forecast() to get predictions for all counties
 
+l <- list()
+for(i in 1:length(fits)) {
+
+  if(!"fit" %in% names(fits[[i]])) {
+    message("skipping")
+    next
+  }
+
+  tmp_loc <- unique(fits[[i]]$location)
+  message(sprintf("forecasting for %s", tmp_loc))
+  tmp_dat <- county_dat[[i]]
+  tmp_fit <- fits[[i]]$fit
+
+  tmp_res <- glm_forecast(tmp_dat, horizon = 4, fit = tmp_fit, alpha = alphas)
+  tmp_res$location <- tmp_loc
+
+  l[[i]] <- tmp_res
+
+}
+
+res <- bind_rows(l)
+
+res
