@@ -1,4 +1,4 @@
-library(dplyr)
+library(tidyverse)
 library(fable)
 library(focustools)
 
@@ -15,43 +15,51 @@ state <- inner_join(
 ## combine US and state data
 usafull <-
   bind_rows(national, state) %>%
-  filter(location %in% c("US", stringr::str_pad(1:56, width=2, pad="0"))) %>%
+  filter(location %in% c("US", str_pad(1:56, width=2, pad="0"))) %>%
   make_tsibble() %>%
   filter(monday>"2020-03-01")
 stopifnot(length(unique(usafull$location))==52L)
+rm(national, state)
 
+# Set forecasting horizon in weeks
 horizon <- 4
 
+# Use bootstrapping?
+bootstrap <- FALSE
+
 mylocs <- unique(usafull$location)
-mylocs <- c("US", "48", "51", "19")
+mylocs <- c("US", "48", "51", "19", "06")
 
 submission_list <- list()
 for (loc in mylocs) {
   message(loc)
   usa <- filter(usafull, location==loc)
-  fit.icases <-  usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
-  fit.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
-  icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = horizon)
-  future_cases <- ts_futurecases(usa, icases_forecast, horizon = horizon)
-  ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
-  cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
+  fits.icases <-  usa %>% model(arima = ARIMA(icases, stepwise=FALSE, approximation=FALSE))
+  fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
+  forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
+  futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
+  forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases, bootstrap = bootstrap)
+  forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
   submission_list[[loc]] <-
-    list(format_for_submission(icases_forecast, target_name = "inc case"),
-         format_for_submission(ideaths_forecast, target_name = "inc death"),
-         format_for_submission(cdeaths_forecast, target_name = "cum death")) %>%
+    list(format_for_submission(forc.icases,  target_name = "inc case"),
+         format_for_submission(forc.ideaths, target_name = "inc death"),
+         format_for_submission(forc.cdeaths, target_name = "cum death")) %>%
     purrr::reduce(dplyr::bind_rows) %>%
     dplyr::arrange(target)
 }
 submission <- bind_rows(submission_list)
+rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, submission_list)
+
+# Write/validate submission
+submission_filename  <-  here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
+if (interactive()) submission_filename <- file.path(tempdir(), paste0(Sys.Date(), "-SigSci-TS.csv"))
+write_csv(submission, file=submission_filename)
+validate_forecast(submission_filename)
 
 # Plot if interactive
-if (interactive()) plot_forecast(.data=usafull, submission = submission, location="US", pi=FALSE)
-if (interactive()) plot_forecast(.data=usafull, submission = submission, location=c("19", "48", "51", "US"), pi=FALSE)
+if (interactive()) p <- plot_forecast(.data=usafull, submission = submission, location="US", pi=FALSE); print(p)
 if (interactive()) p <- plot_forecast(.data=usafull, submission = submission, location=unique(submission$location), pi=TRUE)
-if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.pdf", width=10, height=120, limitsize=FALSE)
+if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.pdf", width=10, height=10, limitsize=FALSE)
+if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.png", width=10, height=10, limitsize=FALSE)
 
 
-# Create submission
-submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-readr::write_csv(submission, file=submission_filename)
-validate_forecast(submission_filename)
