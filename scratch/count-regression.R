@@ -77,8 +77,28 @@ glm_fit <- function(.data, models, metrics = list(yardstick::rmse, yardstick::hu
 }
 
 
+## helper to get the quantiles from prediction intervals
+glm_quibble <- function(fit, new_data, alpha) {
+
+  ## get the quantiles from the alpha
+  q_lower <- alpha/2
+  q_upper <- 1 - q_lower
+
+  ## run the predict method on the fitted model
+  ## use the given alpha
+  fit %>%
+    predict(new_data, alpha = alpha) %>%
+    ## get just the prediction interval bounds ...
+    ## index (time column must be named index) ...
+    ## and point estimate
+    select(index, estimate, lower_pi, upper_pi) %>%
+    ## reshape so that its in long format
+    gather(quantile, value, lower_pi:upper_pi) %>%
+    ## and subout out lower_pi/upper_pi for the appropriate quantile
+    mutate(quantile = ifelse(quantile == "lower_pi", q_lower, q_upper))
+}
 ## a generic forecast function to use fit objects from above
-glm_forecast <- function(.data, fit, horizon = 4) {
+glm_forecast <- function(.data, fit, horizon = 4, alpha = 0.05) {
 
   ## get the last index from the data provided
   last_index <-
@@ -94,9 +114,12 @@ glm_forecast <- function(.data, fit, horizon = 4) {
   new_data <-
     tibble(index = last_index + 1:horizon)
 
-  ## take the fit object provided and use predict
-  fit %>%
-    predict(new_data)
+  # ## take the fit object provided and use predict
+  # fit %>%
+  #   predict(new_data, alpha = alpha)
+
+  ## map the quibble function over the alphas
+  map_df(alpha, .f = function(x) glm_quibble(fit = fit, new_data = new_data, alpha = x))
 }
 
 ## try it on cville data
@@ -107,8 +130,10 @@ cville <-
   as_tibble()
 
 cville_fit <- glm_fit(cville, models = models)
-cville_forecast <- glm_forecast(cville, horizon = 4, fit = cville_fit$fit)
 
+## NOTE: use quantiles up to 0.45 then multiply by 2 for alpha (because two-sided / symmetrical)
+alphas <- c(0.01, 0.025, seq(0.05, 0.45, by = 0.05)) * 2
+cville_forecast <- glm_forecast(cville, horizon = 4, fit = cville_fit$fit, alpha = alphas)
 cville_forecast
 
 ## now try on all counties
