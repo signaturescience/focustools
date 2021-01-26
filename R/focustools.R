@@ -9,6 +9,7 @@ NULL
 
 ## quiets concerns of R CMD check re: the non-bound global variables
 if(getRversion() >= "2.15.1")  utils::globalVariables(c(".",
+                                                        "key",
                                                         "hospitalizedIncrease",
                                                         "ihosp",
                                                         "ccases",
