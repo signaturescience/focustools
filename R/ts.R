@@ -46,7 +46,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
-#' @param bootstrap If `TRUE` (default) use bootstrap to resample forecasts for quantiles. If `FALSE`, use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.
+#' @param bootstrap If `TRUE` use bootstrap to resample forecasts for quantiles. If `FALSE` (default), use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.
 #' @param seed Random seed used in bootstrapping process; default `1863`
 #' @param ... Additional parameters passed to the \link[focustools]{ts_cumulative_forecast} helper; only used if the forecast is cumulative
 #'
@@ -57,7 +57,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' @md
 #'
 #'
-ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=TRUE, seed = 1863, ...) {
+ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=FALSE, seed = 1863, ...) {
 
   if(outcome == "cdeaths" | outcome == "ccases") {
     .forecast <- ts_cumulative_forecast(outcome = outcome, ...)

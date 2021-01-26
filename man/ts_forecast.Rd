@@ -9,7 +9,7 @@ ts_forecast(
   outcome,
   horizon = 4,
   new_data = NULL,
-  bootstrap = TRUE,
+  bootstrap = FALSE,
   seed = 1863,
   ...
 )
@@ -23,7 +23,7 @@ ts_forecast(
 
 \item{new_data}{Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is \code{NULL}}
 
-\item{bootstrap}{If \code{TRUE} (default) use bootstrap to resample forecasts for quantiles. If \code{FALSE}, use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.}
+\item{bootstrap}{If \code{TRUE} use bootstrap to resample forecasts for quantiles. If \code{FALSE} (default), use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.}
 
 \item{seed}{Random seed used in bootstrapping process; default \code{1863}}
 
