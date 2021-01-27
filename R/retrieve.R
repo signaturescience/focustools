@@ -51,6 +51,7 @@ get_cases <- function(source = "jhu", granularity = "national") {
       dplyr::mutate(icases = count - dplyr::lag(count, default = 0L),
                     ccases = count)
 
+
     ## by county
     if (granularity == "county") {
       dat <-
@@ -118,6 +119,12 @@ get_cases <- function(source = "jhu", granularity = "national") {
     }
 
   }
+
+  ## check that icases is NEVER negative at the weekly aggregate
+  dat <-
+    dat %>%
+    dplyr::mutate(icases = ifelse(icases < 0, 0, icases))
+
   return(dat)
 }
 
@@ -264,5 +271,11 @@ get_deaths <- function(source = "jhu", granularity = "national") {
     }
 
   }
+
+  ## check that ideaths is NEVER negative at the weekly aggregate
+  dat <-
+    dat %>%
+    dplyr::mutate(ideaths = ifelse(ideaths < 0, 0, ideaths))
+
   return(dat)
 }
