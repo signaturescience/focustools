@@ -63,7 +63,7 @@ if (!is_monday()) {
   warning("Forecasts should be created on Mondays.")
 } else {
   submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  write_csv(submission, path=submission_filename)
+  write_csv(submission, submission_filename)
   validate_forecast(submission_filename)
 }
 
@@ -77,5 +77,5 @@ if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.p
 
 # Interactively create submission in temp directory (forcing forecast_date to this monday)
 if (interactive()) submission_filename <- file.path(tempdir(), paste0(Sys.Date(), "-SigSci-TS.csv"))
-if (interactive()) readr::write_csv(submission %>% mutate(forecast_date=this_monday()), path=submission_filename)
+if (interactive()) readr::write_csv(submission %>% mutate(forecast_date=this_monday()), submission_filename)
 if (interactive()) validate_forecast(submission_filename)
