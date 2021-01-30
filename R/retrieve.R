@@ -155,6 +155,79 @@ get_hosp <- function(source="covidtracking", granularity="national") {
   }
 }
 
+#' Retrieve vaccination data
+#'
+#' Retrieves vaccination data from [Our World in Data](https://github.com/owid/covid-19-data) (CC-BY).
+#'
+#' @param source Data source (currently only "owid" is accepted).
+#' @return a tibble with the following columns:
+#' - `location`: "US", State-level FIPS codes, and a few others currently without FIPS codes (e.g., "Indian Health Svc", "Bureau of Prisons", "Dept of Defense", others).
+#' - `epiyear`: Epidemiological year (see \link[lubridate]{epiyear} for more details)
+#' - `epiweek`: Epidemiological week (see \link[lubridate]{epiweek} for more details)
+#' - `total_distributed`: the total number of vaccines distributed to this location
+#' - `total_vaccinations`: the number of total shots given
+#' - `proportion_vaccinations_given`: Ratio, `total_vaccinations/total_distributed`
+#' - `people_vaccinated`: the number of people given at least one shot
+#' - `people_fully_vaccinated`: the number of people given the full course of shot+booster
+#' - `population`: the population size of this location
+#' - `total_vaccinations_percap`: the total number of vaccinations given per capita
+#' @examples
+#' v <- get_vax()
+#' v
+#' \dontrun{
+#' library(dplyr)
+#' library(tidyr)
+#' library(ggplot2)
+#' v %>%
+#'   filter(location %in% c("US", "48", "51")) %>%
+#'   mutate(monday=MMWRweek::MMWRweek2Date(epiyear, epiweek, 2)) %>%
+#'   group_by(location) %>%
+#'   top_n(1, wt=monday) %>%
+#'   gather(key, value, total_distributed:total_vaccinations_percap) %>%
+#'   ggplot(aes(location, value)) +
+#'   geom_col() +
+#'   facet_wrap(~key, scales="free_y") +
+#'   scale_y_continuous(labels=scales::number_format()) +
+#'   theme_gray()
+#'   }
+#' @export
+#' @md
+get_vax <- function(source="owid") {
+  vaxspec <- readr::cols(
+    date = readr::col_date(format = ""),
+    location = readr::col_character(),
+    total_distributed = readr::col_double(),
+    total_vaccinations = readr::col_double(),
+    distributed_per_hundred = readr::col_double(),
+    total_vaccinations_per_hundred = readr::col_double(),
+    people_vaccinated = readr::col_double(),
+    people_vaccinated_per_hundred = readr::col_double(),
+    people_fully_vaccinated = readr::col_double(),
+    people_fully_vaccinated_per_hundred = readr::col_double(),
+    daily_vaccinations_raw = readr::col_double(),
+    daily_vaccinations = readr::col_double(),
+    daily_vaccinations_per_million = readr::col_double(),
+    share_doses_used = readr::col_double()
+  )
+  dat <- readr::read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/us_state_vaccinations.csv", col_types=vaxspec)
+  dat <-
+    dat %>%
+    dplyr::select(date, location, total_distributed, total_vaccinations, people_vaccinated, people_fully_vaccinated) %>%
+    dplyr::mutate(location=gsub("United States", "US", location)) %>%
+    dplyr::left_join(locations %>% dplyr::transmute(fips=location, location=location_name), by="location") %>%
+    dplyr::mutate(location = ifelse(!is.na(fips), fips, location)) %>%
+    dplyr::mutate(epiyear=lubridate::epiyear(date), .after=date) %>%
+    dplyr::mutate(epiweek=lubridate::epiweek(date), .after=epiyear) %>%
+    dplyr::select(-fips, -date) %>%
+    dplyr::group_by(location, epiyear, epiweek) %>%
+    dplyr::summarize(dplyr::across(dplyr::everything(), sum, na.rm=TRUE), .groups="drop") %>%
+    dplyr::arrange(location!="US", location) %>%
+    dplyr::left_join(locations %>% dplyr::select(location, population), by="location") %>%
+    dplyr::mutate(total_vaccinations_percap=total_vaccinations/population) %>%
+    dplyr::mutate(proportion_vaccinations_given=total_vaccinations/total_distributed, .after="total_vaccinations")
+  return(dat)
+}
+
 #' Retrieve deaths data
 #'
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
