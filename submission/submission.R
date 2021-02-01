@@ -63,7 +63,7 @@ if (!is_monday()) {
   warning("Forecasts should be created on Mondays.")
 } else {
   submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  write_csv(submission, submission_filename)
+  readr::write_csv(submission, submission_filename)
   validate_forecast(submission_filename)
 }
 
