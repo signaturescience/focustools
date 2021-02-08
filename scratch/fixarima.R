@@ -37,48 +37,23 @@ if (USonly) mylocs <- "US"
 ## Limit to US Plus a few states for testing
 # mylocs <- c("US", "48", "51", "19", "06")
 
-## Create models and forecasts
-submission_list <- list()
-for (loc in mylocs) {
-  message(loc)
-  usa <- filter(usafull, location==loc)
-  fits.icases <-  usa %>% model(arima = ARIMA(log(icases+1), stepwise=FALSE, approximation=FALSE))
-  fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
-  forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
-  futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
-  forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases, bootstrap = bootstrap)
-  forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
-  submission_list[[loc]] <-
-    list(format_for_submission(forc.icases,  target_name = "inc case"),
-         format_for_submission(forc.ideaths, target_name = "inc death"),
-         format_for_submission(forc.cdeaths, target_name = "cum death")) %>%
-    purrr::reduce(dplyr::bind_rows) %>%
-    dplyr::arrange(target)
-}
+message(loc)
+loc <- "US"
+usa <- filter(usafull, location==loc)
+fits.icases <-  usa %>% model(arima = ARIMA(box_cox(icases, lambda=.1), stepwise=FALSE, approximation=FALSE))
+fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
+forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
+futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
+forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases, bootstrap = bootstrap)
+forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
+submission_list[[loc]] <-
+  list(format_for_submission(forc.icases,  target_name = "inc case"),
+       format_for_submission(forc.ideaths, target_name = "inc death"),
+       format_for_submission(forc.cdeaths, target_name = "cum death")) %>%
+  purrr::reduce(dplyr::bind_rows) %>%
+  dplyr::arrange(target)
 submission <- bind_rows(submission_list)
-rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, loc)
-
-# Sanity check
-badstates <- submission %>%
-  filter(target=="4 wk ahead inc case" & type=="point") %>%
-  select(location, icases.4wk=value) %>%
-  inner_join(usafull %>% filter(yweek==max(yweek)), by="location") %>%
-  filter(icases.4wk>2*icases | icases.4wk<.5*icases) %>%
-  pull(location)
-if ("US" %in% badstates) {
-  stop("US forecasts are >2x or <0.5x")
-} else {
-  submission <- submission %>% filter(!(location %in% badstates))
-}
-
-# Create submission in submission directory if it's Monday.
-if (!is_monday()) {
-  warning("Forecasts should be created on Mondays.")
-} else {
-  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  readr::write_csv(submission, submission_filename)
-  validate_forecast(submission_filename)
-}
+submission %>% filter(type=="point")
 
 # Plot if interactive
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="US", pi=TRUE)
