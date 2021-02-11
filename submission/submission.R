@@ -1,4 +1,5 @@
 suppressPackageStartupMessages(suppressWarnings(library(dplyr)))
+suppressPackageStartupMessages(suppressWarnings(library(readr)))
 suppressPackageStartupMessages(suppressWarnings(library(fable)))
 suppressPackageStartupMessages(suppressWarnings(library(focustools)))
 
@@ -58,26 +59,34 @@ for (loc in mylocs) {
 submission <- bind_rows(submission_list)
 rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, loc)
 
-# Sanity check
-badstates <- submission %>%
-  filter(target=="4 wk ahead inc case" & type=="point") %>%
-  select(location, icases.4wk=value) %>%
-  inner_join(usafull %>% filter(yweek==max(yweek)), by="location") %>%
-  filter(icases.4wk>2*icases | icases.4wk<.5*icases) %>%
-  pull(location)
-if ("US" %in% badstates) {
-  stop("US forecasts are >2x or <0.5x")
-} else {
-  submission <- submission %>% filter(!(location %in% badstates))
+if(interactive()) {
+  # Sanity check
+  badstates <- submission %>%
+    filter(target=="4 wk ahead inc case" & type=="point") %>%
+    select(location, icases.4wk=value) %>%
+    inner_join(usafull %>% filter(yweek==max(yweek)), by="location") %>%
+    filter(icases.4wk>2*icases | icases.4wk<.5*icases) %>%
+    pull(location)
+  if ("US" %in% badstates) {
+    stop("US forecasts are >2x or <0.5x")
+  } else {
+    submission <- submission %>% filter(!(location %in% badstates))
+  }
 }
 
 # Create submission in submission directory if it's Monday.
 if (!is_monday()) {
   warning("Forecasts should be created on Mondays.")
+  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
+  readr::write_csv(submission, submission_filename)
+  validation <- validate_forecast(submission_filename, install = !interactive())
+  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
 } else {
   submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
   readr::write_csv(submission, submission_filename)
-  validate_forecast(submission_filename)
+  validation <- validate_forecast(submission_filename, install = !interactive())
+  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
+
 }
 
 # Plot if interactive
@@ -85,10 +94,12 @@ if (interactive()) plot_forecast(.data=usafull, submission = submission, locatio
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="06", pi=TRUE)
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="48", pi=TRUE)
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="51", pi=TRUE)
-if (interactive()) p <- plot_forecast(.data=usafull, submission = submission, location=unique(submission$location), pi=TRUE)
-if (interactive()) ggplot2::ggsave(plot=p, filename="~/Downloads/us-and-states.pdf", width=12, height=150, limitsize=FALSE, scale=.9)
+
+p <- plot_forecast(.data=usafull, submission = submission, location=unique(submission$location), pi=TRUE)
+ggplot2::ggsave(plot=p, filename= here::here("submission", "SigSci-TS", paste0(Sys.Date(),"-us-and-states.pdf")), width=12, height=150, limitsize=FALSE, scale=.9)
 
 # Interactively create submission in temp directory (forcing forecast_date to this monday)
 if (interactive()) submission_filename <- file.path(tempdir(), paste0(Sys.Date(), "-SigSci-TS.csv"))
 if (interactive()) readr::write_csv(submission %>% mutate(forecast_date=this_monday()), submission_filename)
 if (interactive()) validate_forecast(submission_filename)
+
