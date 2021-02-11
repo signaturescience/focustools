@@ -79,13 +79,13 @@ if (!is_monday()) {
   warning("Forecasts should be created on Mondays.")
   submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
   readr::write_csv(submission, submission_filename)
-  validation <- validate_forecast(submission_filename, install = TRUE)
-  write_lines(validation, path = here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
+  validation <- validate_forecast(submission_filename, install = !interactive())
+  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
 } else {
   submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
   readr::write_csv(submission, submission_filename)
-  validation <- validate_forecast(submission_filename, install = TRUE)
-  write_lines(validation, path = here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
+  validation <- validate_forecast(submission_filename, install = !interactive())
+  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
 
 }
 
