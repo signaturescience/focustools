@@ -2,6 +2,7 @@
 
 export("%>%")
 export(c19fh_meta)
+export(focus_explorer)
 export(forecast_pipeline)
 export(format_for_submission)
 export(get_cases)
