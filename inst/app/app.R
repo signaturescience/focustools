@@ -27,7 +27,6 @@ get_plots <- function(n, ...) {
   return(plot_output_list)
 }
 
-
 ui <- fluidPage(
   titlePanel("FOCUS Explorer"),
   sidebarLayout(
@@ -96,7 +95,7 @@ server <- function(input, output) {
       filter(location %in% unique(submission_raw()$data$location))
 
     ## checkbox choices are *names* (not codes) ... see above
-    checkboxGroupInput("location", "Select location", choices = locs$location_name, selected = c("US"))
+    checkboxGroupInput("location", "Select location", choices = locs$location_name, selected = locs$location_name)
 
   })
 
@@ -115,6 +114,20 @@ server <- function(input, output) {
 
   })
 
+  # output$plot_engine <- renderPlot({
+  #   req(!is.null(submission()))
+  #   plot_forecast(.data = usafull,  submission = submission()$data, location = submission()$selected_loc)
+  # })
+  #
+  # plot_height <- reactive({
+  #   req(!is.null(submission()))
+  #   length(unique(submission()$data$location))*200
+  # })
+  #
+  # output$plots <- renderUI({
+  #   req(!is.null(plot_height()))
+  #   plotOutput("plot_engine", height = plot_height())
+  # })
 
   ## tabular output
   output$table <- DT::renderDataTable({
