@@ -52,5 +52,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c(".",
                                                         "location_name",
                                                         "0.25",
                                                         "0.75",
-                                                        "yweek"))
+                                                        "yweek",
+                                                        "Previous",
+                                                        "horizon",
+                                                        ".submission_dir"))
 

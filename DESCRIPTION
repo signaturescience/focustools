@@ -32,7 +32,8 @@ Imports:
     tibble,
     lifecycle,
     stringr,
-    ggplot2
+    ggplot2,
+    shiny
 RdMacros: lifecycle
 Suggests: 
     here
