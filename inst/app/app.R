@@ -38,8 +38,10 @@ ui <- fluidPage(
     ),
     mainPanel(
       tabsetPanel(
+        tabPanel("Welcome", includeMarkdown("welcome.md")),
         tabPanel("Visualization", uiOutput("plots")),
-        tabPanel("Table", DT::dataTableOutput("table"))
+        tabPanel("Table", DT::dataTableOutput("table")),
+        tabPanel("Summary")
       )
     )
   )
@@ -113,21 +115,6 @@ server <- function(input, output) {
               location = submission()$selected_loc)
 
   })
-
-  # output$plot_engine <- renderPlot({
-  #   req(!is.null(submission()))
-  #   plot_forecast(.data = usafull,  submission = submission()$data, location = submission()$selected_loc)
-  # })
-  #
-  # plot_height <- reactive({
-  #   req(!is.null(submission()))
-  #   length(unique(submission()$data$location))*200
-  # })
-  #
-  # output$plots <- renderUI({
-  #   req(!is.null(plot_height()))
-  #   plotOutput("plot_engine", height = plot_height())
-  # })
 
   ## tabular output
   output$table <- DT::renderDataTable({
