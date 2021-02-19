@@ -301,3 +301,41 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   return(p)
 }
 
+#' Helper to reshape data for submission summary
+#'
+#' This function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
+#'
+#' @param .data Tibble with submission data
+#' @param ... Additional arguments passed to \link[tidyr]{spread}
+#'
+#' @return Tibble
+#'
+spread_value <- function(.data, ...) {
+
+  ## quietly ...
+  suppressMessages({
+    tmp <-
+      ## spread the data
+      tidyr::spread(.data, ...) %>%
+      ## then get the location names
+      dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+      dplyr::select(-location)
+  })
+
+  ## one more piece of logic to get "Previous" column before w ahead columns if need be
+  if("Previous" %in% names(tmp)) {
+    tmp <-
+      tmp %>%
+      dplyr::select(location = location_name, Previous, dplyr::everything())
+  } else {
+    tmp <-
+      tmp %>%
+      dplyr::select(location = location_name, dplyr::everything())
+  }
+
+  ## if US is in there put it on top
+  if("US" %in% tmp$location) {
+    tmp <-
+      dplyr::bind_rows(dplyr::filter(tmp, location == "US"), dplyr::filter(tmp, location !="US"))
+  }
+}
