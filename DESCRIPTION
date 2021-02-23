@@ -33,7 +33,8 @@ Imports:
     lifecycle,
     stringr,
     ggplot2,
-    shiny
+    shiny,
+    scales
 RdMacros: lifecycle
 Suggests: 
     here

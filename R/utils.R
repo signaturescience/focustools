@@ -296,6 +296,7 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
     dplyr::filter(target != "Cumulative Cases") %>%
     ggplot2::ggplot(ggplot2::aes(date, point)) +
     ggplot2::geom_line(ggplot2::aes(col=type)) +
+    ggplot2::scale_y_continuous(labels = scales::number_format(big.mark = ",")) +
     ggplot2::facet_wrap(~location + target, scales="free", ncol = 3) +
     ggplot2::theme_bw() +
     ggplot2::labs(x = "Date", y = NULL) +
