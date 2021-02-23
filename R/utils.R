@@ -285,7 +285,7 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   ## get location *names* rather than code
   bound <-
     bound %>%
-    dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+    dplyr::left_join(dplyr::select(locations, location, location_name), by = "location") %>%
     dplyr::select(-location) %>%
     dplyr::rename(location = location_name)
 
