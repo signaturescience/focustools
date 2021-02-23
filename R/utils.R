@@ -282,6 +282,13 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
                                      target == "cum death" ~ "Cumulative Deaths")
     )
 
+  ## get location *names* rather than code
+  bound <-
+    bound %>%
+    dplyr::left_join(dplyr::select(locations, location, location_name)) %>%
+    dplyr::select(-location) %>%
+    dplyr::rename(location = location_name)
+
   # Plot
   p <-
     bound %>%
