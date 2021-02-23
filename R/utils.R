@@ -284,9 +284,12 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
 
   # Plot
   p <-
-    ggplot2::ggplot(bound, ggplot2::aes(date, point)) +
+    bound %>%
+    ## exclude cumulative cases from plot
+    dplyr::filter(target != "Cumulative Cases") %>%
+    ggplot2::ggplot(ggplot2::aes(date, point)) +
     ggplot2::geom_line(ggplot2::aes(col=type)) +
-    ggplot2::facet_wrap(~location + target, scales="free", ncol = 4) +
+    ggplot2::facet_wrap(~location + target, scales="free", ncol = 3) +
     ggplot2::theme_bw() +
     ggplot2::labs(x = "Date", y = NULL) +
     ggplot2::theme(legend.position = "Bottom", legend.title = ggplot2::element_blank())
