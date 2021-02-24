@@ -1,3 +1,8 @@
+## script to run automated app pipeline
+## NOTE: if used locally edit submission dir as needed
+## using here::here("submission", "SigSci-TS") was not working on app refresh
+submission_dir <- "/submission/SigSci-TS"
+
 library(focustools)
 library(tidyverse)
 
@@ -19,7 +24,7 @@ usafull <-
   filter(monday>"2020-03-01")
 
 focus_explorer(.data = usafull,
-               submission_dir = here::here("submission", "SigSci-TS"),
+               submission_dir = submission_dir,
                host = "0.0.0.0",
                port = 3838,
                launch.browser = TRUE)
