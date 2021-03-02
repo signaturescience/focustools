@@ -369,5 +369,6 @@ extract_arima_params <- function(arimafit) {
   .params <- arimafit$arima[[1]]$fit$spec
   dplyr::bind_cols(.params, .broom) %>%
     dplyr::select(location, .model, dplyr::everything()) %>%
-    dplyr::select_if(is.atomic)
+    dplyr::select_if(is.atomic) %>%
+    dplyr::inner_join(locations %>% dplyr::select(location, abbreviation, location_name), ., by="location")
 }
