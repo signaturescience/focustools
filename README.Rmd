@@ -115,7 +115,7 @@ Last of all, we can validate the submission. The object must be written to a fil
 
 ```{r, eval=FALSE}
 ## set up file path for submission file
-## forcing the date in the file name and submission conents to be this monday
+## forcing the date in the file name and submission contents to be this monday
 ffile <- file.path(tempdir(), paste0(this_monday(), "-sigsci-arima.csv"))
 submission %>%
   mutate(forecast_date = this_monday()) %>%
@@ -223,6 +223,7 @@ Run the script in [submission/submission.R](submission/submission.R)  to do the 
 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
 1. Get future case data to create the incident death forecast
 1. Create the incident death forecast based on this new data
+1. Generate cumulative death forecast by summarizing incident death forecast
 1. Prepare submission format
 1. Save the submission to the `submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv`
 1. Validates the submission

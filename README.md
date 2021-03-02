@@ -4,6 +4,7 @@
 # focustools
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 ## Installation
@@ -119,7 +120,7 @@ organizers. For more information on validating the entry see the
 
 ``` r
 ## set up file path for submission file
-## forcing the date in the file name and submission conents to be this monday
+## forcing the date in the file name and submission contents to be this monday
 ffile <- file.path(tempdir(), paste0(this_monday(), "-sigsci-arima.csv"))
 submission %>%
   mutate(forecast_date = this_monday()) %>%
@@ -244,7 +245,9 @@ do the following.
     respectively)
 3.  Get future case data to create the incident death forecast
 4.  Create the incident death forecast based on this new data
-5.  Prepare submission format
-6.  Save the submission to the
+5.  Generate cumulative death forecast by summarizing incident death
+    forecast
+6.  Prepare submission format
+7.  Save the submission to the
     `submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv`
-7.  Validates the submission
+8.  Validates the submission
