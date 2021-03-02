@@ -350,3 +350,24 @@ spread_value <- function(.data, ...) {
       dplyr::bind_rows(dplyr::filter(tmp, location == "US"), dplyr::filter(tmp, location !="US"))
   }
 }
+
+#' Extract ARIMA parameters
+#'
+#' Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from tidy() and glance() on an arima model object.
+#'
+#' @param arimafit A single-row mable (`mdl_df`) from `focustools::model(arima=ARIMA(...))`.
+#'
+#' @return A single-row tibble containing ARIMA model parameter and diagnostics information.
+#' @export
+extract_arima_params <- function(arimafit) {
+  if (!("mdl_df" %in% class(arimafit))) stop("Input must be a mdl_df (mable) from fabletools::model().")
+  if (nrow(arimafit)>1) stop("Input mdl_df must have only one row (one location).")
+  if (!identical(names(arimafit), c("location", "arima"))) stop("Input mdl_df must have columns 'location' and 'arima'.")
+  .tidy <- fabletools::tidy(arimafit)
+  .glance <- fabletools::glance(arimafit)
+  .broom <- dplyr::inner_join(.tidy, .glance, by=c("location", ".model"))
+  .params <- arimafit$arima[[1]]$fit$spec
+  dplyr::bind_cols(.params, .broom) %>%
+    dplyr::select(location, .model, dplyr::everything()) %>%
+    dplyr::select_if(is.atomic)
+}
