@@ -362,11 +362,12 @@ spread_value <- function(.data, ...) {
 extract_arima_params <- function(arimafit) {
   if (!("mdl_df" %in% class(arimafit))) stop("Input must be a mdl_df (mable) from fabletools::model().")
   if (nrow(arimafit)>1) stop("Input mdl_df must have only one row (one location).")
-  if (!identical(names(arimafit), c("location", "arima"))) stop("Input mdl_df must have columns 'location' and 'arima'.")
+  if (names(arimafit)[1]!="location") stop("Input mdl_df must have location.")
+  if (class(arimafit[[2]][[1]]$fit)!="ARIMA") stop("Model must be ARIMA.")
   .tidy <- fabletools::tidy(arimafit)
   .glance <- fabletools::glance(arimafit)
   .broom <- dplyr::inner_join(.tidy, .glance, by=c("location", ".model"))
-  .params <- arimafit$arima[[1]]$fit$spec
+  .params <- arimafit[[2]][[1]]$fit$spec
   dplyr::bind_cols(.params, .broom) %>%
     dplyr::select(location, .model, dplyr::everything()) %>%
     dplyr::select_if(is.atomic) %>%
