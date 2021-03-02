@@ -40,11 +40,13 @@ if (USonly) mylocs <- "US"
 
 ## Create models and forecasts
 submission_list <- list()
+arima_params_list <- list()
 for (loc in mylocs) {
   message(loc)
   usa <- filter(usafull, location==loc)
   # fits.icases <-  usa %>% model(arima = ARIMA(log(icases+1), stepwise=FALSE, approximation=FALSE))
   fits.icases <-  usa %>% model(arima = ARIMA(icases~PDQ(0,0,0)+pdq(1:2,0:2,0), stepwise=FALSE, approximation=FALSE))
+  arima_params_list[[loc]] <- extract_arima_params(fits.icases)
   fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
   forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
   futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
@@ -58,6 +60,7 @@ for (loc in mylocs) {
     dplyr::arrange(target)
 }
 submission <- bind_rows(submission_list)
+arima_params <- bind_rows(arima_params_list)
 rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, loc)
 
 if(interactive()) {
