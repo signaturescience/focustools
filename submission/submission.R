@@ -63,20 +63,8 @@ submission <- bind_rows(submission_list)
 arima_params <- bind_rows(arima_params_list)
 rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, loc)
 
-if(interactive()) {
-  # Sanity check
-  badstates <- submission %>%
-    filter(target=="4 wk ahead inc case" & type=="point") %>%
-    select(location, icases.4wk=value) %>%
-    inner_join(usafull %>% filter(yweek==max(yweek)), by="location") %>%
-    filter(icases.4wk>2*icases | icases.4wk<.5*icases) %>%
-    pull(location)
-  if ("US" %in% badstates) {
-    stop("US forecasts are >2x or <0.5x")
-  } else {
-    submission <- submission %>% filter(!(location %in% badstates))
-  }
-}
+## NOTE: if running interactively make sure that point estimates and intervals seem plausible ...
+## see `?plot_forecast` or `?focus_explorer`
 
 # Create submission in submission directory if it's Monday.
 if (!is_monday()) warning("Forecasts should be created on Mondays.")
