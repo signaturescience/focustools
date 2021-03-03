@@ -40,11 +40,13 @@ if (USonly) mylocs <- "US"
 
 ## Create models and forecasts
 submission_list <- list()
+arima_params_list <- list()
 for (loc in mylocs) {
   message(loc)
   usa <- filter(usafull, location==loc)
   # fits.icases <-  usa %>% model(arima = ARIMA(log(icases+1), stepwise=FALSE, approximation=FALSE))
   fits.icases <-  usa %>% model(arima = ARIMA(icases~PDQ(0,0,0)+pdq(1:2,0:2,0), stepwise=FALSE, approximation=FALSE))
+  arima_params_list[[loc]] <- extract_arima_params(fits.icases)
   fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
   forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
   futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
@@ -58,37 +60,20 @@ for (loc in mylocs) {
     dplyr::arrange(target)
 }
 submission <- bind_rows(submission_list)
+arima_params <- bind_rows(arima_params_list)
 rm(usa, fits.icases, fits.ideaths, forc.icases, forc.ideaths, futr.icases, forc.cdeaths, loc)
 
-if(interactive()) {
-  # Sanity check
-  badstates <- submission %>%
-    filter(target=="4 wk ahead inc case" & type=="point") %>%
-    select(location, icases.4wk=value) %>%
-    inner_join(usafull %>% filter(yweek==max(yweek)), by="location") %>%
-    filter(icases.4wk>2*icases | icases.4wk<.5*icases) %>%
-    pull(location)
-  if ("US" %in% badstates) {
-    stop("US forecasts are >2x or <0.5x")
-  } else {
-    submission <- submission %>% filter(!(location %in% badstates))
-  }
-}
+## NOTE: if running interactively make sure that point estimates and intervals seem plausible ...
+## see `?plot_forecast` or `?focus_explorer`
 
 # Create submission in submission directory if it's Monday.
-if (!is_monday()) {
-  warning("Forecasts should be created on Mondays.")
-  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  readr::write_csv(submission, submission_filename)
-  validation <- validate_forecast(submission_filename, install = !interactive())
-  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
-} else {
-  submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  readr::write_csv(submission, submission_filename)
-  validation <- validate_forecast(submission_filename, install = !interactive())
-  write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
+if (!is_monday()) warning("Forecasts should be created on Mondays.")
+submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
+readr::write_csv(submission, submission_filename)
+validation <- validate_forecast(submission_filename, install = !interactive())
+write_lines(validation, here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-validation.txt")))
+readr::write_csv(arima_params, gsub("-SigSci-TS\\.csv$", "-params.csv", submission_filename))
 
-}
 
 # Plot if interactive
 if (interactive()) plot_forecast(.data=usafull, submission = submission, location="US", pi=TRUE)
