@@ -8,7 +8,8 @@ library(focustools)
 data_dir <- .GlobalEnv$.submission_dir
 ## note that fps are reversed so that most recent *should* appear first
 fps <- rev(list.files(data_dir, pattern = "*.csv$", recursive = TRUE, full.names = TRUE))
-
+## ignore params csv if present
+fps <- fps[!grepl("params", fps)]
 usafull <- .GlobalEnv$.data
 
 ## helper function used in the renderUI for renderPlot calls
