@@ -34,8 +34,10 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("forecast", "Select forecast", choices = basename(fps)),
-      downloadButton("download"),
       uiOutput("loc_checkbox"),
+      htmlOutput("valid"),
+      tags$br(),
+      downloadButton("download"),
       width = 2
     ),
     mainPanel(
@@ -147,6 +149,30 @@ server <- function(input, output) {
 
   })
 
+  ## reactive engine that drives the bus here ...
+  validate_dat <- reactive({
+
+    req(!is.null(submission()))
+    tmp_file <- file.path(tempdir(), "submission-tmp.csv")
+
+    submission()$data %>%
+      write_csv(., tmp_file)
+
+    ## should NOT be valid to have no locations selected
+    if(nrow(submission()$data) == 0) {
+      "<br><font color=\"#b22222\"><b>FORECAST FILE IS NOT VALID</b></font><br>"
+    } else if(validate_forecast(tmp_file)$valid) {
+      "<br><font color=\"#228B22\"><b>FORECAST FILE IS VALID</b></font><br>"
+    } else {
+      "<br><font color=\"#b22222\"><b>FORECAST FILE IS NOT VALID</b></font><br>"
+    }
+
+  })
+
+  output$valid <- renderText({
+    req(!is.null(validate_dat()))
+    validate_dat()
+  })
   ## checkbox to select locations
   ## this is a renderUI option
   output$loc_checkbox <- renderUI({
