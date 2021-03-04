@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyWidgets)
 library(tidyverse)
 library(focustools)
 
@@ -82,18 +83,6 @@ ui <- fluidPage(
                             )
                     )
                  )
-                 # fluidRow(
-                 #   # column(DT::dataTableOutput("counts_icases"), width = 4),
-                 #   # column(DT::dataTableOutput("counts_ideaths"), width = 4)
-                 #   column(
-                 #     tags$h3("Incident Case Counts"),
-                 #     tableOutput("counts_icases"),
-                 #     width = 5),
-                 #   column(
-                 #     tags$h3("Incident Death Counts"),
-                 #     tableOutput("counts_ideaths"),
-                 #     width = 5)
-                 # )
                  )
       )
     )
@@ -140,7 +129,7 @@ server <- function(input, output) {
   summary_dat <- reactive({
 
     req(!is.null(submission()))
-
+    req(nrow(submission()$data) > 0)
     ## get the *names* (not codes) for locations
     locs <-
       focustools:::locations %>%
@@ -171,22 +160,26 @@ server <- function(input, output) {
       filter(location %in% unique(submission_raw()$data$location))
 
     ## checkbox choices are *names* (not codes) ... see above
-    checkboxGroupInput("location", "Select location", choices = locs$location_name, selected = locs$location_name)
-
+    pickerInput("location","Select location", choices = locs$location_name, selected = locs$location_name, options = list(`actions-box` = TRUE),multiple = T)
   })
 
   ## renders all of the plots (individual renderPlot calls generated as a list by get_plots)
   output$plots <- renderUI({
 
-    ## call get_plots
-    ## defined above
-    ## effectively wraps focustools::plot_forecast() ...
-    ## submission is reactive data from submission() reactive ...
-    ## as is the location
-    get_plots(n = length(unique(submission()$data$location)),
-              .data = usafull,
-              submission = submission()$data,
-              location = submission()$selected_loc)
+    ## before trying to render plots make sure that locations are selected
+    if(nrow(submission()$data) == 0) {
+      HTML("<em>No locations selected.</em>")
+    } else {
+      ## call get_plots
+      ## defined above
+      ## effectively wraps focustools::plot_forecast() ...
+      ## submission is reactive data from submission() reactive ...
+      ## as is the location
+      get_plots(n = length(unique(submission()$data$location)),
+                .data = usafull,
+                submission = submission()$data,
+                location = submission()$selected_loc)
+    }
 
   })
 
