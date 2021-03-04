@@ -34,7 +34,8 @@ Imports:
     stringr,
     ggplot2,
     shiny,
-    scales
+    scales,
+    shinyWidgets
 RdMacros: lifecycle
 Suggests: 
     here
