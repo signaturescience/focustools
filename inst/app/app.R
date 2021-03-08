@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyWidgets)
 library(tidyverse)
 library(focustools)
 
@@ -7,7 +8,8 @@ library(focustools)
 data_dir <- .GlobalEnv$.submission_dir
 ## note that fps are reversed so that most recent *should* appear first
 fps <- rev(list.files(data_dir, pattern = "*.csv$", recursive = TRUE, full.names = TRUE))
-
+## ignore params csv if present
+fps <- fps[!grepl("params", fps)]
 usafull <- .GlobalEnv$.data
 
 ## helper function used in the renderUI for renderPlot calls
@@ -32,8 +34,10 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("forecast", "Select forecast", choices = basename(fps)),
-      downloadButton("download"),
       uiOutput("loc_checkbox"),
+      htmlOutput("valid"),
+      tags$br(),
+      downloadButton("download"),
       width = 2
     ),
     mainPanel(
@@ -82,18 +86,6 @@ ui <- fluidPage(
                             )
                     )
                  )
-                 # fluidRow(
-                 #   # column(DT::dataTableOutput("counts_icases"), width = 4),
-                 #   # column(DT::dataTableOutput("counts_ideaths"), width = 4)
-                 #   column(
-                 #     tags$h3("Incident Case Counts"),
-                 #     tableOutput("counts_icases"),
-                 #     width = 5),
-                 #   column(
-                 #     tags$h3("Incident Death Counts"),
-                 #     tableOutput("counts_ideaths"),
-                 #     width = 5)
-                 # )
                  )
       )
     )
@@ -140,7 +132,7 @@ server <- function(input, output) {
   summary_dat <- reactive({
 
     req(!is.null(submission()))
-
+    req(nrow(submission()$data) > 0)
     ## get the *names* (not codes) for locations
     locs <-
       focustools:::locations %>%
@@ -157,6 +149,30 @@ server <- function(input, output) {
 
   })
 
+  ## reactive engine that drives the bus here ...
+  validate_dat <- reactive({
+
+    req(!is.null(submission()))
+    tmp_file <- file.path(tempdir(), "submission-tmp.csv")
+
+    submission()$data %>%
+      write_csv(., tmp_file)
+
+    ## should NOT be valid to have no locations selected
+    if(nrow(submission()$data) == 0) {
+      "<br><font color=\"#b22222\"><b>FORECAST FILE IS NOT VALID</b></font><br>"
+    } else if(validate_forecast(tmp_file)$valid) {
+      "<br><font color=\"#228B22\"><b>FORECAST FILE IS VALID</b></font><br>"
+    } else {
+      "<br><font color=\"#b22222\"><b>FORECAST FILE IS NOT VALID</b></font><br>"
+    }
+
+  })
+
+  output$valid <- renderText({
+    req(!is.null(validate_dat()))
+    validate_dat()
+  })
   ## checkbox to select locations
   ## this is a renderUI option
   output$loc_checkbox <- renderUI({
@@ -171,22 +187,26 @@ server <- function(input, output) {
       filter(location %in% unique(submission_raw()$data$location))
 
     ## checkbox choices are *names* (not codes) ... see above
-    checkboxGroupInput("location", "Select location", choices = locs$location_name, selected = locs$location_name)
-
+    pickerInput("location","Select location", choices = locs$location_name, selected = locs$location_name, options = list(`actions-box` = TRUE),multiple = T)
   })
 
   ## renders all of the plots (individual renderPlot calls generated as a list by get_plots)
   output$plots <- renderUI({
 
-    ## call get_plots
-    ## defined above
-    ## effectively wraps focustools::plot_forecast() ...
-    ## submission is reactive data from submission() reactive ...
-    ## as is the location
-    get_plots(n = length(unique(submission()$data$location)),
-              .data = usafull,
-              submission = submission()$data,
-              location = submission()$selected_loc)
+    ## before trying to render plots make sure that locations are selected
+    if(nrow(submission()$data) == 0) {
+      HTML("<em>No locations selected.</em>")
+    } else {
+      ## call get_plots
+      ## defined above
+      ## effectively wraps focustools::plot_forecast() ...
+      ## submission is reactive data from submission() reactive ...
+      ## as is the location
+      get_plots(n = length(unique(submission()$data$location)),
+                .data = usafull,
+                submission = submission()$data,
+                location = submission()$selected_loc)
+    }
 
   })
 
