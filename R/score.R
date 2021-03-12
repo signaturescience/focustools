@@ -10,8 +10,6 @@
 
 wis <- function(forecast, truth, q = NULL) {
 
-  usethis::use_pipe()
-
   truth <- truth %>%
     dplyr::select(target_variable, target_end_date, location, true_value = value)
 
