@@ -38,7 +38,7 @@ wis <- function(forecast, truth, q = NULL) {
 
   wis <- foo %>%
     dplyr::group_by(target_variable, target_end_date, target, location) %>%
-    dplyr::summarise(wis = (1/(n() + 0.5)) * sum(interval_score, na.rm = TRUE))
+    dplyr::summarise(wis = (1/(dplyr::n() + 0.5)) * sum(interval_score, na.rm = TRUE))
 
   return(wis)
 }
