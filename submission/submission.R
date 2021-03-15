@@ -26,7 +26,7 @@ usafull <-
   bind_rows(national, state) %>%
   filter(location %in% c("US", stringr::str_pad(1:56, width=2, pad="0"))) %>%
   make_tsibble() %>%
-  filter(monday>"2020-03-01")
+  filter(monday>"2020-03-09")
 stopifnot(length(unique(usafull$location))==52L)
 # Clean up
 rm(national, state)
