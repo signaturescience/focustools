@@ -8,3 +8,4 @@
 ^submission$
 ^data-raw$
 ^README.R$
+^\.github$

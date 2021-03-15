@@ -30,12 +30,12 @@ Imports:
     purrr,
     reticulate,
     tibble,
-    lifecycle,
     stringr,
     ggplot2,
     shiny,
-    scales,
-    shinyWidgets
+    scales
 RdMacros: lifecycle
 Suggests: 
-    here
+    here,
+    lifecycle,
+    shinyWidgets
