@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/signaturescience/focustools/workflows/R-CMD-check/badge.svg)](https://github.com/signaturescience/focustools/actions)
 <!-- badges: end -->
 
 ## Installation
