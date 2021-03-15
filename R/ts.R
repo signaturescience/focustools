@@ -206,7 +206,7 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
     # For each point or quantile, get the cumulative sums for weeks 2, 3, and 4
     dplyr::mutate(cvalue=cumsum(value)) %>%
     dplyr::ungroup() %>%
-    dplyr::left_join(recorded_so_far) %>%
+    dplyr::left_join(recorded_so_far, by = "location") %>%
     # Then add the deaths recorded so far
     dplyr::mutate(cvalue=cvalue+observed_to_now) %>%
     # Make the 'value' column this new cumulative sum
