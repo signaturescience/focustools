@@ -161,7 +161,7 @@ ts_futurecases <- function(.data, .forecast, horizon = 4) {
     dplyr::select(location, yweek, icases = value)
 
   tsibble::new_data(.data, horizon, key=location) %>%
-    dplyr::left_join(best_guess)
+    dplyr::left_join(best_guess, by = c("yweek", "location"))
 }
 
 
