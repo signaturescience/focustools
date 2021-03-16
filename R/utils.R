@@ -59,8 +59,7 @@ is_monday <- function() {
 
 #' Visualize and sanity check a forecast
 #'
-#' #' @description
-#' \lifecycle{experimental}
+#' @description
 #'
 #' @param .data Data used to create the submission
 #' @param submission Formatted submission

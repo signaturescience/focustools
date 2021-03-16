@@ -8,13 +8,11 @@
 
 <title>Function to launch FOCUS Explorer shiny app — focus_explorer • focustools</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,9 +36,10 @@
 
 
 
-
 <meta property="og:title" content="Function to launch FOCUS Explorer shiny app — focus_explorer" />
+
 <meta property="og:description" content="The explorer app allows a user to view plots of forecasts, inspect tabular output of submission files, and download subsets of forecast submission data. The app includes an interface to interactively select locations to include in the plots, table, and download. This function wraps shiny::runApp and accepts arguments for the data against which the forecasts should be plotted, as well as the directory containing submission files, both of which are temporarily attached to the global environment for use during the app session. Additional arguments passed to ... will be inherited by runApp." />
+
 
 
 
@@ -88,6 +87,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -109,11 +109,13 @@
     </div>
 
     <div class="ref-description">
+    
     <p>The explorer app allows a user to view plots of forecasts, inspect tabular output of submission files, and download subsets of forecast submission data. The app includes an interface to interactively select locations to include in the plots, table, and download. This function wraps <code><a href='https://shiny.rstudio.com/reference/shiny/latest/runApp.html'>shiny::runApp</a></code> and accepts arguments for the data against which the forecasts should be plotted, as well as the directory containing submission files, both of which are temporarily attached to the global environment for use during the app session. Additional arguments passed to <code>...</code> will be inherited by <a href='https://shiny.rstudio.com/reference/shiny/latest/runApp.html'>runApp</a>.</p>
+    
     </div>
 
-    <pre class="usage"><span class='fu'>focus_explorer</span>(<span class='no'>.data</span>, <span class='no'>submission_dir</span>, <span class='no'>...</span>)</pre>
-
+    <pre class="usage"><span class='fu'>focus_explorer</span><span class='op'>(</span><span class='va'>.data</span>, <span class='va'>submission_dir</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -130,10 +132,11 @@
       <td><p>Additional arguments to be passed to <a href='https://shiny.rstudio.com/reference/shiny/latest/runApp.html'>runApp</a></p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>This function starts a shiny app. On exit it removes objects (see ".data" and "submission_dir") that are temporarily attached and used by the app session.</p>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -150,7 +153,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

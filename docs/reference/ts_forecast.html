@@ -8,13 +8,11 @@
 
 <title>Generate time series forecasts including quantile estimates — ts_forecast • focustools</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,9 +36,10 @@
 
 
 
-
 <meta property="og:title" content="Generate time series forecasts including quantile estimates — ts_forecast" />
+
 <meta property="og:description" content="Generate time series forecasts including quantile estimates" />
+
 
 
 
@@ -88,6 +87,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -109,19 +109,21 @@
     </div>
 
     <div class="ref-description">
+    
     <p>Generate time series forecasts including quantile estimates</p>
+    
     </div>
 
-    <pre class="usage"><span class='fu'>ts_forecast</span>(
-  <span class='no'>mable</span>,
-  <span class='no'>outcome</span>,
-  <span class='kw'>horizon</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>new_data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>bootstrap</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>1863</span>,
-  <span class='no'>...</span>
-)</pre>
-
+    <pre class="usage"><span class='fu'>ts_forecast</span><span class='op'>(</span>
+  <span class='va'>mable</span>,
+  <span class='va'>outcome</span>,
+  horizon <span class='op'>=</span> <span class='fl'>4</span>,
+  new_data <span class='op'>=</span> <span class='cn'>NULL</span>,
+  bootstrap <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  seed <span class='op'>=</span> <span class='fl'>1863</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -143,7 +145,7 @@
     </tr>
     <tr>
       <th>bootstrap</th>
-      <td><p>If <code>TRUE</code> use bootstrap to resample forecasts for quantiles. If <code>FALSE</code> (default), use <a href='https://fabletools.tidyverts.org/reference/reexports.html'>hilo</a> to extract a specified prediction interval at a particular confidence level from a distribution.</p></td>
+      <td><p>If <code>TRUE</code> use bootstrap to resample forecasts for quantiles. If <code>FALSE</code> (default), use <a href='https://pkg.mitchelloharawild.com/distributional/reference/hilo.html'>hilo</a> to extract a specified prediction interval at a particular confidence level from a distribution.</p></td>
     </tr>
     <tr>
       <th>seed</th>
@@ -154,10 +156,11 @@
       <td><p>Additional parameters passed to the <a href='ts_cumulative_forecast.html'>ts_cumulative_forecast</a> helper; only used if the forecast is cumulative</p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>tibble</code> with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.</p>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -174,7 +177,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
