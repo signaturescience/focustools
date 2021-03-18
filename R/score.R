@@ -17,8 +17,15 @@ wis <- function(forecast, truth, q = NULL) {
     dplyr::select(target_variable, target_end_date, location, true_value = value)
 
   forecast <- forecast %>%
-    dplyr::filter(type == "quantile") %>%
-    dplyr::mutate(target_variable = gsub(pattern = "[[:digit:]] wk ahead ", replacement = "", x = target))
+    dplyr::filter(type == "quantile")
+
+  if (!("target_variable" %in% colnames(forecast))) {
+    forecast <- forecast %>%
+      dplyr::mutate(target_variable = gsub(pattern = "[[:digit:]] wk ahead ", replacement = "", x = target))
+  } else {
+    forecast <- forecast %>%
+      dplyr::mutate(target = paste(horizon, temporal_resolution, "ahead", target_variable))
+  }
 
   if (!is.null(q)) {
     forecast <- forecast %>% dplyr::filter(quantile %in% q)
@@ -28,12 +35,12 @@ wis <- function(forecast, truth, q = NULL) {
   lower_quantiles <- forecast[forecast$quantile <= 0.5, ]
   lower_quantiles$alpha <- lower_quantiles$quantile
   lower_quantiles$lower_quantile <- lower_quantiles$value
-  lower_quantiels <- subset(lower_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "lower"))
+  lower_quantiels <- subset(lower_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "lower_quantile"))
 
   upper_quantiles <- forecast[forecast$quantile >= 0.5, ]
   upper_quantiles$alpha <- 1 - upper_quantiles$quantile
   upper_quantiles$upper_quantile <- upper_quantiles$value
-  upper_quantiles <- subset(upper_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "upper"))
+  upper_quantiles <- subset(upper_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "upper_quantile"))
 
   # Calculate the interval score for each interval.
   interval_scores <- merge(x = lower_quantiles, y = upper_quantiles, by = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha"))
