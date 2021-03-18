@@ -1,8 +1,10 @@
 #' Function to compute the Weighted Interval Score (WIS)
 #'
-#' @param forecast A dataframe containing the model-predicted forecasts
-#' @param truth A dataframe containing the observed values
+#' @param forecast A dataframe containing the model-predicted forecasts as obtained from ts_forecast(), load_forecasts(), or similar
+#' @param truth A dataframe containing the observed values as obtained from get_data() or similar
 #' @param q A vector of quantiles to assess the WIS over
+#'
+#' @references \url{https://arxiv.org/abs/2005.12881}
 #'
 #' @return A dataframe containing the weighted interval scores
 #'
@@ -10,35 +12,38 @@
 
 wis <- function(forecast, truth, q = NULL) {
 
+  # Prep the input data frames
   truth <- truth %>%
     dplyr::select(target_variable, target_end_date, location, true_value = value)
 
-  foo <- forecast %>%
+  forecast <- forecast %>%
     dplyr::filter(type == "quantile") %>%
     dplyr::mutate(target_variable = gsub(pattern = "[[:digit:]] wk ahead ", replacement = "", x = target))
 
   if (!is.null(q)) {
-    foo <- foo %>% dplyr::filter(quantile %in% q)
+    forecast <- forecast %>% dplyr::filter(quantile %in% q)
   }
 
-  foo_lower <- foo[foo$quantile <= 0.5, ]
-  foo_lower$alpha <- foo_lower$quantile
-  foo_lower$lower <- foo_lower$value
-  foo_lower <- subset(foo_lower, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "lower"))
+  # Separate the upper and lower quantile estimates into their own data frames. Note that both data frames include the 0.5 quantile
+  lower_quantiles <- forecast[forecast$quantile <= 0.5, ]
+  lower_quantiles$alpha <- lower_quantiles$quantile
+  lower_quantiles$lower_quantile <- lower_quantiles$value
+  lower_quantiels <- subset(lower_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "lower"))
 
-  foo_upper <- foo[foo$quantile >= 0.5, ]
-  foo_upper$alpha <- 1 - foo_upper$quantile
-  foo_upper$upper <- foo_upper$value
-  foo_upper <- subset(foo_upper, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "upper"))
+  upper_quantiles <- forecast[forecast$quantile >= 0.5, ]
+  upper_quantiles$alpha <- 1 - upper_quantiles$quantile
+  upper_quantiles$upper_quantile <- upper_quantiles$value
+  upper_quantiles <- subset(upper_quantiles, select = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha", "upper"))
 
-  foo <- merge(x = foo_lower, y = foo_upper, by = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha"))
-  foo <- merge(x = foo, y = truth, by = c("target_variable", "target_end_date", "location"))
-  foo$interval_score <- (foo$alpha / 2) * ((foo$upper - foo$lower) + ((2 / foo$alpha) * (foo$lower - foo$true_value) * as.numeric(foo$true_value < foo$lower)) + ((2 / foo$alpha) * (foo$true_value - foo$upper) * as.numeric(foo$true_value > foo$upper)))
-  foo$interval_score[foo$alpha == 0.5] <- abs(foo$true_value[foo$alpha == 0.5] - foo$lower[foo$alpha == 0.5]) * 0.5
+  # Calculate the interval score for each interval.
+  interval_scores <- merge(x = lower_quantiles, y = upper_quantiles, by = c("forecast_date", "target", "target_end_date", "target_variable", "location", "alpha"))
+  interval_scores <- merge(x = interval_scores, y = truth, by = c("target_variable", "target_end_date", "location"))
+  interval_scores$score <- (interval_scores$alpha / 2) * ((interval_scores$upper_quantile - interval_scores$lower_quantile) + ((2 / interval_scores$alpha) * (interval_scores$lower_quantile - interval_scores$true_value) * as.numeric(interval_scores$true_value < interval_scores$lower_quantile)) + ((2 / interval_scores$alpha) * (interval_scores$true_value - interval_scores$upper_quantile) * as.numeric(interval_scores$true_value > interval_scores$upper_quantile)))
+  interval_scores$score[interval_scores$alpha == 0.5] <- abs(interval_scores$true_value[interval_scores$alpha == 0.5] - interval_scores$lower_quantile[interval_scores$alpha == 0.5]) * 0.5
 
-  wis <- foo %>%
+  wis <- interval_scores %>%
     dplyr::group_by(target_variable, target_end_date, target, location) %>%
-    dplyr::summarise(wis = (1/(dplyr::n() + 0.5)) * sum(interval_score, na.rm = TRUE))
+    dplyr::summarise(wis = (1/(dplyr::n() + 0.5)) * sum(score, na.rm = TRUE))
 
   return(wis)
 }

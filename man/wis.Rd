@@ -7,9 +7,9 @@
 wis(forecast, truth, q = NULL)
 }
 \arguments{
-\item{forecast}{A dataframe containing the model-predicted forecasts}
+\item{forecast}{A dataframe containing the model-predicted forecasts as obtained from ts_forecast(), load_forecasts(), or similar}
 
-\item{truth}{A dataframe containing the observed values}
+\item{truth}{A dataframe containing the observed values as obtained from get_data() or similar}
 
 \item{q}{A vector of quantiles to assess the WIS over}
 }
@@ -18,4 +18,7 @@ A dataframe containing the weighted interval scores
 }
 \description{
 Function to compute the Weighted Interval Score (WIS)
+}
+\references{
+\url{https://arxiv.org/abs/2005.12881}
 }
