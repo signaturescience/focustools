@@ -1,13 +1,20 @@
 #' Check for valid quantile csv file input
 #'
-#' @param filename Path to the forecast file to be checked
-#' @param verbose Boolean indicating whether or not the output from this function should include validation message; default `TRUE`
-#' @param install Boolean as to whether or not the python dependencies should be installed; if `TRUE` the module will be installed to the virtual environment specified in "envname"; default is `FALSE`
+#' @description
+#'
+#' The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. The organizers include Python scripts to validate weekly submission data. This function provides an R wrapper for one of the validation methods from the `zoltpy` Python module. In order to wrap the Python functionality, the function calls `reticulate` internally to attach the Python environment with `zoltpy` installed. Any changes made upstream (in `zoltpy` release on PyPi repository) will be propagated to this function given a fresh module installation (see "install" argument).
+#'
+#' @param filename Full path to the forecast file to be checked
+#' @param verbose Logical indicating whether or not the output from this function should include validation message; default `TRUE`
+#' @param install Logical as to whether or not the python dependencies should be installed; if `TRUE` the module will be installed to the virtual environment specified in "envname"; default is `FALSE`
 #' @param envname Character vector specifying the name of the virtualenv to which the python dependencies should be installed if `install = TRUE`; default is `NULL` which will install the module to a virtualenv named `r-reticulate`
 #'
 #' @return If `verbose = FALSE`, the returned value will be a boolean with `TRUE` for valid submission file and `FALSE` for invalid file. If `verbose = FALSE`, the function will return a named list with two elements: "valid" (boolean with the `TRUE`/`FALSE` validation code) and "message" (the output from the `zoltpy valid_quantile_csv_file()` function).
-#' @export
 #'
+#' @references https://pypi.org/project/zoltpy/
+#' @references https://covid19forecasthub.org/
+#'
+#' @export
 #' @md
 validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname = NULL) {
 
@@ -44,6 +51,10 @@ validate_forecast <- function(filename, verbose = TRUE, install = FALSE, envname
 
 #' Format forecast for COVID-19 Forecast Hub submission entry
 #'
+#' @description
+#'
+#' The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. This function takes output from a `focustools` forecasting function (e.g. \link[focustools]{ts_forecast}) and prepares an appropriately formatted object that can be written to a file. Formatting steps include constructing a valid string for horizon and target name (e.g. '3 wk ahead inc case'), computing the 'target_end_date' value based on the epidemiological week for the horizon, filtering distributional cutpoints for certain targets ('inc case' only needs 7 of the quantiles), converting all estimates to integers, and bounding all predicted values at minimum of 0.
+#'
 #' @param .forecast Forecast object
 #' @param target_name Name of the target for the forecast; must be one of `'inc case'`, `'inc death'`, or `'cum death'`
 #'
@@ -62,6 +73,7 @@ format_for_submission <- function(.forecast, target_name) {
     .forecast %>%
     dplyr::select(.model:type) %>%
     dplyr::arrange(type, quantile, yweek) %>%
+    ## processing to get horizon N
     dplyr::group_by(yweek) %>%
     dplyr::mutate(N=dplyr::cur_group_id()) %>%
     dplyr::ungroup() %>%
@@ -94,6 +106,10 @@ format_for_submission <- function(.forecast, target_name) {
 
 
 #' Summarize submission
+#'
+#' @description
+#'
+#'
 #'
 #' @param .data Tibble with historical data for trend leading up to forecast
 #' @param submission Formatted submission

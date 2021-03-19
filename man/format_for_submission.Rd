@@ -15,7 +15,7 @@ format_for_submission(.forecast, target_name)
 A \code{tibble} with target names and quantiles/point estimates formatted per the COVID-19 Forecast Hub submission guidelines.
 }
 \description{
-Format forecast for COVID-19 Forecast Hub submission entry
+The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. This function takes output from a \code{focustools} forecasting function (e.g. \link[focustools]{ts_forecast}) and prepares an appropriately formatted object that can be written to a file. Formatting steps include constructing a valid string for horizon and target name (e.g. '3 wk ahead inc case'), computing the 'target_end_date' value based on the epidemiological week for the horizon, filtering distributional cutpoints for certain targets ('inc case' only needs 7 of the quantiles), converting all estimates to integers, and bounding all predicted values at minimum of 0.
 }
 \references{
 https://covid19forecasthub.org/
