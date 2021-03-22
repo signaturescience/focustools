@@ -109,13 +109,14 @@ format_for_submission <- function(.forecast, target_name) {
 #'
 #' @description
 #'
-#'
+#' This function summarizes and reformats submission data as 4-week ahead counts and percent change. The summaries are stratified by location and target (incident cases, incident deaths, and cumulative deaths).
 #'
 #' @param .data Tibble with historical data for trend leading up to forecast
 #' @param submission Formatted submission
 #' @param location Vector specifying locations to filter to; `NULL` by default meaning all locations iwll be used
 #'
-#' @return List
+#' @return Named list with summarized count and percent change data. Each summary is stratified by target and returned in the list as a `tibble` with columns for "location", "Previous" (value week prior to forecast), "1w ahead", "2w ahead", 3w ahead, and "4w ahead".
+#'
 #' @export
 #' @md
 submission_summary <- function(.data, submission, location = NULL) {
