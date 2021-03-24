@@ -2,7 +2,7 @@
 % Please edit documentation in R/ts.R
 \name{ts_cumulative_forecast}
 \alias{ts_cumulative_forecast}
-\title{Helper used in \code{ts_forecast()} to get cumulative foreacst from incident}
+\title{Helper used in \code{ts_forecast()} to get cumulative forecast from incident}
 \usage{
 ts_cumulative_forecast(.data, outcome = "cdeaths", inc_forecast)
 }
@@ -17,5 +17,5 @@ ts_cumulative_forecast(.data, outcome = "cdeaths", inc_forecast)
 A \code{tibble} with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
 }
 \description{
-Helper used in \code{ts_forecast()} to get cumulative foreacst from incident
+Helper used in \code{ts_forecast()} to get cumulative forecast from incident
 }

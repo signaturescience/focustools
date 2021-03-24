@@ -2,7 +2,7 @@
 #'
 #' @param df A tibble containing columns `epiyear` and `epiweek`.
 #' @param chop Logical indicating whether or not to remove the most current week (default `TRUE`).
-#' @return A tsibble containing additional colums `monday` indicating the date
+#' @return A tsibble containing additional columns `monday` indicating the date
 #'   for the Monday of that epiweek, and `yweek` (a yearweek vctr class object)
 #'   that indexes the tsibble in 1 week increments.
 #' @export
@@ -59,7 +59,6 @@ is_monday <- function() {
 
 #' Visualize and sanity check a forecast
 #'
-#' @description
 #'
 #' @param .data Data used to create the submission
 #' @param submission Formatted submission

@@ -113,7 +113,7 @@ format_for_submission <- function(.forecast, target_name) {
 #'
 #' @param .data Tibble with historical data for trend leading up to forecast
 #' @param submission Formatted submission
-#' @param location Vector specifying locations to filter to; `NULL` by default meaning all locations iwll be used
+#' @param location Vector specifying locations to filter to; `NULL` by default meaning all locations will be used
 #'
 #' @return Named list with summarized count and percent change data. Each summary is stratified by target and returned in the list as a `tibble` with columns for "location", "Previous" (value week prior to forecast), "1w ahead", "2w ahead", 3w ahead, and "4w ahead".
 #'

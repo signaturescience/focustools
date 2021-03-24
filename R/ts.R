@@ -1,11 +1,15 @@
 #' Wrapper to fit time series models
 #'
+#' @description
+#'
+#' The time series forecasting pipeline depends on time series models fit with the \link[fabletools]{model} function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (`mable` objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").
+#'
 #' @param .data Data to use for modeling
 #' @param outcomes Character vector specifying names of the column to use as the outcome
 #' @param .fun List of modeling functions to use
 #' @param single Boolean indicating whether or not a "shortcut" should be used to return a single `tibble`; only works if there is one outcome ("outcomes") and one model function (".fun"); default is `TRUE`
 #'
-#' @return A single `mable` (model table) if (`single = TRUE`) or a named list of `mable`s (if `single = FALSE`). For more information see \link[fabletools]{mable}.
+#' @return A single `mable` (model table) if (`single = TRUE`) or a named list of `mable`s (if `single = FALSE`). For more details on data structure see \link[fabletools]{mable}.
 #' @export
 #'
 #' @md
@@ -20,15 +24,17 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
     ## probably should handle this better with quosures or similar
     ## here unlisting the subset data to ensure it is a vector
     train_dat <- unlist(.data[,outcome], use.names = FALSE)
-    # return(train_dat)
     res[[i]] <- purrr::invoke_map(.f = .fun, list(list(x = train_dat, .data = .data)))
     names(res[[i]]) <- names(.fun)
 
   }
+
+  ## make sure list is named by outcome
   res <-
     res %>%
     purrr::set_names(outcomes)
 
+  ## handle the "single" model case
   if(single) {
     if(length(outcomes) > 1 | length(.fun) > 1) {
       stop("you cannot use the 'single' shortcut if you have more than outcome and/or model ...")
@@ -41,6 +47,10 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 
 
 #' Generate time series forecasts including quantile estimates
+#'
+#' @description
+#'
+#' This function can convert models fit with \link[fabletools]{model} or the \link[focustools]{ts_fit} wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 22 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the \link[fabletools]{hilo}.
 #'
 #' @param mable A `mable` (model table); for more information see \link[fabletools]{mable}
 #' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
@@ -165,7 +175,7 @@ ts_futurecases <- function(.data, .forecast, horizon = 4) {
 }
 
 
-#' Helper used in `ts_forecast()` to get cumulative foreacst from incident
+#' Helper used in `ts_forecast()` to get cumulative forecast from incident
 #'
 #' @param .data Data from which the cumulative forecast should get recent counts; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in "inc_forecast"
 #' @param outcome Name of the outcome; should be be one of `'cdeaths'` or `'ccases'`
@@ -220,7 +230,7 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
 
 }
 
-#' Compuate accuracy metrics in support of model selection
+#' Compute accuracy metrics in support of model selection
 #'
 #' @param .data Data to use for modeling
 #' @param horizon Horizon of periods to use for splitting input to ".data" into training / test sets; default is `4`

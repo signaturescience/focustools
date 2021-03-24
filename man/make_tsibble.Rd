@@ -12,7 +12,7 @@ make_tsibble(df, chop = TRUE)
 \item{chop}{Logical indicating whether or not to remove the most current week (default \code{TRUE}).}
 }
 \value{
-A tsibble containing additional colums \code{monday} indicating the date
+A tsibble containing additional columns \code{monday} indicating the date
 for the Monday of that epiweek, and \code{yweek} (a yearweek vctr class object)
 that indexes the tsibble in 1 week increments.
 }

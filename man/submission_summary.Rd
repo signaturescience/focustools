@@ -11,7 +11,7 @@ submission_summary(.data, submission, location = NULL)
 
 \item{submission}{Formatted submission}
 
-\item{location}{Vector specifying locations to filter to; \code{NULL} by default meaning all locations iwll be used}
+\item{location}{Vector specifying locations to filter to; \code{NULL} by default meaning all locations will be used}
 }
 \value{
 Named list with summarized count and percent change data. Each summary is stratified by target and returned in the list as a \code{tibble} with columns for "location", "Previous" (value week prior to forecast), "1w ahead", "2w ahead", 3w ahead, and "4w ahead".

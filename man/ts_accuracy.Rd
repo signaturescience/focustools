@@ -2,7 +2,7 @@
 % Please edit documentation in R/ts.R
 \name{ts_accuracy}
 \alias{ts_accuracy}
-\title{Compuate accuracy metrics in support of model selection}
+\title{Compute accuracy metrics in support of model selection}
 \usage{
 ts_accuracy(.data, horizon = 4, outcomes, .fun)
 }
@@ -19,5 +19,5 @@ ts_accuracy(.data, horizon = 4, outcomes, .fun)
 A `tibble`` containing one row for each combination of model and outcome with accuracy measures from \link[fabletools]{accuracy}.
 }
 \description{
-Compuate accuracy metrics in support of model selection
+Compute accuracy metrics in support of model selection
 }

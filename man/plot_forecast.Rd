@@ -16,7 +16,7 @@ plot_forecast(.data, submission, location = "US", pi = TRUE)
 \item{pi}{Logical as to whether or not the plot should include 50\% prediction interval; default is \code{TRUE}}
 }
 \description{
-
+Visualize and sanity check a forecast
 }
 \examples{
 \dontrun{
