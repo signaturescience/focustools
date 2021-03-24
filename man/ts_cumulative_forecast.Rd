@@ -17,5 +17,5 @@ ts_cumulative_forecast(.data, outcome = "cdeaths", inc_forecast)
 A \code{tibble} with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
 }
 \description{
-Helper used in \code{ts_forecast()} to get cumulative forecast from incident
+This unexported helper is used internally in \link[focustools]{ts_forecast} to generate cumulative forecasts from incident. The function cumulatively sums incident estimates (quantile and point) at each location. Note that if used outside of \link[focustools]{ts_forecast} one must be sure that the ".data" argument matches object used to generate the incident forecast object ("inc_forecast").
 }

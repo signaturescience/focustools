@@ -50,7 +50,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #'
 #' @description
 #'
-#' This function can convert models fit with \link[fabletools]{model} or the \link[focustools]{ts_fit} wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 22 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the \link[fabletools]{hilo}.
+#' This function can convert models fit with \link[fabletools]{model} or the \link[focustools]{ts_fit} wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 23 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the \link[fabletools]{hilo}.
 #'
 #' @param mable A `mable` (model table); for more information see \link[fabletools]{mable}
 #' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
@@ -151,6 +151,10 @@ ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=
 
 #' Helper to generate the estimate of incident cases from an icases forecast object
 #'
+#' @description
+#'
+#' This function takes a time series forecast and extracts the point estimate for incident cases out to a specified horizon. This is necessary to generate the "new_data" to be passed into the \link[focustools]{ts_forecast} incident death models that are based on lagged cases.
+#'
 #' @param .data Data from which the \link[tsibble]{new_data} should be generated; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in ".forecast"
 #' @param .forecast A `tibble` with forecast data generated using \link[focustools]{ts_forecast}; should *only* be a forecast of incident cases
 #' @param horizon Horizon periods through which the \link[tsibble]{new_data} should be generated; default is `4`
@@ -176,6 +180,10 @@ ts_futurecases <- function(.data, .forecast, horizon = 4) {
 
 
 #' Helper used in `ts_forecast()` to get cumulative forecast from incident
+#'
+#' @description
+#'
+#' This unexported helper is used internally in \link[focustools]{ts_forecast} to generate cumulative forecasts from incident. The function cumulatively sums incident estimates (quantile and point) at each location. Note that if used outside of \link[focustools]{ts_forecast} one must be sure that the ".data" argument matches object used to generate the incident forecast object ("inc_forecast").
 #'
 #' @param .data Data from which the cumulative forecast should get recent counts; *CAUTION* for best results make sure that the data passed to this argument is the same object as used to generate the model/forecast that is specified in "inc_forecast"
 #' @param outcome Name of the outcome; should be be one of `'cdeaths'` or `'ccases'`
@@ -209,7 +217,7 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
     dplyr::arrange(yweek, type, quantile,location) %>%
     # Create a new grouping variable, throw it away when you're done with the mutate
     # I don't know what happens if you group by quantile but quantile is NA for point estimates.
-    # This creates a throwaway char that's eg "quantile 0.01" or "point NA" so you're not grouping over an NA
+    # This creates a throwaway char that's eg " US quantile 0.01" or "US point NA" so you're not grouping over an NA
     dplyr::mutate(groupvar=paste(location,type, quantile)) %>%
     # Group by each quantile(/point)
     dplyr::group_by(groupvar) %>%
@@ -225,12 +233,15 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
     # Get rid of junk
     dplyr::select(-groupvar, -cvalue,-observed_to_now)
 
-
   return(.forecast)
 
 }
 
-#' Compute accuracy metrics in support of model selection
+#' Compute accuracy metrics
+#'
+#' @description
+#'
+#' This function wraps \link[focustools]{ts_fit} to provide an interface for evaluting accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (`4`) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
 #'
 #' @param .data Data to use for modeling
 #' @param horizon Horizon of periods to use for splitting input to ".data" into training / test sets; default is `4`
