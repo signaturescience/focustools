@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{this_monday}
 \alias{this_monday}
-\title{Helper to get the date for the Monday of the current week}
+\title{Get Monday}
 \usage{
 this_monday()
 }
@@ -10,5 +10,5 @@ this_monday()
 Date for the Monday of the current week. For more details see \link[lubridate]{floor_date}.
 }
 \description{
-Helper to get the date for the Monday of the current week
+This function is a helper to get the date for the Monday of the current week.
 }

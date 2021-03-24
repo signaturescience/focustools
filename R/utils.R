@@ -1,10 +1,14 @@
-#' Make tsibble
+#' Make `tsibble`
 #'
-#' @param df A tibble containing columns `epiyear` and `epiweek`.
+#' @description
+#'
+#' This function converts an input `tibble` with columns for \link[lubridate]{epiyear} and \link[lubridate]{epiweek} into a \link[tsibble]{tsibble} object. The `tsibble` has columns specifying indices for the time series as well as a date for the Monday of the epiyear/epiweek combination at each row. Users can optionally ignore the current week when generating the `tsibble` via the "chop" argument.
+#'
+#' @param df A `tibble` containing columns `epiyear` and `epiweek`.
 #' @param chop Logical indicating whether or not to remove the most current week (default `TRUE`).
-#' @return A tsibble containing additional columns `monday` indicating the date
+#' @return A `tsibble` containing additional columns `monday` indicating the date
 #'   for the Monday of that epiweek, and `yweek` (a yearweek vctr class object)
-#'   that indexes the tsibble in 1 week increments.
+#'   that indexes the `tsibble` in 1 week increments.
 #' @export
 #' @md
 make_tsibble <- function(df, chop=TRUE) {
@@ -16,7 +20,6 @@ make_tsibble <- function(df, chop=TRUE) {
     # convert to tsibble
     tsibble::as_tsibble(index=yweek, key=location)
   # Remove the incomplete week
-  # if (chop) out <- out %>% dplyr::filter(lubridate::week(monday)!=lubridate::week(lubridate::today()))
   if (chop) out <- utils::head(out, -1)
   return(out)
 }
@@ -38,21 +41,25 @@ quibble <- function(x, q = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.9
   tibble::tibble(q = q, x = stats::quantile(x, q))
 }
 
-#' Helper to get the date for the Monday of the current week
+#' Get Monday
+#'
+#' @description
+#'
+#' This function is a helper to get the date for the Monday of the current week.
 #'
 #' @return Date for the Monday of the current week. For more details see \link[lubridate]{floor_date}.
 #' @export
+#' @md
 #'
 this_monday <- function() {
   lubridate::floor_date(lubridate::today(), "weeks", week_start = 1)
 }
 
 #' Helper function to see if today is Monday
-#'
-#' \lifecycle{experimental}
-#'
+#
 #' @return Logical indicating whether or not today is Monday
 #' @export
+#' @md
 is_monday <- function() {
   lubridate::wday(lubridate::today(), label=TRUE) %in% c("Mon")
 }

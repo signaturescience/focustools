@@ -10,5 +10,5 @@ is_monday()
 Logical indicating whether or not today is Monday
 }
 \description{
-\lifecycle{experimental}
+Helper function to see if today is Monday
 }
