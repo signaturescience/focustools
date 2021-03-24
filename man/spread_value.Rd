@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{spread_value}
 \alias{spread_value}
-\title{Helper to reshape data for submission summary}
+\title{Reshape data for submission summary}
 \usage{
 spread_value(.data, ...)
 }
@@ -12,8 +12,8 @@ spread_value(.data, ...)
 \item{...}{Additional arguments passed to \link[tidyr]{spread}}
 }
 \value{
-Tibble
+A \code{tibble} with wide summary data.
 }
 \description{
-This function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
+This unexported helper function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting \code{tibble}.
 }

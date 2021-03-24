@@ -55,7 +55,11 @@ this_monday <- function() {
   lubridate::floor_date(lubridate::today(), "weeks", week_start = 1)
 }
 
-#' Helper function to see if today is Monday
+#' Check Monday
+#'
+#' @description
+#'
+#' This is a helper function to see if today is Monday.
 #
 #' @return Logical indicating whether or not today is Monday
 #' @export
@@ -64,19 +68,20 @@ is_monday <- function() {
   lubridate::wday(lubridate::today(), label=TRUE) %in% c("Mon")
 }
 
-#' Visualize and sanity check a forecast
+#' Visualize forecast output
+#'
+#' @description
+#'
+#' This function serves as a plotting mechanism for prepped forecast submission data (see \link[focustools]{format_for_submission}). Using truth data supplied, the plots show the historical trajectory of each outcome along with the point estimates for forecasts. Optionally, the user can include 50% prediction interval as well. Plots include trajectories of incident cases, incident deaths, and cumulative deaths faceted by location.
 #'
 #'
-#' @param .data Data used to create the submission
+#' @param .data Historical truth data for all locations and outcomes in submission targets
 #' @param submission Formatted submission
-#' @param location Vector specifying locations to filter to; "US" by default.
+#' @param location Vector specifying locations to filter to; `'US'` by default.
 #' @param pi Logical as to whether or not the plot should include 50% prediction interval; default is `TRUE`
 #'
-#' @examples
-#' \dontrun{
-#' myforecast <- forecast_pipeline(force=TRUE)
-#' plot_forecast(data=myforecast$data, submission=myforecast$submission, location="US")
-#' }
+#' @return A `ggplot2` plot object with line plots for outcome trajectories faceted by location
+#'
 #' @md
 #' @export
 #'
@@ -89,7 +94,6 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   # Check that the specified location is in the data and submission.
   stopifnot("Specified location is not in recorded data" = loc %in% unique(.data$location))
   stopifnot("Specified location is not in forecast data" = loc %in% unique(submission$location))
-
 
   # Grab the real data
   real <-
@@ -157,14 +161,18 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   return(p)
 }
 
-#' Helper to reshape data for submission summary
+#' Reshape data for submission summary
 #'
-#' This function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
+#' @description
+#'
+#' This unexported helper function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
 #'
 #' @param .data Tibble with submission data
 #' @param ... Additional arguments passed to \link[tidyr]{spread}
 #'
-#' @return Tibble
+#' @return A `tibble` with wide summary data.
+#'
+#' @md
 #'
 spread_value <- function(.data, ...) {
 
@@ -198,11 +206,14 @@ spread_value <- function(.data, ...) {
 
 #' Extract ARIMA parameters
 #'
-#' Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from tidy() and glance() on an arima model object.
+#' @description
 #'
-#' @param arimafit A single-row mable (`mdl_df`) from `focustools::model(arima=ARIMA(...))`.
+#' Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from \link[broom]{tidy} and \link[broom]{glance} on an ARIMA model object.
 #'
-#' @return A single-row tibble containing ARIMA model parameter and diagnostics information.
+#' @param arimafit A single-row mable (`mdl_df`) from `fabeltools::model(arima=ARIMA(...))`.
+#'
+#' @return A single-row `tibble` containing ARIMA model parameter and diagnostic information.
+#' @md
 #' @export
 extract_arima_params <- function(arimafit) {
   if (!("mdl_df" %in% class(arimafit))) stop("Input must be a mdl_df (mable) from fabletools::model().")
