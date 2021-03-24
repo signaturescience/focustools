@@ -38,7 +38,7 @@
 
 <meta property="og:title" content="Generate time series forecasts including quantile estimates — ts_forecast" />
 
-<meta property="og:description" content="Generate time series forecasts including quantile estimates" />
+<meta property="og:description" content="This function can convert models fit with model or the ts_fit wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see &quot;new_data&quot; argument). The forecasts generated will include point estimates as well as 23 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the hilo." />
 
 
 
@@ -110,19 +110,11 @@
 
     <div class="ref-description">
     
-    <p>Generate time series forecasts including quantile estimates</p>
+    <p>This function can convert models fit with <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> or the <a href='ts_fit.html'>ts_fit</a> wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 23 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the <a href='https://pkg.mitchelloharawild.com/distributional/reference/hilo.html'>hilo</a>.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>ts_forecast</span><span class='op'>(</span>
-  <span class='va'>mable</span>,
-  <span class='va'>outcome</span>,
-  horizon <span class='op'>=</span> <span class='fl'>4</span>,
-  new_data <span class='op'>=</span> <span class='cn'>NULL</span>,
-  bootstrap <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  seed <span class='op'>=</span> <span class='fl'>1863</span>,
-  <span class='va'>...</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>ts_forecast</span><span class='op'>(</span><span class='va'>mable</span>, <span class='va'>outcome</span>, horizon <span class='op'>=</span> <span class='fl'>4</span>, new_data <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>...</span><span class='op'>)</span></pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -142,14 +134,6 @@
     <tr>
       <th>new_data</th>
       <td><p>Optional covariate data for forecasts using models that were fit using other variables; should be generated using <a href='https://tsibble.tidyverts.org/reference/new-data.html'>new_data</a>; default is <code>NULL</code></p></td>
-    </tr>
-    <tr>
-      <th>bootstrap</th>
-      <td><p>If <code>TRUE</code> use bootstrap to resample forecasts for quantiles. If <code>FALSE</code> (default), use <a href='https://pkg.mitchelloharawild.com/distributional/reference/hilo.html'>hilo</a> to extract a specified prediction interval at a particular confidence level from a distribution.</p></td>
-    </tr>
-    <tr>
-      <th>seed</th>
-      <td><p>Random seed used in bootstrapping process; default <code>1863</code></p></td>
     </tr>
     <tr>
       <th>...</th>

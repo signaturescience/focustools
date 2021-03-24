@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Visualize and sanity check a forecast — plot_forecast • focustools</title>
+<title>Visualize forecast output — plot_forecast • focustools</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -36,11 +36,9 @@
 
 
 
-<meta property="og:title" content="Visualize and sanity check a forecast — plot_forecast" />
+<meta property="og:title" content="Visualize forecast output — plot_forecast" />
 
-<meta property="og:description" content="
-
-" />
+<meta property="og:description" content="This function serves as a plotting mechanism for prepped forecast submission data (see format_for_submission). Using truth data supplied, the plots show the historical trajectory of each outcome along with the point estimates for forecasts. Optionally, the user can include 50% prediction interval as well. Plots include trajectories of incident cases, incident deaths, and cumulative deaths faceted by location." />
 
 
 
@@ -105,16 +103,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Visualize and sanity check a forecast</h1>
+    <h1>Visualize forecast output</h1>
     
     <div class="hidden name"><code>plot_forecast.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    
-
-
+    <p>This function serves as a plotting mechanism for prepped forecast submission data (see <a href='format_for_submission.html'>format_for_submission</a>). Using truth data supplied, the plots show the historical trajectory of each outcome along with the point estimates for forecasts. Optionally, the user can include 50% prediction interval as well. Plots include trajectories of incident cases, incident deaths, and cumulative deaths faceted by location.</p>
     
     </div>
 
@@ -125,7 +121,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>.data</th>
-      <td><p>Data used to create the submission</p></td>
+      <td><p>Historical truth data for all locations and outcomes in submission targets</p></td>
     </tr>
     <tr>
       <th>submission</th>
@@ -133,7 +129,7 @@
     </tr>
     <tr>
       <th>location</th>
-      <td><p>Vector specifying locations to filter to; "US" by default.</p></td>
+      <td><p>Vector specifying locations to filter to; <code>'US'</code> by default.</p></td>
     </tr>
     <tr>
       <th>pi</th>
@@ -141,13 +137,11 @@
     </tr>
     </table>
     
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>myforecast</span> <span class='op'>&lt;-</span> <span class='fu'>forecast_pipeline</span><span class='op'>(</span>force<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'>plot_forecast</span><span class='op'>(</span>data<span class='op'>=</span><span class='va'>myforecast</span><span class='op'>$</span><span class='va'>data</span>, submission<span class='op'>=</span><span class='va'>myforecast</span><span class='op'>$</span><span class='va'>submission</span>, location<span class='op'>=</span><span class='st'>"US"</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <p>A <code>ggplot2</code> plot object with line plots for outcome trajectories faceted by location</p>
+    
+
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

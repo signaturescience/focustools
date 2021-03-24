@@ -83,7 +83,7 @@
 <h3 class="hasAnchor">
 <a href="#generating-forecasts-and-formatting-submission" class="anchor"></a>Generating forecasts and formatting submission</h3>
 <p>Here we provide an example of how to use <code>focustools</code> to generate forecasts for COVID-19 Forecast Hub targets via time series approaches.</p>
-<p>First, load ancillary packages for data analysis and retrieve COVID-19 data from the JHU source. Note that the <code><a href="reference/get_cases.html">get_cases()</a></code> and <code><a href="reference/get_deaths.html">get_deaths()</a></code> functions are executed separately, then joined and converted to a <code>tsibble</code>:</p>
+<p>First, load ancillary packages for data analysis and retrieve COVID-19 data from the JHU source. Note that the <code><a href="reference/retrieve.html">get_cases()</a></code> and <code><a href="reference/retrieve.html">get_deaths()</a></code> functions are executed separately, then joined and converted to a <code>tsibble</code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">focustools</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
@@ -93,8 +93,8 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://fable.tidyverts.org">fable</a></span><span class="op">)</span>
 
 <span class="co">## get data at the national scale from jhu source</span>
-<span class="va">usac</span> <span class="op">&lt;-</span>  <span class="fu"><a href="reference/get_cases.html">get_cases</a></span><span class="op">(</span>source<span class="op">=</span><span class="st">"jhu"</span>,  granularity <span class="op">=</span> <span class="st">"national"</span><span class="op">)</span>
-<span class="va">usad</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_deaths.html">get_deaths</a></span><span class="op">(</span>source<span class="op">=</span><span class="st">"jhu"</span>,  granularity <span class="op">=</span> <span class="st">"national"</span><span class="op">)</span>
+<span class="va">usac</span> <span class="op">&lt;-</span>  <span class="fu"><a href="reference/retrieve.html">get_cases</a></span><span class="op">(</span>source<span class="op">=</span><span class="st">"jhu"</span>,  granularity <span class="op">=</span> <span class="st">"national"</span><span class="op">)</span>
+<span class="va">usad</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/retrieve.html">get_deaths</a></span><span class="op">(</span>source<span class="op">=</span><span class="st">"jhu"</span>,  granularity <span class="op">=</span> <span class="st">"national"</span><span class="op">)</span>
 
 <span class="co">## use the focustools helper to prep the tsibble format</span>
 <span class="va">usa</span> <span class="op">&lt;-</span>  
