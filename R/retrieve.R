@@ -1,4 +1,10 @@
-#' Retrieve case count data
+#' Retrieve data
+#'
+#' @name retrieve
+#'
+#' @description
+#'
+#' The package includes functions to retrieve observed data from two canonical sources: the New York Times and the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University. Both organizations administer data aggregation efforts that post daily COVID-19 case and death to GitHub. The data retrieval functions allow the user to specify "source" and "granularity" of data. Internally each function builds a path to the appropriate `.csv` file on GitHub, then reads the data into memory. The returned object is data aggregated weekly (using \link[lubridate]{epiweek} and \link[lubridate]{epiyear} designations) for available locations at the granularity specified (national, state, or county level).
 #'
 #' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
 #' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
@@ -6,17 +12,19 @@
 #' @return A `tibble` with (at minimum) the following columns:
 #' - **epiyear**: Epidemiological year (see \link[lubridate]{epiyear} for more details)
 #' - **epiweek**: Epidemiological week (see \link[lubridate]{epiweek} for more details)
-#' - **icases**: Incident case count
-#' - **ccases**: Cumulative case count
+#' - **icases/ideaths**: Incident counts (cases or deaths)
+#' - **ccases/cdeaths**: Cumulative counts (cases or deaths)
 #'
 #' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
 #'
-#' @export
 #' @md
 #'
 #' @references https://github.com/CSSEGISandData/COVID-19
 #' @references https://github.com/nytimes/covid-19-data
 #'
+
+#' @rdname retrieve
+#' @export
 get_cases <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {
@@ -128,22 +136,8 @@ get_cases <- function(source = "jhu", granularity = "national") {
   return(dat)
 }
 
-#' Retrieve deaths data
-#'
-#' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
-#' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
-#'
-#' @return A `tibble` with (at minimum) the following columns:
-#' - **epiyear**: Epidemiological year (see \link[lubridate]{epiyear} for more details)
-#' - **epiweek**: Epidemiological week (see \link[lubridate]{epiweek} for more details)
-#' - **ideaths**: Incident case count
-#' - **cdeaths**: Cumulative case count
-#'
-#' If `source = 'jhu'` and `granularity = 'state'` then the **location** column  will include the full name of the state. If `source = 'jhu'` and `granularity = 'county'` then the **location** column  will include fips (county code).
-#'
+#' @rdname retrieve
 #' @export
-#' @md
-#'
 get_deaths <- function(source = "jhu", granularity = "national") {
 
   if(source == "jhu") {

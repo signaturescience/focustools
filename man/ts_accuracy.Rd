@@ -19,5 +19,5 @@ ts_accuracy(.data, horizon = 4, outcomes, .fun)
 A `tibble`` containing one row for each combination of model and outcome with accuracy measures from \link[fabletools]{accuracy}.
 }
 \description{
-This function wraps \link[focustools]{ts_fit} to provide an interface for evaluting accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (\code{4}) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
+This function wraps \link[focustools]{ts_fit} to provide an interface for evaluating accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (\code{4}) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
 }

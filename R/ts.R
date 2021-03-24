@@ -241,7 +241,7 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
 #'
 #' @description
 #'
-#' This function wraps \link[focustools]{ts_fit} to provide an interface for evaluting accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (`4`) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
+#' This function wraps \link[focustools]{ts_fit} to provide an interface for evaluating accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (`4`) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
 #'
 #' @param .data Data to use for modeling
 #' @param horizon Horizon of periods to use for splitting input to ".data" into training / test sets; default is `4`
