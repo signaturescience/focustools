@@ -4,15 +4,7 @@
 \alias{ts_forecast}
 \title{Generate time series forecasts including quantile estimates}
 \usage{
-ts_forecast(
-  mable,
-  outcome,
-  horizon = 4,
-  new_data = NULL,
-  bootstrap = FALSE,
-  seed = 1863,
-  ...
-)
+ts_forecast(mable, outcome, horizon = 4, new_data = NULL, ...)
 }
 \arguments{
 \item{mable}{A \code{mable} (model table); for more information see \link[fabletools]{mable}}
@@ -22,10 +14,6 @@ ts_forecast(
 \item{horizon}{Optional horizon periods through which the forecasts should be generated; default is \code{4}}
 
 \item{new_data}{Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is \code{NULL}}
-
-\item{bootstrap}{If \code{TRUE} use bootstrap to resample forecasts for quantiles. If \code{FALSE} (default), use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.}
-
-\item{seed}{Random seed used in bootstrapping process; default \code{1863}}
 
 \item{...}{Additional parameters passed to the \link[focustools]{ts_cumulative_forecast} helper; only used if the forecast is cumulative}
 }

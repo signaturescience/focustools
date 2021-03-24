@@ -56,8 +56,6 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
-#' @param bootstrap If `TRUE` use bootstrap to resample forecasts for quantiles. If `FALSE` (default), use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.
-#' @param seed Random seed used in bootstrapping process; default `1863`
 #' @param ... Additional parameters passed to the \link[focustools]{ts_cumulative_forecast} helper; only used if the forecast is cumulative
 #'
 #' @return A `tibble` with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
@@ -67,7 +65,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' @md
 #'
 #'
-ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=FALSE, seed = 1863, ...) {
+ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, ...) {
 
   if(outcome == "cdeaths" | outcome == "ccases") {
     .forecast <- ts_cumulative_forecast(outcome = outcome, ...)
@@ -80,66 +78,35 @@ ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=
       myforecast <- fabletools::forecast(mable, new_data=new_data)
     }
 
-    # If using bootstrapping to resample forecasts:
-    if (bootstrap) {
+    # Make the 0.5 quantile the means (point estimates). The quidk doesn't contain a
+    # median hilo. You'll bind this to the other quantiles in the step below.
+    q5 <-
+      myforecast %>%
+      tibble::as_tibble() %>%
+      dplyr::transmute(.model, yweek, location, quantile=0.5, value=.mean, type="quantile")
 
-      # bootstrap a model
-      boots <-
-        mable %>%
-        fabletools::generate(h=horizon, times=1000, bootstrap=TRUE, new_data = new_data, seed = seed)
+    point_estimates <-
+      myforecast %>%
+      dplyr::as_tibble() %>%
+      dplyr::mutate(quantile=NA_real_, .after=yweek) %>%
+      dplyr::mutate(type="point") %>%
+      dplyr::rename(value=.mean) %>%
+      dplyr::select(.model, yweek, location, quantile, value, type)
 
-      # get the quantiles
-      myquibbles <-
-        boots %>%
-        dplyr::as_tibble() %>%
-        dplyr::group_by(.model, yweek, location) %>%
-        dplyr::summarize(quibble(.sim), .groups="drop")
+    # Create quantile table from distribution column in the forecast
+    .forecast <-
+      myforecast %>%
+      fabletools::hilo(sort(unique(quidk$interval))) %>%
+      fabletools::unpack_hilo(dplyr::ends_with("%")) %>%
+      tidyr::gather(key, value, dplyr::contains("%")) %>%
+      dplyr::inner_join(quidk, by="key") %>%
+      tibble::as_tibble() %>%
+      dplyr::transmute(.model, yweek, location, quantile, value, type="quantile") %>%
+      dplyr::bind_rows(q5) %>%
+      dplyr::bind_rows(point_estimates) %>%
+      dplyr::arrange(yweek, quantile)
 
-      .forecast <-
-        dplyr::bind_rows(
-          myquibbles %>%
-            dplyr::mutate(type="quantile") %>%
-            dplyr::rename(quantile=q, value=x),
-          myforecast %>%
-            dplyr::as_tibble() %>%
-            dplyr::mutate(quantile=NA_real_, .after=yweek) %>%
-            dplyr::mutate(type="point") %>%
-            dplyr::rename(value=.mean)
-        )
-
-    } else {
-
-      # Make the 0.5 quantile the means (point estimates). The quidk doesn't contain a
-      # median hilo. You'll bind this to the other quantiles in the step below.
-      q5 <-
-        myforecast %>%
-        tibble::as_tibble() %>%
-        dplyr::transmute(.model, yweek, location, quantile=0.5, value=.mean, type="quantile")
-
-      point_estimates <-
-        myforecast %>%
-        dplyr::as_tibble() %>%
-        dplyr::mutate(quantile=NA_real_, .after=yweek) %>%
-        dplyr::mutate(type="point") %>%
-        dplyr::rename(value=.mean) %>%
-        dplyr::select(.model, yweek, location, quantile, value, type)
-
-      # Create quantile table from distribution column in the forecast
-      .forecast <-
-        myforecast %>%
-        fabletools::hilo(sort(unique(quidk$interval))) %>%
-        fabletools::unpack_hilo(dplyr::ends_with("%")) %>%
-        tidyr::gather(key, value, dplyr::contains("%")) %>%
-        dplyr::inner_join(quidk, by="key") %>%
-        tibble::as_tibble() %>%
-        dplyr::transmute(.model, yweek, location, quantile, value, type="quantile") %>%
-        dplyr::bind_rows(q5) %>%
-        dplyr::bind_rows(point_estimates) %>%
-        dplyr::arrange(yweek, quantile)
-
-    }
-
-    ## return named list with forecast AND quibbles
+    ## return forecast as tibble
     return(.forecast)
 
   } else {
@@ -147,7 +114,6 @@ ts_forecast <- function(mable, outcome, horizon = 4, new_data = NULL, bootstrap=
   }
 
 }
-
 
 #' Helper to generate the estimate of incident cases from an icases forecast object
 #'
