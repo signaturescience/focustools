@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+<h1 id="focustools">focustools</h1>
+<!-- badges: start -->
+
+<p><a href="https://github.com/signaturescience/focustools/actions"><img src="data:text/plain; charset=utf-8;charset=utf-8,Not%20Found" alt="R CMD Check (stable)" /></a></p>
+<p><a href="https://github.com/signaturescience/focustools/actions"><img src="data:text/plain; charset=utf-8;charset=utf-8,Not%20Found" alt="R CMD Check (dev)" /></a></p>
+<!-- badges: end -->
+
+<h2 id="installation">Installation</h2>
+<p>Install from GitHub as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;signaturescience/focustools&quot;</span>)</span></code></pre></div>
+<h2 id="usage">Usage</h2>
+<h3 id="generating-forecasts-and-formatting-submission">Generating forecasts and formatting submission</h3>
+<p>Here we provide an example of how to use <code>focustools</code> to generate forecasts for COVID-19 Forecast Hub targets via time series approaches.</p>
+<p>First, load ancillary packages for data analysis and retrieve COVID-19 data from the JHU source. Note that the <code>get_cases()</code> and <code>get_deaths()</code> functions are executed separately, then joined and converted to a <code>tsibble</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">library</span>(focustools)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">library</span>(readr)</span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="kw">library</span>(purrr)</span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">library</span>(fabletools)</span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">library</span>(fable)</span>
+<span id="cb2-7"><a href="#cb2-7"></a></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="co">## get data at the national scale from jhu source</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>usac &lt;-<span class="st">  </span><span class="kw">get_cases</span>(<span class="dt">source=</span><span class="st">&quot;jhu&quot;</span>,  <span class="dt">granularity =</span> <span class="st">&quot;national&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10"></a>usad &lt;-<span class="st"> </span><span class="kw">get_deaths</span>(<span class="dt">source=</span><span class="st">&quot;jhu&quot;</span>,  <span class="dt">granularity =</span> <span class="st">&quot;national&quot;</span>)</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="co">## use the focustools helper to prep the tsibble format</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>usa &lt;-<span class="st">  </span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">inner_join</span>(usac, usad, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;location&quot;</span>, <span class="st">&quot;epiyear&quot;</span>, <span class="st">&quot;epiweek&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="st">  </span><span class="kw">make_tsibble</span>(<span class="dt">chop=</span><span class="ot">TRUE</span>)</span></code></pre></div>
+<p>With the data prepped, we can now fit the models. In this case, we’ll fit two models. One will be an ARIMA of incident cases, with parameters automatically optimized. For more details see <code>?fable::ARIMA</code>. The other model will use the three week lagged incident case counts to predict incident deaths:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>fit.icases &lt;-<span class="st"> </span>usa <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">model</span>(<span class="dt">arima =</span> <span class="kw">ARIMA</span>(icases, <span class="dt">stepwise=</span><span class="ot">FALSE</span>, <span class="dt">approximation=</span><span class="ot">FALSE</span>))</span>
+<span id="cb3-2"><a href="#cb3-2"></a>fit.ideaths &lt;-<span class="st"> </span>usa <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">model</span>(<span class="dt">linear_caselag3 =</span> <span class="kw">TSLM</span>(ideaths <span class="op">~</span><span class="st"> </span><span class="kw">lag</span>(icases, <span class="dv">3</span>)))</span></code></pre></div>
+<p>Note that the code above uses the <code>fabletools::model()</code> function directly. The <code>focustools</code> package does include <code>ts_fit()</code>, which is a wrapper for modeling multiple outcomes and/or using a list of model specifications. However, currently <code>ts_fit()</code> is incompatible with the <code>TSLM</code> model used above for the incident deaths. For an example of <code>ts_fit()</code> in action see the “Evaluating model accuracy” section below.</p>
+<p>With the model fit objects created, we can generate forecasts (including point and quantile estimates) for the outcomes of interest at an arbitrary horizon. Note that given the model we have chosen for the incident deaths outcome, we do need to make sure to generate the incident case forecast <em>first</em> so that we can retrieve point estimates for future cases, which will be passed into the incident deaths forecast:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">## generate incident case forecast</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>icases_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(fit.icases, <span class="dt">outcome =</span> <span class="st">&quot;icases&quot;</span>, <span class="dt">horizon =</span> <span class="dv">4</span>)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>icases_forecast</span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="co">## need to get future cases to pass to ideaths forecast</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>future_cases &lt;-<span class="st"> </span><span class="kw">ts_futurecases</span>(usa, icases_forecast, <span class="dt">horizon =</span> <span class="dv">4</span>)</span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="co"># Forecast incident deaths based on best guess for cases</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>ideaths_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(fit.ideaths,  <span class="dt">outcome =</span> <span class="st">&quot;ideaths&quot;</span>, <span class="dt">new_data =</span> future_cases)</span>
+<span id="cb4-9"><a href="#cb4-9"></a>ideaths_forecast</span></code></pre></div>
+<p>We can use the forecasts of incidence to infer cumulative targets. The <code>ts_forecast()</code> function is flexible enough to switch methods internally, requiring a “inc_forecast” parameter if either “cdeaths” or “ccases” is passed as the “outcome” for the forecast:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">## generate cumulative forecasts</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>cdeaths_forecast &lt;-<span class="st"> </span><span class="kw">ts_forecast</span>(<span class="dt">outcome =</span> <span class="st">&quot;cdeaths&quot;</span>, <span class="dt">.data =</span> usa, <span class="dt">inc_forecast =</span> ideaths_forecast)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>cdeaths_forecast</span></code></pre></div>
+<p>Prior to submitting these forecasts to the COVID-19 Forecast Hub we need to prepare them in the canonical submission format. Data prep in <code>format_for_submission</code> includes naming targets appropriately and ensuring that target dates adhere to epidemiological week format:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">## create submission object</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>submission &lt;-</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="st">  </span><span class="kw">list</span>(<span class="kw">format_for_submission</span>(icases_forecast, <span class="dt">target_name =</span> <span class="st">&quot;inc case&quot;</span>),</span>
+<span id="cb6-4"><a href="#cb6-4"></a>       <span class="kw">format_for_submission</span>(ideaths_forecast, <span class="dt">target_name =</span> <span class="st">&quot;inc death&quot;</span>),</span>
+<span id="cb6-5"><a href="#cb6-5"></a>       <span class="kw">format_for_submission</span>(cdeaths_forecast, <span class="dt">target_name =</span> <span class="st">&quot;cum death&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="st">  </span><span class="kw">reduce</span>(bind_rows) <span class="op">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="st">  </span><span class="kw">arrange</span>(target)</span>
+<span id="cb6-8"><a href="#cb6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9"></a>submission</span></code></pre></div>
+<p>Last of all, we can validate the submission. The object must be written to a file and then validated with <code>validate_forecast()</code>, which wraps a python function developed and maintained by the COVID-19 Forecast Hub organizers. For more information on validating the entry see the “Submission validation” section below:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">## set up file path for submission file</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">## forcing the date in the file name and submission contents to be this monday</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>ffile &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="kw">paste0</span>(<span class="kw">this_monday</span>(), <span class="st">&quot;-sigsci-arima.csv&quot;</span>))</span>
+<span id="cb7-4"><a href="#cb7-4"></a>submission <span class="op">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">forecast_date =</span> <span class="kw">this_monday</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="st">  </span><span class="kw">write_csv</span>(ffile)</span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="kw">validate_forecast</span>(ffile)</span></code></pre></div>
+<h2 id="submission-validation">Submission validation</h2>
+<p>Submissions to the COVID-19 Forecast Hub must comply to the entry format for the forecast file:</p>
+<p><a href="https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format">https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format</a></p>
+<p>The organizers have provided code to validate entry formats. We have included some of those methods in this repo, such that entry format can be checked as follows (uncomment the first line if you’ve installed dependencies to a conda environment called <code>focus</code>):</p>
+<pre><code># conda activate focus
+python3 inst/validation/validate_single_forecast_file.py scratch/fable-submission-mockup-allmetrics-forecasts/2021-01-04-sigsci-ts.csv
+</code></pre>
+<p>Note that the following Python modules should be installed:</p>
+<pre><code>pandas
+requests
+pymmwr
+click
+urllib3
+selenium
+webdriver-manager
+pyyaml
+PyGithub
+git+https://github.com/reichlab/zoltpy/
+https://github.com/hannanabdul55/pykwalify/archive/master.zip
+</code></pre>
+<p>You can install these dependencies by running the following. Optionally create and activate a conda environment prior to installing these dependencies.</p>
+<pre><code># conda create -n focus
+# conda activate focus
+pip3 install -r inst/validation/requirements.txt
+</code></pre>
+<p>In order to run a very similar check using R, we have developed a wrapper to the <a href="https://github.com/reichlab/zoltpy/blob/master/zoltpy/covid19.py#L75-L93"><code>validate_quantile_csv_file()</code> function from the <code>zoltpy</code> module</a>, which drives the <code>validate_single_forecast_file.py</code> script above. To use the wrapper function in R:</p>
+<pre><code>validate_forecast(&quot;submission/SigSci-TS/2021-01-11-SigSci-TS.csv&quot;)
+</code></pre>
+<h2 id="script-to-create-submission-ready-forecasts">Script to create submission-ready forecasts</h2>
+<p>Run the script in <a href="submission/submission.R">submission/submission.R</a> to do the following.</p>
+<ol>
+<li>Get data (national level from JHU by default)</li>
+<li>Fit incident case and incident death models (ARIMA and lagged TSLM respectively)</li>
+<li>Get future case data to create the incident death forecast</li>
+<li>Create the incident death forecast based on this new data</li>
+<li>Generate cumulative death forecast by summarizing incident death forecast</li>
+<li>Prepare submission format</li>
+<li>Save the submission to the <code>submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv</code></li>
+<li>Validates the submission</li>
+</ol>
+
+</body>
+</html>

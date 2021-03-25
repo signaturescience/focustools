@@ -128,54 +128,6 @@ submission %>%
 validate_forecast(ffile)
 ```
 
-### Evaluating model accuracy
-
-In order to facilitate model selection and evaluation, we included a wrapper function to generate model accuracy measures for multiple outcomes and models simultaneously. The `ts_accuracy()` function relies heavily on `ts_fit()`. As noted above, in basic usage it may not be necessary to use `ts_fit()` to generate forecasts / submissions. Furthermore, there are some models for which `ts_fit()` will not work. Those limitations will apply to `ts_accuracy()` as well.
-
-However, `ts_fit()` can be useful for iterating over outcomes and arbitrary compatible models:
-
-```{r}
-ts_funs <- 
-  list(
-    ARIMA = function(x, .data) model(.data, ARIMA = ARIMA(x, stepwise=FALSE, approximation=FALSE)),
-    SES_Additive = function(x, .data) model(.data, SES_additive = ETS(x ~ error("A") + trend("N") + season("N"))),
-    SES_Multiplicative = function(x, .data) model(.data, SES_multiplicative = ETS(x ~ error("M") + trend("N") + season("N"))),
-    Holt_Additive = function(x, .data) model(.data, Holt_Additive = ETS(x ~ error("A") + trend("A") + season("N"))),
-    Holt_Multiplicative = function(x, .data) model(.data, Holt_Multiplicative = ETS(x ~ error("M") + trend("A") + season("N")))
-  )
-
-ts_fit(usa, outcomes = "icases", .fun = ts_funs, single = FALSE)
-```
-
-For convenience, the function can return a single `mable` (model tables) instead of a list if `single = TRUE` and there is only one outcome and model:
-
-
-```{r}
-ts_funs <- 
-  list(
-    ARIMA = function(x, .data) model(.data, ARIMA = ARIMA(x, stepwise=FALSE, approximation=FALSE))
-  )
-
-ts_fit(usa, outcomes = "icases", .fun = ts_funs, single = TRUE)
-```
-
-The `ts_accuracy()` function accepts a list of models and returns metrics for each model and outcome(s):
-
-```{r}
-ts_funs <- 
-  list(
-    ARIMA = function(x, .data) model(.data, ARIMA = ARIMA(x, stepwise=FALSE, approximation=FALSE)),
-    SES_Additive = function(x, .data) model(.data, SES_additive = ETS(x ~ error("A") + trend("N") + season("N"))),
-    SES_Multiplicative = function(x, .data) model(.data, SES_multiplicative = ETS(x ~ error("M") + trend("N") + season("N"))),
-    Holt_Additive = function(x, .data) model(.data, Holt_Additive = ETS(x ~ error("A") + trend("A") + season("N"))),
-    Holt_Multiplicative = function(x, .data) model(.data, Holt_Multiplicative = ETS(x ~ error("M") + trend("A") + season("N")))
-  )
-
-ts_accuracy(.data = usa, horizon = 4, outcomes = c("icases","ideaths"), .fun = ts_funs)
-```
-
-> **CAUTION**: The list passed to ".fun" in either `ts_accuracy()` or `ts_fit()` *must* include functions formatted exactly as the example above. These functions should all wrap `fable::model` with the outcome as "x" and data passed in as ".data".
-
 ## Submission validation
 
 Submissions to the COVID-19 Forecast Hub must comply to the entry format for the forecast file:

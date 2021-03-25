@@ -53,7 +53,7 @@ ts_fit <- function(.data, outcomes, .fun, single = TRUE) {
 #' This function can convert models fit with \link[fabletools]{model} or the \link[focustools]{ts_fit} wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 23 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the \link[fabletools]{hilo}.
 #'
 #' @param mable A `mable` (model table); for more information see \link[fabletools]{mable}
-#' @param outcome Name of the outcome; must be one of `'icases',`,`'ideaths'`, `'cdeaths'`, `'ccases'`
+#' @param outcome Name of the outcome; must be one of `'icases'`,`'ideaths'`, `'cdeaths'`, `'ccases'`
 #' @param horizon Optional horizon periods through which the forecasts should be generated; default is `4`
 #' @param new_data Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is `NULL`
 #' @param ... Additional parameters passed to the \link[focustools]{ts_cumulative_forecast} helper; only used if the forecast is cumulative
@@ -201,62 +201,4 @@ ts_cumulative_forecast <- function(.data, outcome = "cdeaths", inc_forecast) {
 
   return(.forecast)
 
-}
-
-#' Compute accuracy metrics
-#'
-#' @description
-#'
-#' This function wraps \link[focustools]{ts_fit} to provide an interface for evaluating accuracy measures for one or more model definitions. Metrics included come from the \link[fabletools]{accuracy} function, and model definitions must be time series models (see \link[fabletools]{model} for more information). Note that the function uses the "horizon" to split data in training/test sets. For example, the default "horizon" (`4`) will use the last four weeks of input data as the test set and all data prior to those four weeks as the training set.
-#'
-#' @param .data Data to use for modeling
-#' @param horizon Horizon of periods to use for splitting input to ".data" into training / test sets; default is `4`
-#' @param outcomes Character vector specifying names of the column to use as the outcome
-#' @param .fun List of modeling functions to use
-#'
-#' @return A `tibble`` containing one row for each combination of model and outcome with accuracy measures from \link[fabletools]{accuracy}.
-#' @md
-#' @export
-#'
-ts_accuracy <- function(.data, horizon = 4, outcomes, .fun) {
-
-  ## create training and test split by horizon
-  train_data <-
-    .data %>%
-    dplyr::slice(-utils::tail(dplyr::row_number(), horizon))
-
-  test_data <-
-    .data %>%
-    dplyr::slice(utils::tail(dplyr::row_number(), horizon))
-
-  ## run ts_fit
-  fit <- ts_fit(.data = train_data, outcomes = outcomes, .fun = .fun, single = FALSE)
-
-  ## run forecast operation on all fits
-  ## need the nested map here to traverse the list of lists
-  ## recall: ts_fit returns a list of models nested in a list of otucomes
-  l <- purrr::map(fit, function(x) purrr::map(x, function(y) (fabletools::forecast(y, h=4))))
-
-  ## now loop over each outcome in that list ...
-  ## get its name ...
-  ## force the column names for test data to be named to match the outcome name in the .fun funs
-  ## NOTE: using a for loop here to have a little more flexibility than a nested map()
-  ## create empty tibble to store loop results
-  res <- dplyr::tibble()
-
-  for(i in 1:length(names(l))) {
-
-    test_data_tmp <- test_data
-
-    outcome <- names(l)[i]
-
-    names(test_data_tmp)[which(names(test_data_tmp) == outcome)] <- "x"
-    tmp_res <- purrr::map_df(l[[i]], fabletools::accuracy, test_data_tmp)
-    tmp_res$outcome <- outcome
-
-    res <- rbind(res,tmp_res)
-
-  }
-
-  return(res)
 }
