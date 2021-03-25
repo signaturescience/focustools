@@ -2,7 +2,11 @@
 #'
 #' @description
 #'
+#' \Sexpr[results=rd, stage=render]{lifecycle::badge("experimental")}
+#'
 #' The time series forecasting pipeline depends on time series models fit with the \link[fabletools]{model} function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (`mable` objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").
+#'
+#' **NOTE**: The functionality in `ts_fit()` is experimental. Users may find more flexibility using the \link[fabletools]{model} function to fit models to be used downstream in `ts_forecast()`.
 #'
 #' @param .data Data to use for modeling
 #' @param outcomes Character vector specifying names of the column to use as the outcome

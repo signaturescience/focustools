@@ -38,7 +38,9 @@
 
 <meta property="og:title" content="Wrapper to fit time series models — ts_fit" />
 
-<meta property="og:description" content="The time series forecasting pipeline depends on time series models fit with the model function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (mable objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. &quot;ideaths&quot; and &quot;icases&quot;)." />
+<meta property="og:description" content="
+The time series forecasting pipeline depends on time series models fit with the model function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (mable objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. &quot;ideaths&quot; and &quot;icases&quot;).
+NOTE: The functionality in ts_fit() is experimental. Users may find more flexibility using the model function to fit models to be used downstream in ts_forecast()." />
 
 
 
@@ -110,7 +112,9 @@
 
     <div class="ref-description">
     
-    <p>The time series forecasting pipeline depends on time series models fit with the <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (<code>mable</code> objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").</p>
+    <p><a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a></p>
+<p>The time series forecasting pipeline depends on time series models fit with the <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (<code>mable</code> objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").</p>
+<p><strong>NOTE</strong>: The functionality in <code>ts_fit()</code> is experimental. Users may find more flexibility using the <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> function to fit models to be used downstream in <code><a href='ts_forecast.html'>ts_forecast()</a></code>.</p>
     
     </div>
 
