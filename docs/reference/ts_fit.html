@@ -8,11 +8,13 @@
 
 <title>Wrapper to fit time series models — ts_fit • focustools</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,12 +38,11 @@
 
 
 
-<meta property="og:title" content="Wrapper to fit time series models — ts_fit" />
 
+<meta property="og:title" content="Wrapper to fit time series models — ts_fit" />
 <meta property="og:description" content="
 The time series forecasting pipeline depends on time series models fit with the model function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (mable objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. &quot;ideaths&quot; and &quot;icases&quot;).
 NOTE: The functionality in ts_fit() is experimental. Users may find more flexibility using the model function to fit models to be used downstream in ts_forecast()." />
-
 
 
 
@@ -86,10 +87,15 @@ NOTE: The functionality in ts_fit() is experimental. Users may find more flexibi
   </a>
 </li>
 <li>
+  <a href="../articles/focustools.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../articles/index.html">Articles</a>
+</li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -111,15 +117,13 @@ NOTE: The functionality in ts_fit() is experimental. Users may find more flexibi
     </div>
 
     <div class="ref-description">
-    
-    <p><a href='https://www.tidyverse.org/lifecycle/#experimental'><img src='figures/lifecycle-experimental.svg' alt='Experimental lifecycle'></a></p>
+    <p><a href='https://lifecycle.r-lib.org/articles/stages.html#experimental'><img src='figures/lifecycle-experimental.svg' alt='[Experimental]' /></a></p>
 <p>The time series forecasting pipeline depends on time series models fit with the <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (<code>mable</code> objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").</p>
 <p><strong>NOTE</strong>: The functionality in <code>ts_fit()</code> is experimental. Users may find more flexibility using the <a href='https://fabletools.tidyverts.org/reference/model.html'>model</a> function to fit models to be used downstream in <code><a href='ts_forecast.html'>ts_forecast()</a></code>.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>ts_fit</span><span class='op'>(</span><span class='va'>.data</span>, <span class='va'>outcomes</span>, <span class='va'>.fun</span>, single <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
-    
+    <pre class="usage"><span class='fu'>ts_fit</span>(<span class='no'>.data</span>, <span class='no'>outcomes</span>, <span class='no'>.fun</span>, <span class='kw'>single</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -140,11 +144,10 @@ NOTE: The functionality in ts_fit() is experimental. Users may find more flexibi
       <td><p>Boolean indicating whether or not a "shortcut" should be used to return a single <code>tibble</code>; only works if there is one outcome ("outcomes") and one model function (".fun"); default is <code>TRUE</code></p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A single <code>mable</code> (model table) if (<code>single = TRUE</code>) or a named list of <code>mable</code>s (if <code>single = FALSE</code>). For more details on data structure see <a href='https://fabletools.tidyverts.org/reference/mable.html'>mable</a>.</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -161,7 +164,7 @@ NOTE: The functionality in ts_fit() is experimental. Users may find more flexibi
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

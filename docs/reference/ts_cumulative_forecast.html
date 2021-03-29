@@ -6,13 +6,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Helper used in ts_forecast() to get cumulative forecast from incident — ts_cumulative_forecast • focustools</title>
+<title>Helper used in <code>ts_forecast()</code> to get cumulative forecast from incident — ts_cumulative_forecast • focustools</title>
+
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,10 +38,9 @@
 
 
 
-<meta property="og:title" content="Helper used in ts_forecast() to get cumulative forecast from incident — ts_cumulative_forecast" />
 
+<meta property="og:title" content="Helper used in <code>ts_forecast()</code> to get cumulative forecast from incident — ts_cumulative_forecast" />
 <meta property="og:description" content="This unexported helper is used internally in ts_forecast to generate cumulative forecasts from incident. The function cumulatively sums incident estimates (quantile and point) at each location. Note that if used outside of ts_forecast one must be sure that the &quot;.data&quot; argument matches object used to generate the incident forecast object (&quot;inc_forecast&quot;)." />
-
 
 
 
@@ -84,10 +85,15 @@
   </a>
 </li>
 <li>
+  <a href="../articles/focustools.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../articles/index.html">Articles</a>
+</li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -109,13 +115,11 @@
     </div>
 
     <div class="ref-description">
-    
     <p>This unexported helper is used internally in <a href='ts_forecast.html'>ts_forecast</a> to generate cumulative forecasts from incident. The function cumulatively sums incident estimates (quantile and point) at each location. Note that if used outside of <a href='ts_forecast.html'>ts_forecast</a> one must be sure that the ".data" argument matches object used to generate the incident forecast object ("inc_forecast").</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>ts_cumulative_forecast</span><span class='op'>(</span><span class='va'>.data</span>, outcome <span class='op'>=</span> <span class='st'>"cdeaths"</span>, <span class='va'>inc_forecast</span><span class='op'>)</span></pre>
-    
+    <pre class="usage"><span class='fu'>ts_cumulative_forecast</span>(<span class='no'>.data</span>, <span class='kw'>outcome</span> <span class='kw'>=</span> <span class='st'>"cdeaths"</span>, <span class='no'>inc_forecast</span>)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -132,11 +136,10 @@
       <td><p>A <code>tibble</code> with incident forecast data generated using <a href='ts_forecast.html'>ts_forecast</a>; should <em>only</em> be incident cases corresponding to outcome for which cumulative count is to be aggregated</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>tibble</code> with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -153,7 +156,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

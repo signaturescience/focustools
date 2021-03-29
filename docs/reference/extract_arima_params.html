@@ -8,11 +8,13 @@
 
 <title>Extract ARIMA parameters — extract_arima_params • focustools</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,10 +38,9 @@
 
 
 
+
 <meta property="og:title" content="Extract ARIMA parameters — extract_arima_params" />
-
 <meta property="og:description" content="Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from tidy and glance on an ARIMA model object." />
-
 
 
 
@@ -84,10 +85,15 @@
   </a>
 </li>
 <li>
+  <a href="../articles/focustools.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../articles/index.html">Articles</a>
+</li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -109,13 +115,11 @@
     </div>
 
     <div class="ref-description">
-    
-    <p>Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from <a href='https://rdrr.io/pkg/generics/man/tidy.html'>tidy</a> and <a href='https://rdrr.io/pkg/generics/man/glance.html'>glance</a> on an ARIMA model object.</p>
-    
+    <p>Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from <a href='https://broom.tidymodels.org/reference/reexports.html'>tidy</a> and <a href='https://broom.tidymodels.org/reference/reexports.html'>glance</a> on an ARIMA model object.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>extract_arima_params</span><span class='op'>(</span><span class='va'>arimafit</span><span class='op'>)</span></pre>
-    
+    <pre class="usage"><span class='fu'>extract_arima_params</span>(<span class='no'>arimafit</span>)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -124,11 +128,10 @@
       <td><p>A single-row mable (<code>mdl_df</code>) from <code>fabeltools::model(arima=ARIMA(...))</code>.</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A single-row <code>tibble</code> containing ARIMA model parameter and diagnostic information.</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -145,7 +148,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

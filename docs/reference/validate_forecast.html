@@ -8,11 +8,13 @@
 
 <title>Check for valid quantile csv file input — validate_forecast • focustools</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -36,10 +38,9 @@
 
 
 
+
 <meta property="og:title" content="Check for valid quantile csv file input — validate_forecast" />
-
 <meta property="og:description" content="The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. The organizers include Python scripts to validate weekly submission data. This function provides an R wrapper for one of the validation methods from the zoltpy Python module. In order to wrap the Python functionality, the function calls reticulate internally to attach the Python environment with zoltpy installed. Any changes made upstream (in zoltpy release on PyPi repository) will be propagated to this function given a fresh module installation (see &quot;install&quot; argument)." />
-
 
 
 
@@ -84,10 +85,15 @@
   </a>
 </li>
 <li>
+  <a href="../articles/focustools.html">Get started</a>
+</li>
+<li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li>
+  <a href="../articles/index.html">Articles</a>
+</li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -109,13 +115,11 @@
     </div>
 
     <div class="ref-description">
-    
     <p>The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. The organizers include Python scripts to validate weekly submission data. This function provides an R wrapper for one of the validation methods from the <code>zoltpy</code> Python module. In order to wrap the Python functionality, the function calls <code>reticulate</code> internally to attach the Python environment with <code>zoltpy</code> installed. Any changes made upstream (in <code>zoltpy</code> release on PyPi repository) will be propagated to this function given a fresh module installation (see "install" argument).</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>validate_forecast</span><span class='op'>(</span><span class='va'>filename</span>, verbose <span class='op'>=</span> <span class='cn'>TRUE</span>, install <span class='op'>=</span> <span class='cn'>FALSE</span>, envname <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
-    
+    <pre class="usage"><span class='fu'>validate_forecast</span>(<span class='no'>filename</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>install</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>envname</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -136,16 +140,14 @@
       <td><p>Character vector specifying the name of the virtualenv to which the python dependencies should be installed if <code>install = TRUE</code>; default is <code>NULL</code> which will install the module to a virtualenv named <code>r-reticulate</code></p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>If <code>verbose = FALSE</code>, the returned value will be a boolean with <code>TRUE</code> for valid submission file and <code>FALSE</code> for invalid file. If <code>verbose = FALSE</code>, the function will return a named list with two elements: "valid" (boolean with the <code>TRUE</code>/<code>FALSE</code> validation code) and "message" (the output from the <code>zoltpy valid_quantile_csv_file()</code> function).</p>
-    
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>https://pypi.org/project/zoltpy/</p>
 <p>https://covid19forecasthub.org/</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -162,7 +164,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
