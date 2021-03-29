@@ -8,8 +8,6 @@ suppressPackageStartupMessages(suppressWarnings(library(focustools)))
 USonly <- FALSE
 ## Set forecasting horizon in weeks
 horizon <- 4
-## Use bootstrapping?
-bootstrap <- FALSE
 
 ## Get national data
 national <- inner_join(
@@ -26,7 +24,7 @@ usafull <-
   bind_rows(national, state) %>%
   filter(location %in% c("US", stringr::str_pad(1:56, width=2, pad="0"))) %>%
   make_tsibble() %>%
-  filter(monday>"2020-03-09")
+  filter(monday>"2020-03-01")
 stopifnot(length(unique(usafull$location))==52L)
 # Clean up
 rm(national, state)
@@ -48,7 +46,7 @@ for (loc in mylocs) {
   fits.icases <-  usa %>% model(arima = ARIMA(icases~PDQ(0,0,0)+pdq(1:2,0:2,0), stepwise=FALSE, approximation=FALSE))
   arima_params_list[[loc]] <- extract_arima_params(fits.icases)
   fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
-  forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon, bootstrap=bootstrap)
+  forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon)
   futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
   forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases, bootstrap = bootstrap)
   forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
