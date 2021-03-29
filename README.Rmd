@@ -41,8 +41,9 @@ Install from GitHub as follows:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("signaturescience/focustools")
+devtools::install_github("signaturescience/focustools", build_vignettes = FALSE)
 ```
+
 ## Usage
 
 ### Generating forecasts and formatting submission
