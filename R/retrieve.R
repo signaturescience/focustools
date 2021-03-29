@@ -59,8 +59,10 @@ get_cases <- function(source = "jhu", granularity = "national") {
         ## within each county (fips code), year, week grouping
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
-        dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
-        dplyr::group_by(fips) %>%
+        ## ignore the current week because it will likely be incomplete ...
+        dplyr::mutate(yweek_tmp = paste0(epiyear, "-", epiweek)) %>%
+        dplyr::filter((yweek_tmp != paste0(lubridate::epiyear(Sys.Date()), "-", lubridate::epiweek(Sys.Date())))) %>%
+        dplyr::select(-yweek_tmp) %>%        dplyr::group_by(fips) %>%
         dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(ccases = cumsum(icases)) %>%
         dplyr::ungroup() %>%
@@ -74,7 +76,9 @@ get_cases <- function(source = "jhu", granularity = "national") {
         ## sum up the number of deaths at that week
         dplyr::summarise(icases = sum(icases, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
-        dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
+        dplyr::mutate(yweek_tmp = paste0(epiyear, "-", epiweek)) %>%
+        dplyr::filter((yweek_tmp != paste0(lubridate::epiyear(Sys.Date()), "-", lubridate::epiweek(Sys.Date())))) %>%
+        dplyr::select(-yweek_tmp) %>%
         ## now group by state
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
@@ -211,7 +215,10 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         ## within each county (fips code), year, week grouping
         dplyr::group_by(fips,epiyear,epiweek) %>%
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
-        dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
+        ## ignore the current week because it will likely be incomplete ...
+        dplyr::mutate(yweek_tmp = paste0(epiyear, "-", epiweek)) %>%
+        dplyr::filter((yweek_tmp != paste0(lubridate::epiyear(Sys.Date()), "-", lubridate::epiweek(Sys.Date())))) %>%
+        dplyr::select(-yweek_tmp) %>%
         dplyr::group_by(fips) %>%
         dplyr::arrange(fips,epiyear,epiweek) %>%
         dplyr::mutate(cdeaths = cumsum(ideaths)) %>%
@@ -226,7 +233,9 @@ get_deaths <- function(source = "jhu", granularity = "national") {
         ## sum up the number of deaths at that week
         dplyr::summarise(ideaths = sum(ideaths, na.rm = TRUE), .groups = "drop") %>%
         ## ignore the current week because it will likely be incomplete ...
-        dplyr::filter(epiweek != lubridate::week(Sys.Date())) %>%
+        dplyr::mutate(yweek_tmp = paste0(epiyear, "-", epiweek)) %>%
+        dplyr::filter((yweek_tmp != paste0(lubridate::epiyear(Sys.Date()), "-", lubridate::epiweek(Sys.Date())))) %>%
+        dplyr::select(-yweek_tmp) %>%
         ## now group by statee
         dplyr::group_by(state) %>%
         ## arrange by state first then date (ascending)
