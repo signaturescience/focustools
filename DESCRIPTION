@@ -54,4 +54,7 @@ RdMacros: lifecycle
 Suggests: 
     here,
     lifecycle,
-    shinyWidgets
+    shinyWidgets,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

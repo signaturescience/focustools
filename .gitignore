@@ -14,3 +14,4 @@ README.R
 
 # internal stuff not going to github (proposal, slides, PILIT report, etc)
 internal/
+inst/doc
