@@ -1,0 +1,7 @@
+articles:
+- title: Getting started
+  desc: >
+    This vignette provides an introduction to using the `focustools` package for
+    **Fo**recasting **C**OVID-19 in the **U**nited **S**tates.
+  contents:
+    - focustools
