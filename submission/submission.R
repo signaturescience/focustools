@@ -48,7 +48,7 @@ for (loc in mylocs) {
   fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
   forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = horizon)
   futr.icases <- ts_futurecases(usa, forc.icases, horizon = horizon)
-  forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases, bootstrap = bootstrap)
+  forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases)
   forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
   submission_list[[loc]] <-
     list(format_for_submission(forc.icases,  target_name = "inc case"),
