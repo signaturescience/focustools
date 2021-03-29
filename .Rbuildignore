@@ -10,3 +10,6 @@
 ^README.R$
 ^\.github$
 docs/
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
