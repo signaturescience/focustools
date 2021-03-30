@@ -1,5 +1,5 @@
 ---
-title: "FOCUS Tools: Basic Usage"
+title: "focustools: Basic Usage"
 subtitle: "*Fo*recasting *C*OVID-19 in the *US*"
 output: 
   rmarkdown::html_vignette:
@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 Here we provide an example of how to use `focustools` to generate forecasts for COVID-19 Forecast Hub targets via time series approaches. First, load the `focustools` package and other ancillary packages.
 
 ```{r setup, message=FALSE, warning=FALSE}
@@ -29,24 +28,23 @@ library(fabletools)
 library(fable)
 ```
 
-
 ## Get data
 
-First, let's retrieve COVID-19 data from the JHU source. Note that the `get_cases()` and `get_deaths()` functions are executed separately, then joined and converted to a [`tsibble`](https://otexts.com/fpp3/tsibbles.html). Note that `granularity="state"` would pull in data at the state and territory level.
+First, let's retrieve COVID-19 data from the [JHU source](https://github.com/cssegisanddata/covid-19). Note that the `get_cases()` and `get_deaths()` functions are executed separately, then joined and converted to a [`tsibble`](https://otexts.com/fpp3/tsibbles.html). Note that `granularity="state"` would pull in data at the state and territory level.
 
 ```{r, eval=FALSE}
-## get data at the national scale from jhu source
+## Get data at the national scale from JHU source
 usac <-  get_cases(source="jhu",  granularity = "national")
 usad <- get_deaths(source="jhu",  granularity = "national")
 
-## use the focustools helper to prep the tsibble format
+## Use the focustools helper to prep the tsibble format
 usa <-  
   dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>% 
   make_tsibble(chop=TRUE)
 ```
 
 ```{r, echo=FALSE}
-# Pull from internal data
+## Pull from internal data
 usa <- focustools:::usa_20210329
 ```
 
@@ -55,10 +53,10 @@ usa <- focustools:::usa_20210329
 With the data prepared, we can now fit the models. In this case, we'll fit two models. One will be an ARIMA of incident cases, with parameters automatically optimized. For more details see `?fable::ARIMA`. In this case we will restrict the order of non-seasonal auto-regressive terms, order of integration for non-seasonal differencing, and order of non-seasonal moving average terms. The other model will use the three week lagged incident case counts to predict incident deaths:
 
 ```{r}
-# Fit incident case model
+## Fit incident case model
 fits.icases  <- usa %>% model(arima = ARIMA(icases~PDQ(0,0,0)+pdq(1:2,0:2,0), stepwise=FALSE, approximation=FALSE))
 
-# Fit incident death model based on cases three weeks ago
+## Fit incident death model based on cases three weeks ago
 fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
 ```
 
@@ -67,20 +65,20 @@ fits.ideaths <- usa %>% model(linear_caselag3 = TSLM(ideaths ~ lag(icases, 3)))
 With the model fit objects created, we can generate forecasts (including point and quantile estimates) for the outcomes of interest at an arbitrary horizon (here, 4 weeks). Note that given the model we have chosen for the incident deaths outcome, we do need to make sure to generate the incident case forecast *first* so that we can retrieve point estimates for future cases, which will be passed into the incident deaths forecast:
 
 ```{r}
-## generate incident case forecast
+## Generate incident case forecast
 forc.icases <- ts_forecast(fits.icases, outcome = "icases", horizon = 4)
 
-## need to get future cases to pass to ideaths forecast
+## Need to get future cases to pass to ideaths forecast
 futr.icases <- ts_futurecases(usa, forc.icases, horizon = 4)
 
-# Forecast incident deaths based on best guess for cases
+## Forecast incident deaths based on best guess for cases
 forc.ideaths <- ts_forecast(fits.ideaths,  outcome = "ideaths", new_data = futr.icases)
 ```
 
 We can use the forecasts of incident deaths to infer cumulative deaths. The `ts_forecast()` function is flexible enough to switch methods internally, requiring a "inc_forecast" parameter if either "cdeaths" or "ccases" is passed as the "outcome" for the forecast:
 
 ```{r}
-## generate cumulative death forecast
+## Generate cumulative death forecast
 forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = forc.ideaths)
 ```
 
@@ -89,7 +87,7 @@ forc.cdeaths <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = for
 Prior to [submitting these forecasts to the COVID-19 Forecast Hub](https://github.com/reichlab/covid19-forecast-hub/blob/708ea2b0e34ecb03afb82a62eb9bf5a1b4b97222/data-processed/README.md) we need to prepare them in the [canonical submission format](https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-file-format). Data prep in `format_for_submission` includes naming targets appropriately and ensuring that target dates adhere to epidemiological week format:
 
 ```{r}
-## create submission object
+## Create submission object
 submission <-
   list(format_for_submission(forc.icases,  target_name = "inc case"),
          format_for_submission(forc.ideaths, target_name = "inc death"),

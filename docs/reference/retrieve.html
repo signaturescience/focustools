@@ -8,13 +8,11 @@
 
 <title>Retrieve data — retrieve • focustools</title>
 
-
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
@@ -38,9 +36,10 @@
 
 
 
-
 <meta property="og:title" content="Retrieve data — retrieve" />
+
 <meta property="og:description" content="The package includes functions to retrieve observed data from two canonical sources: the New York Times and the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University. Both organizations administer data aggregation efforts that post daily COVID-19 case and death to GitHub. The data retrieval functions allow the user to specify &quot;source&quot; and &quot;granularity&quot; of data. Internally each function builds a path to the appropriate .csv file on GitHub, then reads the data into memory. The returned object is data aggregated weekly (using epiweek and epiyear designations) for available locations at the granularity specified (national, state, or county level)." />
+
 
 
 
@@ -80,7 +79,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -94,6 +93,7 @@
   <a href="../articles/index.html">Articles</a>
 </li>
       </ul>
+      
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
@@ -115,13 +115,15 @@
     </div>
 
     <div class="ref-description">
+    
     <p>The package includes functions to retrieve observed data from two canonical sources: the New York Times and the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University. Both organizations administer data aggregation efforts that post daily COVID-19 case and death to GitHub. The data retrieval functions allow the user to specify "source" and "granularity" of data. Internally each function builds a path to the appropriate <code>.csv</code> file on GitHub, then reads the data into memory. The returned object is data aggregated weekly (using <a href='http://lubridate.tidyverse.org/reference/week.html'>epiweek</a> and <a href='http://lubridate.tidyverse.org/reference/year.html'>epiyear</a> designations) for available locations at the granularity specified (national, state, or county level).</p>
+    
     </div>
 
-    <pre class="usage"><span class='fu'>get_cases</span>(<span class='kw'>source</span> <span class='kw'>=</span> <span class='st'>"jhu"</span>, <span class='kw'>granularity</span> <span class='kw'>=</span> <span class='st'>"national"</span>)
+    <pre class="usage"><span class='fu'>get_cases</span><span class='op'>(</span>source <span class='op'>=</span> <span class='st'>"jhu"</span>, granularity <span class='op'>=</span> <span class='st'>"national"</span><span class='op'>)</span>
 
-<span class='fu'>get_deaths</span>(<span class='kw'>source</span> <span class='kw'>=</span> <span class='st'>"jhu"</span>, <span class='kw'>granularity</span> <span class='kw'>=</span> <span class='st'>"national"</span>)</pre>
-
+<span class='fu'>get_deaths</span><span class='op'>(</span>source <span class='op'>=</span> <span class='st'>"jhu"</span>, granularity <span class='op'>=</span> <span class='st'>"national"</span><span class='op'>)</span></pre>
+    
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -134,7 +136,7 @@
       <td><p>Data aggregation level; must be one of <code>'national'</code>, <code>'state'</code>, or <code>'county'</code>; if data source is <code>'nyt'</code> then only <code>'national'</code> can be used currently; default is <code>'national'</code></p></td>
     </tr>
     </table>
-
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A <code>tibble</code> with (at minimum) the following columns:</p><ul>
@@ -145,10 +147,12 @@
 </ul>
 
 <p>If <code>source = 'jhu'</code> and <code>granularity = 'state'</code> then the <strong>location</strong> column  will include the full name of the state. If <code>source = 'jhu'</code> and <code>granularity = 'county'</code> then the <strong>location</strong> column  will include fips (county code).</p>
+    
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>https://github.com/CSSEGISandData/COVID-19</p>
 <p>https://github.com/nytimes/covid-19-data</p>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -165,7 +169,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

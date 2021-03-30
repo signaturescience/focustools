@@ -52,18 +52,17 @@ To get started, see the package vignette:
 vignette("focustools")
 ```
 
+## COVID-19 Forecast Hub submissions
 
-## Script to create submission-ready forecasts
+`focustools` was originally developed to generate forecasts of COVID-19 targets in the United States. The package includes functionality to prepare forecast output for submission to the [COVID-19 Forecast Hub](https://covid19forecasthub.org/). The `focustools` GitHub repository includes a `submission/` directory with select forecast submission files. That same directory tracks a pipeline R script that does the following:
 
-Run the script in [submission/submission.R](submission/submission.R)  to do the following.
-
-1. Get data (national level from JHU by default)
-1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
-1. Get future case data to create the incident death forecast
-1. Create the incident death forecast based on this new data
-1. Generate cumulative death forecast by summarizing incident death forecast
-1. Prepare submission format
-1. Save the submission to the `submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv`
-1. Validates the submission
+1. Retrieves historical observed count data (national level from JHU by default)
+1. Fits incident case and incident death models
+1. Forecasts future case data to facilitate the incident death forecast
+1. Creates the incident death forecast based on this new data
+1. Generates cumulative death forecast by summarizing incident death forecast
+1. Prepares submission format
+1. Savse the submission to `submission/TEAM-MODEL/YYYY-MM-DD-TEAM-MODEL.csv`
+1. Validates the submission file
 
 
