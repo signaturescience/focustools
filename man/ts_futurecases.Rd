@@ -17,5 +17,5 @@ ts_futurecases(.data, .forecast, horizon = 4)
 A \code{tsibble} with horizon periods and respective forecasted incident cases.
 }
 \description{
-Helper to generate the estimate of incident cases from an icases forecast object
+This function takes a time series forecast and extracts the point estimate for incident cases out to a specified horizon. This is necessary to generate the "new_data" to be passed into the \link[focustools]{ts_forecast} incident death models that are based on lagged cases.
 }

@@ -16,8 +16,12 @@ ts_fit(.data, outcomes, .fun, single = TRUE)
 \item{single}{Boolean indicating whether or not a "shortcut" should be used to return a single \code{tibble}; only works if there is one outcome ("outcomes") and one model function (".fun"); default is \code{TRUE}}
 }
 \value{
-A single \code{mable} (model table) if (\code{single = TRUE}) or a named list of \code{mable}s (if \code{single = FALSE}). For more information see \link[fabletools]{mable}.
+A single \code{mable} (model table) if (\code{single = TRUE}) or a named list of \code{mable}s (if \code{single = FALSE}). For more details on data structure see \link[fabletools]{mable}.
 }
 \description{
-Wrapper to fit time series models
+\Sexpr[results=rd, stage=render]{lifecycle::badge("experimental")}
+
+The time series forecasting pipeline depends on time series models fit with the \link[fabletools]{model} function. This function provides a wrapper that allows the user to pass in a list of function definitions and return a list of model outputs (\code{mable} objects) corresponding to each fit. The function also allows the user to pass in a vector of multiple outcome variable names (i.e. "ideaths" and "icases").
+
+\strong{NOTE}: The functionality in \code{ts_fit()} is experimental. Users may find more flexibility using the \link[fabletools]{model} function to fit models to be used downstream in \code{ts_forecast()}.
 }

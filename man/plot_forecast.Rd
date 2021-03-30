@@ -2,26 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{plot_forecast}
 \alias{plot_forecast}
-\title{Visualize and sanity check a forecast}
+\title{Visualize forecast output}
 \usage{
 plot_forecast(.data, submission, location = "US", pi = TRUE)
 }
 \arguments{
-\item{.data}{Data used to create the submission}
+\item{.data}{Historical truth data for all locations and outcomes in submission targets}
 
 \item{submission}{Formatted submission}
 
-\item{location}{Vector specifying locations to filter to; "US" by default.}
+\item{location}{Vector specifying locations to filter to; \code{'US'} by default.}
 
 \item{pi}{Logical as to whether or not the plot should include 50\% prediction interval; default is \code{TRUE}}
 }
+\value{
+A \code{ggplot2} plot object with line plots for outcome trajectories faceted by location
+}
 \description{
-#' @description
-\lifecycle{experimental}
-}
-\examples{
-\dontrun{
-myforecast <- forecast_pipeline(force=TRUE)
-plot_forecast(data=myforecast$data, submission=myforecast$submission, location="US")
-}
+This function serves as a plotting mechanism for prepped forecast submission data (see \link[focustools]{format_for_submission}). Using truth data supplied, the plots show the historical trajectory of each outcome along with the point estimates for forecasts. Optionally, the user can include 50\% prediction interval as well. Plots include trajectories of incident cases, incident deaths, and cumulative deaths faceted by location.
 }

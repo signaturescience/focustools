@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{is_monday}
 \alias{is_monday}
-\title{Helper function to see if today is Monday}
+\title{Check Monday}
 \usage{
 is_monday()
 }
@@ -10,5 +10,5 @@ is_monday()
 Logical indicating whether or not today is Monday
 }
 \description{
-\lifecycle{experimental}
+This is a helper function to see if today is Monday.
 }

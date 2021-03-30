@@ -1,10 +1,14 @@
-#' Make tsibble
+#' Make `tsibble`
 #'
-#' @param df A tibble containing columns `epiyear` and `epiweek`.
+#' @description
+#'
+#' This function converts an input `tibble` with columns for \link[lubridate]{epiyear} and \link[lubridate]{epiweek} into a \link[tsibble]{tsibble} object. The `tsibble` has columns specifying indices for the time series as well as a date for the Monday of the epiyear/epiweek combination at each row. Users can optionally ignore the current week when generating the `tsibble` via the "chop" argument.
+#'
+#' @param df A `tibble` containing columns `epiyear` and `epiweek`.
 #' @param chop Logical indicating whether or not to remove the most current week (default `TRUE`).
-#' @return A tsibble containing additional colums `monday` indicating the date
+#' @return A `tsibble` containing additional columns `monday` indicating the date
 #'   for the Monday of that epiweek, and `yweek` (a yearweek vctr class object)
-#'   that indexes the tsibble in 1 week increments.
+#'   that indexes the `tsibble` in 1 week increments.
 #' @export
 #' @md
 make_tsibble <- function(df, chop=TRUE) {
@@ -16,222 +20,51 @@ make_tsibble <- function(df, chop=TRUE) {
     # convert to tsibble
     tsibble::as_tsibble(index=yweek, key=location)
   # Remove the incomplete week
-  # if (chop) out <- out %>% dplyr::filter(lubridate::week(monday)!=lubridate::week(lubridate::today()))
   if (chop) out <- utils::head(out, -1)
   return(out)
 }
 
-#' Make quantile tibbles
+#' Get Monday
 #'
-#' Make a quantile tibble for required quantiles.
-#' Defaults to `c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)`.
-#' For `N wk ahead inc case target`, filter to: `c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)`
+#' @description
 #'
-#' @param x A numeric vector.
-#' @param q Quantiles to report. Defaults to `c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)`.
-#' @return A tibble of quantiles (`q`) and their values (`x`).
-#' @export
-#' @md
-#' @examples
-#' quibble(iris$Sepal.Length)
-quibble <- function(x, q = c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)) {
-  tibble::tibble(q = q, x = stats::quantile(x, q))
-}
-
-#' Parse model metadata from COVID-19 Forecast Hub repository
-#'
-#' @param team Optional indvidual team name for which the metadata; default `NULL`
-#' @param write Boolean indicating whether or not the metadata results should be written to disk
-#'
-#' @return A `tibble` with the model metadata, which includes (among other fields) team name, model name, description of methods, licensing info, and relevant URLs.
-#'
-#' @export
-#'
-#' @md
-#'
-#'
-c19fh_meta <- function(team = NULL, write = TRUE) {
-
-  ## construct request to GH API endpoint
-  req <- httr::GET("https://api.github.com/repos/reichlab/covid19-forecast-hub/git/trees/master?recursive=1")
-
-  ## get paths to all files
-  repo_files <- purrr::map_chr(httr::content(req)$tree, "path")
-
-  ## if you want to look at a specific team ...
-  if(!is.null(team)) {
-    ## subset to only metadata files
-    meta_files <- repo_files[grepl(paste0("^data-processed/", team, "/metadata*"), repo_files)]
-  } else {
-    ## subset to only metadata files
-    meta_files <- repo_files[grepl("^data-processed/.*/metadata*", repo_files)]
-  }
-
-  ## add prefix for API endpoint
-  meta_files <- paste0("https://raw.githubusercontent.com/reichlab/covid19-forecast-hub/master/", meta_files)
-
-  ## read_yaml from GH directly and map to a tibble
-  c19f_methods <- purrr::map_df(meta_files, yaml::read_yaml)
-
-  if(write) {
-    ## write csv to disk
-    outfile <- paste0(format(Sys.Date(), "%F"), "-c19fh-metadata.csv")
-    message(paste0("Saving to file: "), outfile)
-    readr::write_csv(c19f_methods, outfile)
-  }
-
-  ## return tibble regardless of whether or not the output is written
-  return(c19f_methods)
-
-}
-
-
-#' Helper to get the date for the Monday of the current week
+#' This function is a helper to get the date for the Monday of the current week.
 #'
 #' @return Date for the Monday of the current week. For more details see \link[lubridate]{floor_date}.
 #' @export
+#' @md
 #'
 this_monday <- function() {
   lubridate::floor_date(lubridate::today(), "weeks", week_start = 1)
 }
 
-#' Helper function to see if today is Monday
+#' Check Monday
 #'
-#' \lifecycle{experimental}
+#' @description
 #'
+#' This is a helper function to see if today is Monday.
+#
 #' @return Logical indicating whether or not today is Monday
 #' @export
+#' @md
 is_monday <- function() {
   lubridate::wday(lubridate::today(), label=TRUE) %in% c("Mon")
 }
 
-#' Pipeline to produce a forecast
+#' Visualize forecast output
 #'
 #' @description
-#' \lifecycle{deprecated}
 #'
-#' Runs the pipeline with reasonable defaults and some hard-coded values to do the following. See the Examples. For now this function only works on Mondays!
-#' 1. Get data (national level from JHU by default)
-#' 1. Fit incident case and incident death models (ARIMA and lagged TSLM respectively)
-#' 1. Get future case data to create the incident death forecast
-#' 1. Create the incident death forecast based on this new data
-#' 1. Prepare submission format
-#' 1. Suggest a submission filename
-#' 1. Return all resulting objects to a list.
+#' This function serves as a plotting mechanism for prepped forecast submission data (see \link[focustools]{format_for_submission}). Using truth data supplied, the plots show the historical trajectory of each outcome along with the point estimates for forecasts. Optionally, the user can include 50% prediction interval as well. Plots include trajectories of incident cases, incident deaths, and cumulative deaths faceted by location.
 #'
-#' @param method Forecasting method to use; currently only `'ts'` (time series) is supported
-#' @param source Data source to query; must be one of `'jhu'` or `'nyt'`; default is `'jhu'`
-#' @param granularity Data aggregation level; must be one of `'national'`, `'state'`, or `'county'`; if data source is `'nyt'` then only `'national'` can be used currently; default is `'national'`
-#' @param horizon Horizon periods through which the forecasts should be generated; default is `4`
-#' @param force Logical -- force the pipeline to run even if it isn't Monday? (default is `FALSE`; changing to `TRUE` may break something if today isn't Monday).
-#' @param ... Arguments passed to other functions
 #'
-#' @examples
-#' \dontrun{
-#' # Run all the steps to create models and forecasts
-#' myforecast <- forecast_pipeline()
-#' # Look at the submission and the suggested filename.
-#' myforecast$submission
-#' myforecast$submission_filename
-#' # Write submission to file
-#' readr::write_csv(myforecast$submission, file=myforecast$submission_filename)
-#' # Validate submission
-#' validate_forecast(myforecast$submission_filename)
-#' }
-#' @md
-#' @export
-forecast_pipeline <- function(method = "ts", source="jhu", granularity="national", horizon=4, force=FALSE, ...) {
-
-  .Deprecated("submission.R in the submission/ directory")
-
-  # If it isn't monday and you haven't set FORCE=TRUE, then don't run the code.
-  if (!is_monday()) {
-    if (!force) {
-      stop("Try again on Monday or set `force=TRUE`.")
-    } else {
-      warning("Forcing forecast on a non-Monday. This may not validate. Proceeding...")
-    }
-  } else {
-    message("Today is a Monday, proceeding with forecasting...")
-  }
-
-  # Get data
-  message("Getting data...")
-  usac <-  get_cases(source=source, granularity=granularity)
-  usad <- get_deaths(source=source, granularity=granularity)
-  usa <-
-    dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>%
-    make_tsibble(...)
-
-  if(method == "ts") {
-    # Fit incident deaths and incident cases
-    message("Fitting incident death and case models...")
-    fit.icases <-  usa %>% fabletools::model(arima = fable::ARIMA(icases, stepwise=FALSE, approximation=FALSE))
-    fit.ideaths <- usa %>% fabletools::model(linear_caselag3 = fable::TSLM(ideaths ~ lag(icases, 3)))
-
-    ## Generate incident case forecast
-    message("Generating incident case forecast...")
-    icases_forecast <- ts_forecast(fit.icases, outcome = "icases", horizon = horizon)
-
-    ## Get future cases to pass to ideaths forecast
-    message("Generating future case data for incident death forecast...")
-    future_cases <- ts_futurecases(usa, icases_forecast, horizon = horizon)
-
-    # Forecast incident deaths based on best guess for cases
-    message("Generating incident death forecast...")
-    ideaths_forecast <- ts_forecast(fit.ideaths,  outcome = "ideaths", new_data = future_cases)
-
-    ## Generate cumulative death forecast from incident death forecast created above
-    message("Generating cumulative death forecast...")
-    cdeaths_forecast <- ts_forecast(outcome = "cdeaths", .data = usa, inc_forecast = ideaths_forecast)
-  } else {
-    stop("Currently only time series (method='ts') is supported ...")
-  }
-
-  ## create submission object
-  message("Formatting data for submission...")
-  submission <-
-    list(format_for_submission(icases_forecast, target_name = "inc case"),
-         format_for_submission(ideaths_forecast, target_name = "inc death"),
-         format_for_submission(cdeaths_forecast, target_name = "cum death")) %>%
-    purrr::reduce(dplyr::bind_rows) %>%
-    dplyr::arrange(target)
-
-  # Suggested submission filename
-  # submission_filename <- here::here("submission", "SigSci-TS", paste0(Sys.Date(), "-SigSci-TS.csv"))
-  submission_filename <- paste0(Sys.Date(), "-SigSci-TS.csv")
-
-  # Create and return output
-  out <- list(data=usa,
-              fit.icases=fit.icases,
-              fit.ideaths=fit.ideaths,
-              icases_forecast=icases_forecast,
-              future_cases=future_cases,
-              ideaths_forecast=ideaths_forecast,
-              cdeaths_forecast=cdeaths_forecast,
-              submission=submission,
-              submission_filename=submission_filename)
-
-  message("Done!")
-  return(out)
-}
-
-
-#' Visualize and sanity check a forecast
-#'
-#' #' @description
-#' \lifecycle{experimental}
-#'
-#' @param .data Data used to create the submission
+#' @param .data Historical truth data for all locations and outcomes in submission targets
 #' @param submission Formatted submission
-#' @param location Vector specifying locations to filter to; "US" by default.
+#' @param location Vector specifying locations to filter to; `'US'` by default.
 #' @param pi Logical as to whether or not the plot should include 50% prediction interval; default is `TRUE`
 #'
-#' @examples
-#' \dontrun{
-#' myforecast <- forecast_pipeline(force=TRUE)
-#' plot_forecast(data=myforecast$data, submission=myforecast$submission, location="US")
-#' }
+#' @return A `ggplot2` plot object with line plots for outcome trajectories faceted by location
+#'
 #' @md
 #' @export
 #'
@@ -244,7 +77,6 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   # Check that the specified location is in the data and submission.
   stopifnot("Specified location is not in recorded data" = loc %in% unique(.data$location))
   stopifnot("Specified location is not in forecast data" = loc %in% unique(submission$location))
-
 
   # Grab the real data
   real <-
@@ -312,14 +144,18 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   return(p)
 }
 
-#' Helper to reshape data for submission summary
+#' Reshape data for submission summary
 #'
-#' This function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
+#' @description
+#'
+#' This unexported helper function is used in \link[focustools]{submission_summary}. It spreads forecast targets to a wide format and forces "US" locations to be at the top of the resulting `tibble`.
 #'
 #' @param .data Tibble with submission data
 #' @param ... Additional arguments passed to \link[tidyr]{spread}
 #'
-#' @return Tibble
+#' @return A `tibble` with wide summary data.
+#'
+#' @md
 #'
 spread_value <- function(.data, ...) {
 
@@ -353,11 +189,14 @@ spread_value <- function(.data, ...) {
 
 #' Extract ARIMA parameters
 #'
-#' Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from tidy() and glance() on an arima model object.
+#' @description
 #'
-#' @param arimafit A single-row mable (`mdl_df`) from `focustools::model(arima=ARIMA(...))`.
+#' Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from \link[broom]{tidy} and \link[broom]{glance} on an ARIMA model object.
 #'
-#' @return A single-row tibble containing ARIMA model parameter and diagnostics information.
+#' @param arimafit A single-row mable (`mdl_df`) from `fabeltools::model(arima=ARIMA(...))`.
+#'
+#' @return A single-row `tibble` containing ARIMA model parameter and diagnostic information.
+#' @md
 #' @export
 extract_arima_params <- function(arimafit) {
   if (!("mdl_df" %in% class(arimafit))) stop("Input must be a mdl_df (mable) from fabletools::model().")

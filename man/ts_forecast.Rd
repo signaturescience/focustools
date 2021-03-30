@@ -4,28 +4,16 @@
 \alias{ts_forecast}
 \title{Generate time series forecasts including quantile estimates}
 \usage{
-ts_forecast(
-  mable,
-  outcome,
-  horizon = 4,
-  new_data = NULL,
-  bootstrap = FALSE,
-  seed = 1863,
-  ...
-)
+ts_forecast(mable, outcome, horizon = 4, new_data = NULL, ...)
 }
 \arguments{
 \item{mable}{A \code{mable} (model table); for more information see \link[fabletools]{mable}}
 
-\item{outcome}{Name of the outcome; must be one of \verb{'icases',},\code{'ideaths'}, \code{'cdeaths'}, \code{'ccases'}}
+\item{outcome}{Name of the outcome; must be one of \code{'icases'},\code{'ideaths'}, \code{'cdeaths'}, \code{'ccases'}}
 
 \item{horizon}{Optional horizon periods through which the forecasts should be generated; default is \code{4}}
 
 \item{new_data}{Optional covariate data for forecasts using models that were fit using other variables; should be generated using \link[tsibble]{new_data}; default is \code{NULL}}
-
-\item{bootstrap}{If \code{TRUE} use bootstrap to resample forecasts for quantiles. If \code{FALSE} (default), use \link[fabletools]{hilo} to extract a specified prediction interval at a particular confidence level from a distribution.}
-
-\item{seed}{Random seed used in bootstrapping process; default \code{1863}}
 
 \item{...}{Additional parameters passed to the \link[focustools]{ts_cumulative_forecast} helper; only used if the forecast is cumulative}
 }
@@ -33,5 +21,5 @@ ts_forecast(
 A \code{tibble} with forecast results, including the name of the model, year and week, value of the forecast estimate, type of estimate (quantile or point), and bin of the quantile (if applicable) for the estimate.
 }
 \description{
-Generate time series forecasts including quantile estimates
+This function can convert models fit with \link[fabletools]{model} or the \link[focustools]{ts_fit} wrapper to forecasted values. The user specifies the horizon out to which forecasts should be generated, as well as any optional covariate data needed for forecasting (e.g. when using a model of incident deaths based on lagged incident cases, the forecast function needs incident cases moving into the forecast horizons; see "new_data" argument). The forecasts generated will include point estimates as well as 23 quantiles: 0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.975, 0.99. By default these quantiles are calculated using the \link[fabletools]{hilo}.
 }

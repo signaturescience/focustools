@@ -7,11 +7,11 @@
 validate_forecast(filename, verbose = TRUE, install = FALSE, envname = NULL)
 }
 \arguments{
-\item{filename}{Path to the forecast file to be checked}
+\item{filename}{Full path to the forecast file to be checked}
 
-\item{verbose}{Boolean indicating whether or not the output from this function should include validation message; default \code{TRUE}}
+\item{verbose}{Logical indicating whether or not the output from this function should include validation message; default \code{TRUE}}
 
-\item{install}{Boolean as to whether or not the python dependencies should be installed; if \code{TRUE} the module will be installed to the virtual environment specified in "envname"; default is \code{FALSE}}
+\item{install}{Logical as to whether or not the python dependencies should be installed; if \code{TRUE} the module will be installed to the virtual environment specified in "envname"; default is \code{FALSE}}
 
 \item{envname}{Character vector specifying the name of the virtualenv to which the python dependencies should be installed if \code{install = TRUE}; default is \code{NULL} which will install the module to a virtualenv named \code{r-reticulate}}
 }
@@ -19,5 +19,10 @@ validate_forecast(filename, verbose = TRUE, install = FALSE, envname = NULL)
 If \code{verbose = FALSE}, the returned value will be a boolean with \code{TRUE} for valid submission file and \code{FALSE} for invalid file. If \code{verbose = FALSE}, the function will return a named list with two elements: "valid" (boolean with the \code{TRUE}/\code{FALSE} validation code) and "message" (the output from the \verb{zoltpy valid_quantile_csv_file()} function).
 }
 \description{
-Check for valid quantile csv file input
+The submission file for the COVID-19 Forecast Hub must adhere to requirements for file format, column names, target identifiers, and date ranges for horizons. The organizers include Python scripts to validate weekly submission data. This function provides an R wrapper for one of the validation methods from the \code{zoltpy} Python module. In order to wrap the Python functionality, the function calls \code{reticulate} internally to attach the Python environment with \code{zoltpy} installed. Any changes made upstream (in \code{zoltpy} release on PyPi repository) will be propagated to this function given a fresh module installation (see "install" argument).
+}
+\references{
+https://pypi.org/project/zoltpy/
+
+https://covid19forecasthub.org/
 }

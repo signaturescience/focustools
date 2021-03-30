@@ -7,11 +7,11 @@
 extract_arima_params(arimafit)
 }
 \arguments{
-\item{arimafit}{A single-row mable (`mdl_df`) from `focustools::model(arima=ARIMA(...))`.}
+\item{arimafit}{A single-row mable (\code{mdl_df}) from \code{fabeltools::model(arima=ARIMA(...))}.}
 }
 \value{
-A single-row tibble containing ARIMA model parameter and diagnostics information.
+A single-row \code{tibble} containing ARIMA model parameter and diagnostic information.
 }
 \description{
-Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from tidy() and glance() on an arima model object.
+Extracts ARIMA model parameters, including p, d, q, P, D, Q, and results from \link[broom]{tidy} and \link[broom]{glance} on an ARIMA model object.
 }

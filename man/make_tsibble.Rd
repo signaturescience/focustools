@@ -2,20 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{make_tsibble}
 \alias{make_tsibble}
-\title{Make tsibble}
+\title{Make \code{tsibble}}
 \usage{
 make_tsibble(df, chop = TRUE)
 }
 \arguments{
-\item{df}{A tibble containing columns \code{epiyear} and \code{epiweek}.}
+\item{df}{A \code{tibble} containing columns \code{epiyear} and \code{epiweek}.}
 
 \item{chop}{Logical indicating whether or not to remove the most current week (default \code{TRUE}).}
 }
 \value{
-A tsibble containing additional colums \code{monday} indicating the date
+A \code{tsibble} containing additional columns \code{monday} indicating the date
 for the Monday of that epiweek, and \code{yweek} (a yearweek vctr class object)
-that indexes the tsibble in 1 week increments.
+that indexes the \code{tsibble} in 1 week increments.
 }
 \description{
-Make tsibble
+This function converts an input \code{tibble} with columns for \link[lubridate]{epiyear} and \link[lubridate]{epiweek} into a \link[tsibble]{tsibble} object. The \code{tsibble} has columns specifying indices for the time series as well as a date for the Monday of the epiyear/epiweek combination at each row. Users can optionally ignore the current week when generating the \code{tsibble} via the "chop" argument.
 }

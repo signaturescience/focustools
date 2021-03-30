@@ -3,7 +3,7 @@ library(dplyr)
 library(readr)
 library(tidyr)
 
-locations <- read_csv("data-raw/locations.csv")
+locations <- read_csv(here::here("data-raw/locations.csv"))
 
 ## exclude DC county code because DC will be a state/territory
 locations <-
@@ -27,6 +27,13 @@ quidk <-
   select(quantile, interval, direction, key)
 quidk
 
-usethis::use_data(locations, quidk,
+# Data for vignette 2021-03-29
+usac <-  focustools::get_cases(source="jhu",  granularity = "national")
+usad <- focustools::get_deaths(source="jhu",  granularity = "national")
+usa_20210329 <-
+  dplyr::inner_join(usac, usad, by = c("location", "epiyear", "epiweek")) %>%
+  focustools::make_tsibble(chop=TRUE)
+
+usethis::use_data(locations, quidk, usa_20210329,
                   internal = TRUE,
                   overwrite = TRUE)
