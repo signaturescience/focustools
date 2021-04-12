@@ -149,22 +149,22 @@
 <span class="co">#&gt; # A tibble: 6 x 7</span>
 <span class="co">#&gt;   forecast_date target           target_end_date location type   quantile  value</span>
 <span class="co">#&gt;   &lt;date&gt;        &lt;glue&gt;           &lt;date&gt;          &lt;chr&gt;    &lt;chr&gt;     &lt;dbl&gt;  &lt;int&gt;</span>
-<span class="co">#&gt; 1 2021-04-05    1 wk ahead cum … 2021-04-03      US       point    NA     556853</span>
-<span class="co">#&gt; 2 2021-04-05    1 wk ahead cum … 2021-04-03      US       quant…    0.01  548945</span>
-<span class="co">#&gt; 3 2021-04-05    1 wk ahead cum … 2021-04-03      US       quant…    0.025 550191</span>
-<span class="co">#&gt; 4 2021-04-05    1 wk ahead cum … 2021-04-03      US       quant…    0.05  551262</span>
-<span class="co">#&gt; 5 2021-04-05    1 wk ahead cum … 2021-04-03      US       quant…    0.1   552497</span>
-<span class="co">#&gt; 6 2021-04-05    1 wk ahead cum … 2021-04-03      US       quant…    0.15  553330</span>
+<span class="co">#&gt; 1 2021-04-12    1 wk ahead cum … 2021-04-03      US       point    NA     556853</span>
+<span class="co">#&gt; 2 2021-04-12    1 wk ahead cum … 2021-04-03      US       quant…    0.01  548945</span>
+<span class="co">#&gt; 3 2021-04-12    1 wk ahead cum … 2021-04-03      US       quant…    0.025 550191</span>
+<span class="co">#&gt; 4 2021-04-12    1 wk ahead cum … 2021-04-03      US       quant…    0.05  551262</span>
+<span class="co">#&gt; 5 2021-04-12    1 wk ahead cum … 2021-04-03      US       quant…    0.1   552497</span>
+<span class="co">#&gt; 6 2021-04-12    1 wk ahead cum … 2021-04-03      US       quant…    0.15  553330</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="va">submission</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 x 7</span>
 <span class="co">#&gt;   forecast_date target           target_end_date location type    quantile value</span>
 <span class="co">#&gt;   &lt;date&gt;        &lt;glue&gt;           &lt;date&gt;          &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;</span>
-<span class="co">#&gt; 1 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.8      NA</span>
-<span class="co">#&gt; 2 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.85     NA</span>
-<span class="co">#&gt; 3 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.9      NA</span>
-<span class="co">#&gt; 4 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.95     NA</span>
-<span class="co">#&gt; 5 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.975    NA</span>
-<span class="co">#&gt; 6 2021-04-05    4 wk ahead inc … 2021-04-24      US       quanti…    0.99     NA</span></code></pre></div>
+<span class="co">#&gt; 1 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.8      NA</span>
+<span class="co">#&gt; 2 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.85     NA</span>
+<span class="co">#&gt; 3 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.9      NA</span>
+<span class="co">#&gt; 4 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.95     NA</span>
+<span class="co">#&gt; 5 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.975    NA</span>
+<span class="co">#&gt; 6 2021-04-12    4 wk ahead inc … 2021-04-24      US       quanti…    0.99     NA</span></code></pre></div>
 <p>Lastly, we can <a href="https://github.com/reichlab/covid19-forecast-hub/blob/master/data-processed/README.md#forecast-validation">validate the submission</a>. The object must be written to a file and then validated with <code><a href="../reference/validate_forecast.html">validate_forecast()</a></code>, which wraps a <a href="https://github.com/reichlab/covid19-forecast-hub/blob/708ea2b0e34ecb03afb82a62eb9bf5a1b4b97222/code/validation/test_formatting.py">python function developed and maintained by the COVID-19 Forecast Hub organizers</a>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ffile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"-focustools-ts.csv"</span><span class="op">)</span><span class="op">)</span>
@@ -178,8 +178,8 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot_forecast.html">plot_forecast</a></span><span class="op">(</span>.data<span class="op">=</span><span class="va">usa</span>, submission<span class="op">=</span><span class="va">submission</span><span class="op">)</span>
 <span class="co">#&gt; Warning: Removed 1 row(s) containing missing values (geom_path).</span>
-<span class="co">#&gt; Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning -</span>
-<span class="co">#&gt; Inf</span></code></pre></div>
+<span class="co">#&gt; Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning</span>
+<span class="co">#&gt; -Inf</span></code></pre></div>
 <p><img src="focustools_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
 <p>And we can use <code><a href="../reference/submission_summary.html">submission_summary()</a></code> to produce a summary of the forecasts for each target (cumulative deaths, incident cases, incident deaths):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
