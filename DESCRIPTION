@@ -49,7 +49,9 @@ Imports:
     stringr,
     ggplot2,
     shiny,
-    scales
+    scales,
+    feasts,
+    urca
 RdMacros: lifecycle
 Suggests: 
     here,
