@@ -57,6 +57,7 @@ Suggests:
     here,
     lifecycle,
     shinyWidgets,
+    DT,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
