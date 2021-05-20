@@ -52,7 +52,6 @@ Imports:
     scales,
     feasts,
     urca
-RdMacros: lifecycle
 Suggests: 
     here,
     lifecycle,
