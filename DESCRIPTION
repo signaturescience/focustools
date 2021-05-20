@@ -24,7 +24,7 @@ Authors@R:
 Description: Miscellaneous functions for retrieving data, creating and evaluating time series 
     forecasting models for COVID-19 cases and deaths in the United States. 
     Built for participation in the COVID-19 Forecast Hub.
-License: GPL-3
+License: GPL (>= 3)
 Encoding: UTF-8
 Depends:
     R (>= 2.10)
