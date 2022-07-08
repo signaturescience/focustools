@@ -61,6 +61,7 @@ is_monday <- function() {
 #' @param .data Historical truth data for all locations and outcomes in submission targets
 #' @param submission Formatted submission
 #' @param location Vector specifying locations to filter to; `'US'` by default.
+#' @param target Vector specifying target(s) to plot; default is `c('Incident Cases','Incident Deaths','Cumulative Deaths')`
 #' @param pi Logical as to whether or not the plot should include 50% prediction interval; default is `TRUE`
 #'
 #' @return A `ggplot2` plot object with line plots for outcome trajectories faceted by location
@@ -68,11 +69,13 @@ is_monday <- function() {
 #' @md
 #' @export
 #'
-plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
+plot_forecast <- function(.data, submission, target=c('Incident Cases','Incident Deaths','Cumulative Deaths'), location="US", pi = TRUE) {
 
   ## pretty sure we need to add an intermediary variable for the filter below
   ## otherwise the condition will interpret as the column name not the vector ... i think?
   loc <- location
+
+  tmp_target <- target
 
   # Check that the specified location is in the data and submission.
   stopifnot("Specified location is not in recorded data" = loc %in% unique(.data$location))
@@ -83,7 +86,8 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
     .data %>%
     tibble::as_tibble() %>%
     dplyr::filter(location %in% loc) %>%
-    tidyr::gather(target, value, icases, ccases, ideaths, cdeaths) %>%
+    tidyr::gather(target, value, -epiyear,-epiweek,-monday,-yweek,-location) %>%
+    # tidyr::gather(target, value, icases, ccases, ideaths, cdeaths) %>%
     dplyr::mutate(target = target %>% stringr::str_remove_all("s$") %>% stringr::str_replace_all(c("^i"="inc ", "^c"="cum "))) %>%
     dplyr::select(location, date=monday, target, point=value) %>%
     dplyr::mutate(type="recorded") %>%
@@ -125,7 +129,9 @@ plot_forecast <- function(.data, submission, location="US", pi = TRUE) {
   p <-
     bound %>%
     ## exclude cumulative cases from plot
-    dplyr::filter(target != "Cumulative Cases") %>%
+    # dplyr::filter(target != "Cumulative Cases") %>%
+    ## filter to only include targets passed in
+    dplyr::filter(target %in% tmp_target) %>%
     ggplot2::ggplot(ggplot2::aes(date, point)) +
     ggplot2::geom_line(ggplot2::aes(col=type)) +
     ggplot2::scale_y_continuous(labels = scales::number_format(big.mark = ",")) +

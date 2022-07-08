@@ -1,6 +1,6 @@
 Package: focustools
 Title: Forecasting COVID-19 in the United States (FOCUS) tools
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     c(person(given = "VP",
              family = "Nagraj",
@@ -29,7 +29,7 @@ Encoding: UTF-8
 Depends:
     R (>= 2.10)
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     magrittr,
     dplyr,

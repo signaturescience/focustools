@@ -4,12 +4,20 @@
 \alias{plot_forecast}
 \title{Visualize forecast output}
 \usage{
-plot_forecast(.data, submission, location = "US", pi = TRUE)
+plot_forecast(
+  .data,
+  submission,
+  target = c("Incident Cases", "Incident Deaths", "Cumulative Deaths"),
+  location = "US",
+  pi = TRUE
+)
 }
 \arguments{
 \item{.data}{Historical truth data for all locations and outcomes in submission targets}
 
 \item{submission}{Formatted submission}
+
+\item{target}{Vector specifying target(s) to plot; default is \code{c('Incident Cases','Incident Deaths','Cumulative Deaths')}}
 
 \item{location}{Vector specifying locations to filter to; \code{'US'} by default.}
 
